@@ -7,7 +7,7 @@ from django.utils import timezone
 
 # Create your models here.
 class RouteSet(Model):
-    up_date = DateField(null=False, default=timezone.now(),
+    up_date = DateField(null=False,
                         verbose_name='This is the date that the route set was available')
     down_date = DateField(null=True, verbose_name='This is the date that the route set was taken down')
     is_active = BooleanField(default=False, verbose_name='Is the set active.', null=False)
