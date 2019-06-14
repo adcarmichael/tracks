@@ -1,7 +1,13 @@
+if __name__ == "__main__":
+    import django
+    import os
+    os.environ['DJANGO_SETTINGS_MODULE'] = 'tracks.settings'
+    django.setup()
+
+
 from routes.models import RouteSet, Route
 from enum import Enum
 from unittest import TestCase
-
 
 class Grade(Enum):
     null = 0

@@ -4,6 +4,7 @@ from routes.views import home_page
 from django.http import HttpRequest
 from routes.models import RouteSet, Route
 from django.test import Client
+
 # Create your tests here.
 
 
@@ -26,16 +27,19 @@ class RoutePageTest(TestCase):
         self.assertTrue(html.startswith('<html>'))
         self.assertTrue(html.endswith('</html>'))
 
+    def test_access_to_route_data(self):
+        r = Route()
+        r.grade = 'Green'
+        Route.objects.all()
+        # class TestEdenRouteSet(TestCase):
 
-# class TestEdenRouteSet(TestCase):
+        #     def setup(self):
+        #         self.route_grades = [1, 1, 2, 1, 2, 1, 2, 1, 4]
+        #         self. up_date = '2019-05-06'
+        #         self.down_date = '2010-06-14'
+        #         # climber.route.eden(colour='green',routes=route_grades,up_date=up_date,down_date=down_date)
+        #         self.fail()
 
-#     def setup(self):
-#         self.route_grades = [1, 1, 2, 1, 2, 1, 2, 1, 4]
-#         self. up_date = '2019-05-06'
-#         self.down_date = '2010-06-14'
-#         # climber.route.eden(colour='green',routes=route_grades,up_date=up_date,down_date=down_date)
-#         self.fail()
+        #     def test_get_all_routes_in_set(self):
 
-#     def test_get_all_routes_in_set(self):
-
-#         self.fail()
+        #         self.fail()
