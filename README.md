@@ -8,7 +8,7 @@ import sys
 import os
 
 sys.path.append(os.path.abspath("/home/pi/garageMonitor/django/garageMonitor"))
-os.environ['DJANGO_SETTINGS_MODULE'] = 'garageMonitor.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'tracks.settings'
 django.setup()
 import models
     config = models.SystemConfiguration.objects.filter(idSystemConfiguration=1)

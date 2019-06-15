@@ -1,11 +1,10 @@
 from django.test import TestCase
 from django.urls import resolve
 from routes.views import home_page
-from django.http import HttpRequest
 from routes.models import RouteSet, Route
 from django.test import Client
-
-# Create your tests here.
+import routes.services as services
+from datetime import datetime
 
 
 class HomePageTest(TestCase):
@@ -43,3 +42,32 @@ class RoutePageTest(TestCase):
         #     def test_get_all_routes_in_set(self):
 
         #         self.fail()
+
+
+class EdenRockMapTest(TestCase):
+    def test_colour(self):
+        map_obj = services.EdenRockDbMap()
+        for e in services.Grade:
+            mapped_value = map_obj.colour(e.name)
+            self.assertEqual(mapped_value, e.value)
+
+    def test_colour_with_mixed_case(self):
+        map_obj = services.EdenRockDbMap()
+        mapped_value = map_obj.colour('GreeN')
+        self.assertEqual(mapped_value, services.Grade.green.value)
+
+
+class TestDal(TestCase):
+    def test_add_route_set(self):
+        dal = services.get_dal()
+        colour = 'black'
+        grade = ['high']
+        up_date = '03/06/2019'
+        dal.add_route_set(colour, grade, up_date)
+        routes = dal.get_routes_all()
+
+        breakpoint()
+        self.fail()
+
+    def test__deactivate_all_active_route_sets_of_a_colour(self):
+        self.fail()

@@ -6,28 +6,38 @@ from datetime import date
 from django.utils import timezone
 
 # Create your models here.
+
+
 class RouteSet(Model):
     up_date = DateField(null=False,
                         verbose_name='This is the date that the route set was available')
-    down_date = DateField(null=True, verbose_name='This is the date that the route set was taken down')
-    is_active = BooleanField(default=False, verbose_name='Is the set active.', null=False)
+    down_date = DateField(
+        null=True, verbose_name='This is the date that the route set was taken down', default=date(2000, 1, 1))
+    is_active = BooleanField(
+        default=False, verbose_name='Is the set active.', null=False)
 
     def __str__(self):
         return "{} {} {}".format(self.up_date, self.down_date, self.is_active)
 
 
 class Route(Model):
+    number = IntegerField(
+        verbose_name='The number of the route if given e.g. route 6 or 11.', null=True)
     grade = IntegerField(verbose_name='Grade of climbing route')
-    grade_sub = IntegerField(verbose_name='Optional sub grade of climbing route', null=True, default=0)
+    grade_sub = IntegerField(
+        verbose_name='Optional sub grade of climbing route', null=True, default=0)
     route_set = ForeignKey(RouteSet, on_delete=CASCADE)
 
     def __str__(self):
         return "{} {} {}".format(self.grade, self.grade_sub, self.route_set)
 
+
 """ 
 The Profile class which OnetoOnes with django user model and reciever decoraters were taken from 
 https://simpleisbetterthancomplex.com/tutorial/2016/07/22/how-to-extend-django-user-model.html
 """
+
+
 class Profile(Model):
     user_id = IntegerField()
     level = IntegerField(verbose_name='Climbing level')
@@ -36,4 +46,5 @@ class Profile(Model):
 class RouteRecord(Model):
     route_id = ForeignKey(Route, on_delete=CASCADE)
     user = ForeignKey(Profile, on_delete=CASCADE)
-    status = IntegerField(verbose_name='E.g. mastered, climbed, attempted, todo')
+    status = IntegerField(
+        verbose_name='E.g. mastered, climbed, attempted, todo')
