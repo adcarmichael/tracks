@@ -74,3 +74,6 @@ class TestDal(TestCase):
 
     def test__deactivate_all_active_route_sets_of_a_colour(self):
         self.fail()
+
+    def test_add_route_with_down_date(self):
+        self.fail()
