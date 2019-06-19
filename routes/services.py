@@ -24,14 +24,26 @@ def get_dal(key='eden'):
 
 class _DalBase:
     @staticmethod
-    def _add_route_for_set(number, grade, grade_sub, up_date, down_date):
-        r = Route(grade=grade,
-                  grade_sub=grade_sub,
-                  number=number)
-        r.route_set = RouteSet(up_date=Cast(up_date,DateField()), down_date=Cast(down_date,DateField()))
+    def _create_route_set_for_list_of_grade_sub(grade, grade_sub_list, up_date, down_date=None):
 
-        r.route_set.save()
-        r.save()
+        rs = RouteSet.objects.create(up_date=Cast(up_date, DateField()))
+        
+        if down_date:
+            rs.down_date = Cast(down_date, DateField())
+            rs.save()
+        
+        for ind, grade_sub in enumerate(grade_sub_list):
+            number = ind + 1
+            Route.objects.create(grade=grade,
+                                grade_sub=grade_sub,
+                                number=number,
+                                route_set=rs)
+            # r.objects.create = Route(grade=grade,
+            #         grade_sub=grade_sub,
+            #         number=number,
+            #         route_set=rs)
+            # rs.routes.add_route_set(r)
+            # r.save()
 
 
 class _DalEdenRocks(_DalBase):
@@ -45,16 +57,14 @@ class _DalEdenRocks(_DalBase):
         for student in student_list:
             print(student.grade)
         return a
-        
-
+       
     def add_route_set(self, colour, grade_list, up_date, down_date=None):
         eden_map = _EdenRockConfMapper()
         grade = eden_map.colour(colour)
         up_date_clean = datetime.datetime.strptime(up_date, "%d/%m/%Y").date()
-        for ind, grade_sub_str in enumerate(grade_list):
-            route_number = ind + 1
-            grade_sub = eden_map.grade(grade_sub_str)
-            self._add_route_for_set(route_number, grade, grade_sub, up_date_clean, down_date)
+
+        grade_sub_list = [eden_map.grade(grade_sub_str) for grade_sub_str in grade_list]
+        self._create_route_set_for_list_of_grade_sub(grade, grade_sub_list, up_date_clean, down_date)
 
 
 def _deactivate_all_active_route_sets_of_a_colour(colour):

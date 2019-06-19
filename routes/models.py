@@ -26,7 +26,7 @@ class Route(Model):
     grade = IntegerField(verbose_name='Grade of climbing route')
     grade_sub = IntegerField(
         verbose_name='Optional sub grade of climbing route', null=True, default=0)
-    route_set = ForeignKey(RouteSet, on_delete=CASCADE)
+    route_set = ForeignKey(RouteSet, on_delete=CASCADE, related_name='routes')
 
     def __str__(self):
         return "{} {} {}".format(self.grade, self.grade_sub, self.route_set)

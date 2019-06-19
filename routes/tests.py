@@ -59,15 +59,18 @@ class EdenRockMapTest(TestCase):
 
 class TestDal(TestCase):
     def test_add_route_set(self):
+
         dal = services.get_dal()
+        routes = dal.get_routes_all()
+        self.assertEqual(routes.count(), 0)
+
         colour = 'black'
         grade = ['high']
         up_date = '03/06/2019'
         dal.add_route_set(colour, grade, up_date)
         routes = dal.get_routes_all()
 
-        breakpoint()
-        self.fail()
+        self.assertEqual(routes.count(), 1)
 
     def test__deactivate_all_active_route_sets_of_a_colour(self):
         self.fail()
