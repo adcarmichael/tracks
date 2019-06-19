@@ -5,6 +5,7 @@ from routes.models import RouteSet, Route
 from django.test import Client
 import routes.services as services
 from datetime import datetime
+import routes.conf as conf
 
 
 class HomePageTest(TestCase):
@@ -62,15 +63,18 @@ class TestDal(TestCase):
 
         dal = services.get_dal()
         routes = dal.get_routes_all()
-        self.assertEqual(routes.count(), 0)
+        self.assertEqual(routes.count(), 0,
+                         'ensure that there is zero routes in db initially')
 
         colour = 'black'
         grade = ['high']
         up_date = '03/06/2019'
         dal.add_route_set(colour, grade, up_date)
         routes = dal.get_routes_all()
-
+        r = routes[0]
         self.assertEqual(routes.count(), 1)
+        self.assertEqual(r.grade, conf.Grade.black.value)
+        self.assertEqual(r.grade_sub, conf.GradeSub.high.value)
 
     def test__deactivate_all_active_route_sets_of_a_colour(self):
         self.fail()
