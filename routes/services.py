@@ -61,10 +61,34 @@ class _DalEdenRocks(_DalBase):
     def add_route_set(self, colour, grade_list, up_date, down_date=None):
         eden_map = _EdenRockConfMapper()
         grade = eden_map.colour(colour)
-        up_date_clean = datetime.datetime.strptime(up_date, "%d/%m/%Y").date()
+        up_date = datetime.datetime.strptime(up_date, "%d/%m/%Y").date()
+        if down_date:
+            down_date = datetime.datetime.strptime(down_date, "%d/%m/%Y").date()
 
         grade_sub_list = [eden_map.grade(grade_sub_str) for grade_sub_str in grade_list]
-        self._create_route_set_for_list_of_grade_sub(grade, grade_sub_list, up_date_clean, down_date)
+        self._create_route_set_for_list_of_grade_sub(grade, grade_sub_list, up_date, down_date)
+
+
+class EdenRockData:
+    def __init__(self, query):
+        self.query = query
+
+    def _convert_query_to_list(self, field_str):
+        
+        return [tmp[field_str] for tmp in self.query.values(field_str)]
+
+    def get_colour(self):
+        colour = [conf.Grade(a).name for a in self._convert_query_to_list('grade')]
+        return colour
+
+    def get_down_date(self):
+        return [a.route_set.down_date for a in self.query]
+
+    def get_up_date(self):
+        return [a.route_set.up_date for a in self.query]
+
+    def get_grade(self):
+        return [conf.GradeSub(a).name for a in self._convert_query_to_list('grade_sub')]
 
 
 def _deactivate_all_active_route_sets_of_a_colour(colour):

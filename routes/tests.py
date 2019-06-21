@@ -6,6 +6,8 @@ from django.test import Client
 import routes.services as services
 from datetime import datetime
 import routes.conf as conf
+from django.db.models.functions import Cast, Coalesce
+from django.db.models import DateField
 
 
 class HomePageTest(TestCase):
@@ -59,6 +61,14 @@ class EdenRockMapTest(TestCase):
 
 
 class TestDal(TestCase):
+    def add_sample(self, down_date=None):
+        dal = services.get_dal()
+        colour = 'black'
+        grade = ['high', 'medium']
+        up_date = '03/06/2019'
+
+        dal.add_route_set(colour, grade, up_date, down_date=down_date)
+
     def test_add_route_set(self):
 
         dal = services.get_dal()
@@ -66,18 +76,71 @@ class TestDal(TestCase):
         self.assertEqual(routes.count(), 0,
                          'ensure that there is zero routes in db initially')
 
-        colour = 'black'
-        grade = ['high']
-        up_date = '03/06/2019'
-        dal.add_route_set(colour, grade, up_date)
+        self.add_sample()
+
         routes = dal.get_routes_all()
         r = routes[0]
-        self.assertEqual(routes.count(), 1)
+        self.assertEqual(routes.count(), 2)
         self.assertEqual(r.grade, conf.Grade.black.value)
         self.assertEqual(r.grade_sub, conf.GradeSub.high.value)
 
-    def test__deactivate_all_active_route_sets_of_a_colour(self):
+    def test_deactivate_all_active_route_sets_of_a_colour(self):
         self.fail()
 
     def test_add_route_with_down_date(self):
-        self.fail()
+        dal = services.get_dal()
+        down_date = '04/07/2019'
+        self.add_sample(down_date=down_date)
+        routes = dal.get_routes_all()
+        r = routes[0]
+        self.assertEqual(r.down_date, down_date)
+
+    def test_add_route_without_down_date(self):
+        dal = services.get_dal()
+        self.add_sample()
+        routes = dal.get_routes_all()
+        r = routes[0]
+        with self.assertRaises(AttributeError):
+            r.down_date
+
+
+class TestEdenRockPoD(TestCase):
+
+    def get_query(self):
+        up_date = datetime.strptime('01/02/1989', "%d/%m/%Y").date()
+        rs = RouteSet.objects.create(up_date=Cast(up_date, DateField()))
+        Route.objects.create(grade=2,
+                             grade_sub=4,
+                             number=1,
+                             route_set=rs)
+        Route.objects.create(grade=3,
+                             grade_sub=4,
+                             number=2,
+                             route_set=rs)
+        return Route.objects.all()
+
+    def test_get_colour(self):
+        query = self.get_query()
+        erd = services.EdenRockData(query)
+        colour = erd.get_colour()
+        self.assertEqual(colour[0], 'orange')
+
+    def test_get_grade(self):
+        query = self.get_query()
+        erd = services.EdenRockData(query)
+        grade = erd.get_grade()
+        self.assertEqual(grade[0], 'high')
+
+    def test_get_down_date(self):
+        query = self.get_query()
+        erd = services.EdenRockData(query)
+        down_date = erd.get_down_date()
+        down_date_exp = datetime.strptime('01/01/2000', "%d/%m/%Y").date()
+        self.assertEqual(down_date[0], down_date_exp)
+
+    def test_get_up_date(self):
+        query = self.get_query()
+        erd = services.EdenRockData(query)
+        up_date = erd.get_up_date()
+        up_date_exp = datetime.strptime('01/02/1989', "%d/%m/%Y").date()
+        self.assertEqual(up_date[0], up_date_exp)
