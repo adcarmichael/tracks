@@ -52,11 +52,9 @@ class _DalEdenRocks(_DalBase):
         pass
 
     def get_routes_all(self):
-        a = Route.objects.all()
-        student_list = Route.objects.all()
-        for student in student_list:
-            print(student.grade)
-        return a
+        query = Route.objects.all()
+        data = _EdenRockData(query)
+        return data
        
     def add_route_set(self, colour, grade_list, up_date, down_date=None):
         eden_map = _EdenRockConfMapper()
@@ -69,7 +67,7 @@ class _DalEdenRocks(_DalBase):
         self._create_route_set_for_list_of_grade_sub(grade, grade_sub_list, up_date, down_date)
 
 
-class EdenRockData:
+class _EdenRockData:
     def __init__(self, query):
         self.query = query
 
@@ -89,6 +87,21 @@ class EdenRockData:
 
     def get_grade(self):
         return [conf.GradeSub(a).name for a in self._convert_query_to_list('grade_sub')]
+
+    def get_count(self):
+        return self.query.count()
+
+    def get_number(self):
+        return self._convert_query_to_list('number')
+
+    def get_route_id(self):
+        return self._convert_query_to_list('id')
+
+    def get_route_set_id(self):
+        return [a.route_set.id for a in self.query]
+
+    def get_route_set_is_active(self):
+        return [a.route_set.is_active for a in self.query]
 
 
 def _deactivate_all_active_route_sets_of_a_colour(colour):

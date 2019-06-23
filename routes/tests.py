@@ -49,62 +49,66 @@ class RoutePageTest(TestCase):
 
 class EdenRockMapTest(TestCase):
     def test_colour(self):
-        map_obj = services.EdenRockDbMap()
-        for e in services.Grade:
+        map_obj = services._EdenRockConfMapper()
+        for e in conf.Grade:
             mapped_value = map_obj.colour(e.name)
             self.assertEqual(mapped_value, e.value)
 
     def test_colour_with_mixed_case(self):
-        map_obj = services.EdenRockDbMap()
+        map_obj = services._EdenRockConfMapper()
         mapped_value = map_obj.colour('GreeN')
-        self.assertEqual(mapped_value, services.Grade.green.value)
+        self.assertEqual(mapped_value, conf.Grade.green.value)
 
 
 class TestDal(TestCase):
-    def add_sample(self, down_date=None):
+    def add_sample(self, colour='black', grade=['high', 'medium'], down_date=None, up_date='03/06/2019'):
         dal = services.get_dal()
-        colour = 'black'
-        grade = ['high', 'medium']
-        up_date = '03/06/2019'
-
         dal.add_route_set(colour, grade, up_date, down_date=down_date)
 
     def test_add_route_set(self):
 
         dal = services.get_dal()
-        routes = dal.get_routes_all()
-        self.assertEqual(routes.count(), 0,
+        data = dal.get_routes_all()
+        self.assertEqual(data.get_count(), 0,
                          'ensure that there is zero routes in db initially')
 
         self.add_sample()
 
-        routes = dal.get_routes_all()
-        r = routes[0]
-        self.assertEqual(routes.count(), 2)
-        self.assertEqual(r.grade, conf.Grade.black.value)
-        self.assertEqual(r.grade_sub, conf.GradeSub.high.value)
+        dataNew = dal.get_routes_all()
+        self.assertEqual(dataNew.get_count(), 2)
+        self.assertEqual(dataNew.get_colour()[0], conf.Grade.black.name)
+        self.assertEqual(dataNew.get_grade()[0], conf.GradeSub.high.name)
 
     def test_deactivate_all_active_route_sets_of_a_colour(self):
+        self.add_sample()
+        self.add_sample()
         self.fail()
 
     def test_add_route_with_down_date(self):
         dal = services.get_dal()
         down_date = '04/07/2019'
+        down_date_exp = datetime.strptime(
+            down_date, "%d/%m/%Y").date()
         self.add_sample(down_date=down_date)
-        routes = dal.get_routes_all()
-        r = routes[0]
-        self.assertEqual(r.down_date, down_date)
+        data = dal.get_routes_all()
+        self.assertEqual(data.get_down_date()[0], down_date_exp)
 
     def test_add_route_without_down_date(self):
         dal = services.get_dal()
+        down_date_exp = datetime.strptime(
+            '01/01/2000', "%d/%m/%Y").date()
         self.add_sample()
-        routes = dal.get_routes_all()
-        r = routes[0]
-        with self.assertRaises(AttributeError):
-            r.down_date
+        data = dal.get_routes_all()
+        self.assertEqual(data.get_down_date()[0], down_date_exp)
+
+    def test_get_colour(self):
+        up_date_old = '11/06/2019'
+        up_date_new = '11/07/2019'
+        self.add_sample(up_date=up_date_old)
+        self.add_sample(up_date=up_date_new)
 
 
-class TestEdenRockPoD(TestCase):
+class Test_EdenRockData(TestCase):
 
     def get_query(self):
         up_date = datetime.strptime('01/02/1989', "%d/%m/%Y").date()
@@ -121,26 +125,58 @@ class TestEdenRockPoD(TestCase):
 
     def test_get_colour(self):
         query = self.get_query()
-        erd = services.EdenRockData(query)
+        erd = services._EdenRockData(query)
         colour = erd.get_colour()
         self.assertEqual(colour[0], 'orange')
 
     def test_get_grade(self):
         query = self.get_query()
-        erd = services.EdenRockData(query)
+        erd = services._EdenRockData(query)
         grade = erd.get_grade()
         self.assertEqual(grade[0], 'high')
 
     def test_get_down_date(self):
         query = self.get_query()
-        erd = services.EdenRockData(query)
+        erd = services._EdenRockData(query)
         down_date = erd.get_down_date()
         down_date_exp = datetime.strptime('01/01/2000', "%d/%m/%Y").date()
         self.assertEqual(down_date[0], down_date_exp)
 
     def test_get_up_date(self):
         query = self.get_query()
-        erd = services.EdenRockData(query)
+        erd = services._EdenRockData(query)
         up_date = erd.get_up_date()
         up_date_exp = datetime.strptime('01/02/1989', "%d/%m/%Y").date()
         self.assertEqual(up_date[0], up_date_exp)
+
+    def test_get_count(self):
+        query = self.get_query()
+        data = services._EdenRockData(query)
+        count = data.get_count()
+        self.assertEqual(count, 2)
+
+    def test_get_number(self):
+        query = self.get_query()
+        data = services._EdenRockData(query)
+        number = data.get_number()
+        self.assertEqual(number[0], 1)
+        self.assertEqual(number[1], 2)
+
+    def test_get_route_id(self):
+        query = self.get_query()
+        data = services._EdenRockData(query)
+        id = data.get_route_id()
+        self.assertEqual(id[0], 1)
+        self.assertEqual(id[1], 2)
+
+    def test_get_route_set_id(self):
+        query = self.get_query()
+        data = services._EdenRockData(query)
+        id = data.get_route_set_id()
+        self.assertEqual(id[0], 1)
+
+    def test_get_route_set_is_active(self):
+        query = self.get_query()
+        data = services._EdenRockData(query)
+        is_active = data.get_route_set_is_active()
+        self.assertEqual(is_active[0], True)
