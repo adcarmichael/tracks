@@ -23,6 +23,11 @@ def get_dal(key='eden'):
 
 
 class _DalBase:
+
+    def _get_all_routes(self):
+        query = Route.objects.all()
+        return query
+
     @staticmethod
     def _create_route_set_for_list_of_grade_sub(grade, grade_sub_list, up_date, down_date=None):
 
@@ -52,18 +57,40 @@ class _DalEdenRocks(_DalBase):
         pass
 
     def get_routes_all(self):
-        query = Route.objects.all()
+        query = self._get_all_routes()
         data = _EdenRockData(query)
         return data
-       
+
+    def get_routes_of_colour(self, colour, is_active=False):
+        
+        query = self._get_all_routes()
+        breakpoint()
+        query = query.filter(grade=8).order_by('-route_set__up_date')
+        if is_active:
+            
+            for index in range(0, query.count()):
+                date_search = query[index].route_set.up_date
+                if date_search < datetime.datetime.now().date():
+                    id = query[index].route_set.id
+                    query = query.filter(route_set__id=id)
+        
+        return _EdenRockData(query)
+        
+    def _filter_query_to_active_up_date(self,query):
+        for index in range(0, query.count()):
+                date_search = query[index].route_set.up_date
+                if date_search < datetime.datetime.now().date():
+                    id = query[index].route_set.id
+                    query = query.filter(route_set__id=id)
+        return query
+
     def add_route_set(self, colour, grade_list, up_date, down_date=None):
-        eden_map = _EdenRockConfMapper()
-        grade = eden_map.colour(colour)
+        grade = _EdenRockConfMapper().colour(colour)
         up_date = datetime.datetime.strptime(up_date, "%d/%m/%Y").date()
         if down_date:
             down_date = datetime.datetime.strptime(down_date, "%d/%m/%Y").date()
 
-        grade_sub_list = [eden_map.grade(grade_sub_str) for grade_sub_str in grade_list]
+        grade_sub_list = [_EdenRockConfMapper().grade(grade_sub_str) for grade_sub_str in grade_list]
         self._create_route_set_for_list_of_grade_sub(grade, grade_sub_list, up_date, down_date)
 
 
@@ -109,16 +136,20 @@ def _deactivate_all_active_route_sets_of_a_colour(colour):
 
 
 class _EdenRockConfMapper:
-    def colour(self, colour):
+    
+    @staticmethod
+    def colour(colour):
         g = conf.Grade
         return g.get_value_from_name(colour)
-
-    def grade(self, grade):
+   
+    @staticmethod
+    def grade(grade):
         g = conf.GradeSub
         return g.get_value_from_name(grade)
 
-    def up_date(self, up_date):
+    @staticmethod
+    def up_date(up_date):
         pass
 
-    def down_date(self, down_date):
+    def down_date(down_date):
         pass

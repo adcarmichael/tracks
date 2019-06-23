@@ -49,14 +49,12 @@ class RoutePageTest(TestCase):
 
 class EdenRockMapTest(TestCase):
     def test_colour(self):
-        map_obj = services._EdenRockConfMapper()
         for e in conf.Grade:
-            mapped_value = map_obj.colour(e.name)
+            mapped_value = services._EdenRockConfMapper().colour(e.name)
             self.assertEqual(mapped_value, e.value)
 
     def test_colour_with_mixed_case(self):
-        map_obj = services._EdenRockConfMapper()
-        mapped_value = map_obj.colour('GreeN')
+        mapped_value = services._EdenRockConfMapper().colour('GreeN')
         self.assertEqual(mapped_value, conf.Grade.green.value)
 
 
@@ -104,8 +102,12 @@ class TestDal(TestCase):
     def test_get_colour(self):
         up_date_old = '11/06/2019'
         up_date_new = '11/07/2019'
-        self.add_sample(up_date=up_date_old)
-        self.add_sample(up_date=up_date_new)
+        colour = 'black'
+        self.add_sample(up_date=up_date_old, colour=colour)
+        self.add_sample(up_date=up_date_new, colour=colour)
+        dal = services.get_dal()
+        data = dal.get_routes_of_colour(colour, is_active=False)
+        self.fail()
 
 
 class Test_EdenRockData(TestCase):
