@@ -102,12 +102,50 @@ class TestDal(TestCase):
     def test_get_colour(self):
         up_date_old = '11/06/2019'
         up_date_new = '11/07/2019'
-        colour = 'black'
-        self.add_sample(up_date=up_date_old, colour=colour)
-        self.add_sample(up_date=up_date_new, colour=colour)
+        colour_old = 'black'
+        colour_new = 'red'
+        self.add_sample(up_date=up_date_old, grade=[
+                        'medium'], colour=colour_old)
+        self.add_sample(up_date=up_date_new, grade=[
+                        'medium'], colour=colour_new)
         dal = services.get_dal()
-        data = dal.get_routes_of_colour(colour, is_active=False)
-        self.fail()
+        data = dal.get_route_set_of_colour(colour_new, is_active=False)
+
+        colour_act = data.get_colour()
+        self.assertEqual(colour_act[0], colour_new)
+        self.assertEqual(data.get_count(), 1)
+
+    def test_get_colour_that_is_active(self):
+        ''' This test asserts that only an active date is returned'''
+        up_date_old = '11/06/2019'
+        up_date_active = '15/06/2019'
+        up_date_future = '11/07/2020'
+        colour_exp = 'red'
+
+        # Add dates out of order to ensure that it simply is not picking
+        # up the latest and is instead ordering query by date
+        self.add_sample(up_date=up_date_active, grade=[
+                        'medium'], colour=colour_exp)
+        self.add_sample(up_date=up_date_future, grade=[
+                        'medium'], colour=colour_exp)
+        self.add_sample(up_date=up_date_old, grade=[
+                        'medium'], colour=colour_exp)
+
+        dal = services.get_dal()
+        data = dal.get_route_set_of_colour(colour_exp, is_active=True)
+
+        colour_act = data.get_colour()[0]
+        up_date_act = data.get_up_date()[0]
+        self.assertEqual(colour_act, colour_exp)
+        self.assertEqual(up_date_act, Utils.convert_to_date(up_date_active))
+        self.assertEqual(data.get_count(), 1)
+
+
+class Utils:
+    @staticmethod
+    def convert_to_date(date_str):
+        date = datetime.strptime(date_str, "%d/%m/%Y").date()
+        return date
 
 
 class Test_EdenRockData(TestCase):
