@@ -52,8 +52,7 @@ class _DalBase:
 
 
 class _DalEdenRocks(_DalBase):
-    def __init__(self, is_active=True):
-        self.is_active = True
+    def __init__(self):
         pass
 
     def get_routes_all(self):
@@ -61,27 +60,22 @@ class _DalEdenRocks(_DalBase):
         data = _EdenRockData(query)
         return data
 
-    def get_routes_of_colour(self, colour, is_active=False):
-        
+    def get_route_set_of_colour(self, colour, is_active=False):
         query = self._get_all_routes()
-        breakpoint()
-        query = query.filter(grade=8).order_by('-route_set__up_date')
+        grade = _EdenRockConfMapper.colour(colour)
+        query = query.filter(grade=grade).order_by('-route_set__up_date')
         if is_active:
-            
-            for index in range(0, query.count()):
-                date_search = query[index].route_set.up_date
-                if date_search < datetime.datetime.now().date():
-                    id = query[index].route_set.id
-                    query = query.filter(route_set__id=id)
+            query = self._filter_query_to_active_up_date(query)
         
         return _EdenRockData(query)
         
-    def _filter_query_to_active_up_date(self,query):
+    def _filter_query_to_active_up_date(self, query):
         for index in range(0, query.count()):
-                date_search = query[index].route_set.up_date
-                if date_search < datetime.datetime.now().date():
-                    id = query[index].route_set.id
-                    query = query.filter(route_set__id=id)
+            date_search = query[index].route_set.up_date
+            if date_search < datetime.datetime.now().date():
+                id = query[index].route_set.id
+                query = query.filter(route_set__id=id)
+                return query
         return query
 
     def add_route_set(self, colour, grade_list, up_date, down_date=None):
@@ -129,6 +123,9 @@ class _EdenRockData:
 
     def get_route_set_is_active(self):
         return [a.route_set.is_active for a in self.query]
+
+    def __repr__(self):
+        return f"Colour: {self.get_colour()[0]} \nNum Routes: {self.get_count()} "
 
 
 def _deactivate_all_active_route_sets_of_a_colour(colour):
