@@ -25,7 +25,7 @@ def get_dal(key='eden'):
 class _DalBase:
 
     def _get_all_routes(self):
-        query = Route.objects.all()
+        query = Route.objects.all().order_by('-route_set__up_date')
         return query
 
     @staticmethod
@@ -63,7 +63,7 @@ class _DalEdenRocks(_DalBase):
     def get_route_set_of_colour(self, colour, is_active=False):
         query = self._get_all_routes()
         grade = _EdenRockConfMapper.colour(colour)
-        query = query.filter(grade=grade).order_by('-route_set__up_date')
+        query = query.filter(grade=grade)
         if is_active:
             query = self._filter_query_to_active_up_date(query)
         
