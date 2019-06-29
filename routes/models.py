@@ -5,8 +5,6 @@ from django.db.models import OneToOneField
 from datetime import date
 from django.utils import timezone
 
-# Create your models here.
-
 
 class RouteSet(Model):
     up_date = DateField(null=False,
@@ -28,12 +26,6 @@ class Route(Model):
 
     def __str__(self):
         return "{} {} {}".format(self.grade, self.grade_sub, self.route_set)
-
-
-""" 
-The Profile class which OnetoOnes with django user model and reciever decoraters were taken from 
-https://simpleisbetterthancomplex.com/tutorial/2016/07/22/how-to-extend-django-user-model.html
-"""
 
 
 class Profile(Model):
