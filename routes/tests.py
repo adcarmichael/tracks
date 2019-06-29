@@ -4,6 +4,7 @@ from routes.views import home_page
 from routes.models import RouteSet, Route
 from django.test import Client
 import routes.services as services
+from routes.services import Utils
 from datetime import datetime
 import routes.conf as conf
 from django.db.models.functions import Cast, Coalesce
@@ -63,6 +64,11 @@ class TestDal(TestCase):
         dal = services.get_dal()
         dal.add_route_set(colour, grade, up_date, down_date=down_date)
 
+    def test_get_all_routes_with_zero_in_database(self):
+        dal = services.get_dal()
+        data = dal.get_routes_all()
+        self.assertFalse(data.get_count())
+
     def test_add_route_set(self):
 
         dal = services.get_dal()
@@ -92,11 +98,6 @@ class TestDal(TestCase):
                          1], Utils.convert_to_date(dates[0]))
         self.assertEqual(data.get_up_date()[
                          2], Utils.convert_to_date(dates[2]))
-
-    def test_deactivate_all_active_route_sets_of_a_colour(self):
-        self.add_sample()
-        self.add_sample()
-        self.fail()
 
     def test_add_route_with_down_date(self):
         dal = services.get_dal()
@@ -155,13 +156,6 @@ class TestDal(TestCase):
         self.assertEqual(colour_act, colour_exp)
         self.assertEqual(up_date_act, Utils.convert_to_date(up_date_active))
         self.assertEqual(data.get_count(), 1)
-
-
-class Utils:
-    @staticmethod
-    def convert_to_date(date_str):
-        date = datetime.strptime(date_str, "%d/%m/%Y").date()
-        return date
 
 
 class Test_EdenRockData(TestCase):
@@ -230,9 +224,3 @@ class Test_EdenRockData(TestCase):
         data = services._EdenRockData(query)
         id = data.get_route_set_id()
         self.assertEqual(id[0], 1)
-
-    def test_get_route_set_is_active(self):
-        query = self.get_query()
-        data = services._EdenRockData(query)
-        is_active = data.get_route_set_is_active()
-        self.assertEqual(is_active[0], True)

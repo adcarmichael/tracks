@@ -13,11 +13,9 @@ class RouteSet(Model):
                         verbose_name='This is the date that the route set was available')
     down_date = DateField(
         null=True, verbose_name='This is the date that the route set was taken down', default=date(2000, 1, 1))
-    is_active = BooleanField(
-        default=False, verbose_name='Is the set active.', null=False)
 
     def __str__(self):
-        return "{} {} {}".format(self.up_date, self.down_date, self.is_active)
+        return "{} {}".format(self.up_date, self.down_date)
 
 
 class Route(Model):

@@ -43,12 +43,15 @@ class _DalBase:
                                 grade_sub=grade_sub,
                                 number=number,
                                 route_set=rs)
-            # r.objects.create = Route(grade=grade,
-            #         grade_sub=grade_sub,
-            #         number=number,
-            #         route_set=rs)
-            # rs.routes.add_route_set(r)
-            # r.save()
+
+    def _filter_query_to_active_based_on_up_date(self, query):
+        for index in range(0, query.count()):
+            date_search = query[index].route_set.up_date
+            if date_search < datetime.datetime.now().date():
+                id = query[index].route_set.id
+                query = query.filter(route_set__id=id)
+                return query
+        return query
 
 
 class _DalEdenRocks(_DalBase):
@@ -65,18 +68,9 @@ class _DalEdenRocks(_DalBase):
         grade = _EdenRockConfMapper.colour(colour)
         query = query.filter(grade=grade)
         if is_active:
-            query = self._filter_query_to_active_up_date(query)
+            query = self._filter_query_to_active_based_on_up_date(query)
         
         return _EdenRockData(query)
-        
-    def _filter_query_to_active_up_date(self, query):
-        for index in range(0, query.count()):
-            date_search = query[index].route_set.up_date
-            if date_search < datetime.datetime.now().date():
-                id = query[index].route_set.id
-                query = query.filter(route_set__id=id)
-                return query
-        return query
 
     def add_route_set(self, colour, grade_list, up_date, down_date=None):
         grade = _EdenRockConfMapper().colour(colour)
@@ -121,9 +115,6 @@ class _EdenRockData:
     def get_route_set_id(self):
         return [a.route_set.id for a in self.query]
 
-    def get_route_set_is_active(self):
-        return [a.route_set.is_active for a in self.query]
-
     def __repr__(self):
         return f"Colour: {self.get_colour()[0]} \nNum Routes: {self.get_count()} "
 
@@ -144,9 +135,9 @@ class _EdenRockConfMapper:
         g = conf.GradeSub
         return g.get_value_from_name(grade)
 
-    @staticmethod
-    def up_date(up_date):
-        pass
 
-    def down_date(down_date):
-        pass
+class Utils:
+    @staticmethod
+    def convert_str_to_datetime(date_str):
+        date = datetime.strptime(date_str, "%d/%m/%Y").date()
+        return date
