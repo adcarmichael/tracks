@@ -8,7 +8,7 @@ if __name__ == "__main__":
 from routes.models import RouteSet, Route
 from enum import Enum
 import routes.conf as conf
-import datetime
+from datetime import datetime
 from django.db.models import DateField
 from django.db.models.functions import Cast, Coalesce
 
@@ -47,7 +47,7 @@ class _DalBase:
     def _filter_query_to_active_based_on_up_date(self, query):
         for index in range(0, query.count()):
             date_search = query[index].route_set.up_date
-            if date_search < datetime.datetime.now().date():
+            if date_search < datetime.now().date():
                 id = query[index].route_set.id
                 query = query.filter(route_set__id=id)
                 return query
@@ -74,9 +74,9 @@ class _DalEdenRocks(_DalBase):
 
     def add_route_set(self, colour, grade_list, up_date, down_date=None):
         grade = _EdenRockConfMapper().colour(colour)
-        up_date = datetime.datetime.strptime(up_date, "%d/%m/%Y").date()
+        up_date = datetime.strptime(up_date, "%d/%m/%Y").date()
         if down_date:
-            down_date = datetime.datetime.strptime(down_date, "%d/%m/%Y").date()
+            down_date = datetime.strptime(down_date, "%d/%m/%Y").date()
 
         grade_sub_list = [_EdenRockConfMapper().grade(grade_sub_str) for grade_sub_str in grade_list]
         self._create_route_set_for_list_of_grade_sub(grade, grade_sub_list, up_date, down_date)

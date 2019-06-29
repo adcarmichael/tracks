@@ -93,11 +93,11 @@ class TestDal(TestCase):
         data = dal.get_routes_all()
 
         self.assertEqual(data.get_up_date()[
-                         0], Utils.convert_to_date(dates[1]))
+                         0], Utils.convert_str_to_datetime(dates[1]))
         self.assertEqual(data.get_up_date()[
-                         1], Utils.convert_to_date(dates[0]))
+                         1], Utils.convert_str_to_datetime(dates[0]))
         self.assertEqual(data.get_up_date()[
-                         2], Utils.convert_to_date(dates[2]))
+                         2], Utils.convert_str_to_datetime(dates[2]))
 
     def test_add_route_with_down_date(self):
         dal = services.get_dal()
@@ -154,7 +154,8 @@ class TestDal(TestCase):
         colour_act = data.get_colour()[0]
         up_date_act = data.get_up_date()[0]
         self.assertEqual(colour_act, colour_exp)
-        self.assertEqual(up_date_act, Utils.convert_to_date(up_date_active))
+        self.assertEqual(
+            up_date_act, Utils.convert_str_to_datetime(up_date_active))
         self.assertEqual(data.get_count(), 1)
 
 
