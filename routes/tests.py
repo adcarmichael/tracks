@@ -77,6 +77,22 @@ class TestDal(TestCase):
         self.assertEqual(dataNew.get_colour()[0], conf.Grade.black.name)
         self.assertEqual(dataNew.get_grade()[0], conf.GradeSub.high.name)
 
+    def test_get_all_routes_are_ordered_by_up_date(self):
+        dates = ['04/07/2019', '04/07/2021', '04/06/2019']
+        self.add_sample(grade=['medium'], up_date=dates[0])
+        self.add_sample(grade=['medium'], up_date=dates[1])
+        self.add_sample(grade=['medium'], up_date=dates[2])
+
+        dal = services.get_dal()
+        data = dal.get_routes_all()
+
+        self.assertEqual(data.get_up_date()[
+                         0], Utils.convert_to_date(dates[1]))
+        self.assertEqual(data.get_up_date()[
+                         1], Utils.convert_to_date(dates[0]))
+        self.assertEqual(data.get_up_date()[
+                         2], Utils.convert_to_date(dates[2]))
+
     def test_deactivate_all_active_route_sets_of_a_colour(self):
         self.add_sample()
         self.add_sample()
