@@ -11,6 +11,11 @@ from django.db.models.functions import Cast, Coalesce
 from django.db.models import DateField
 
 
+def add_sample_route_set(colour='black', grade=['high', 'medium'], down_date=None, up_date='03/06/2019'):
+    dal = services.get_dal()
+    dal.add_route_set(colour, grade, up_date, down_date=down_date)
+
+
 class HomePageTest(TestCase):
     def test_root_url_resolves_to_home_page(self):
         found = resolve('/')
@@ -30,22 +35,16 @@ class RoutePageTest(TestCase):
         self.assertTrue(html.startswith('<html>'))
         self.assertTrue(html.endswith('</html>'))
 
+    def test_user_records_route_completion(self):
+        add_sample_route_set(colour='green')
+
+        self.fail('Please complete the test!')
+        pass
+
     def test_access_to_route_data(self):
         r = Route()
         r.grade = 'Green'
         Route.objects.all()
-        # class TestEdenRouteSet(TestCase):
-
-        #     def setup(self):
-        #         self.route_grades = [1, 1, 2, 1, 2, 1, 2, 1, 4]
-        #         self. up_date = '2019-05-06'
-        #         self.down_date = '2010-06-14'
-        #         # climber.route.eden(colour='green',routes=route_grades,up_date=up_date,down_date=down_date)
-        #         self.fail()
-
-        #     def test_get_all_routes_in_set(self):
-
-        #         self.fail()
 
 
 class EdenRockMapTest(TestCase):
@@ -60,9 +59,6 @@ class EdenRockMapTest(TestCase):
 
 
 class TestDal(TestCase):
-    def add_sample(self, colour='black', grade=['high', 'medium'], down_date=None, up_date='03/06/2019'):
-        dal = services.get_dal()
-        dal.add_route_set(colour, grade, up_date, down_date=down_date)
 
     def test_get_all_routes_with_zero_in_database(self):
         dal = services.get_dal()
@@ -76,7 +72,7 @@ class TestDal(TestCase):
         self.assertEqual(data.get_count(), 0,
                          'ensure that there is zero routes in db initially')
 
-        self.add_sample()
+        add_sample_route_set()
 
         dataNew = dal.get_routes_all()
         self.assertEqual(dataNew.get_count(), 2)
@@ -85,9 +81,9 @@ class TestDal(TestCase):
 
     def test_get_all_routes_are_ordered_by_up_date(self):
         dates = ['04/07/2019', '04/07/2021', '04/06/2019']
-        self.add_sample(grade=['medium'], up_date=dates[0])
-        self.add_sample(grade=['medium'], up_date=dates[1])
-        self.add_sample(grade=['medium'], up_date=dates[2])
+        add_sample_route_set(grade=['medium'], up_date=dates[0])
+        add_sample_route_set(grade=['medium'], up_date=dates[1])
+        add_sample_route_set(grade=['medium'], up_date=dates[2])
 
         dal = services.get_dal()
         data = dal.get_routes_all()
@@ -104,7 +100,7 @@ class TestDal(TestCase):
         down_date = '04/07/2019'
         down_date_exp = datetime.strptime(
             down_date, "%d/%m/%Y").date()
-        self.add_sample(down_date=down_date)
+        add_sample_route_set(down_date=down_date)
         data = dal.get_routes_all()
         self.assertEqual(data.get_down_date()[0], down_date_exp)
 
@@ -112,7 +108,7 @@ class TestDal(TestCase):
         dal = services.get_dal()
         down_date_exp = datetime.strptime(
             '01/01/2000', "%d/%m/%Y").date()
-        self.add_sample()
+        add_sample_route_set()
         data = dal.get_routes_all()
         self.assertEqual(data.get_down_date()[0], down_date_exp)
 
@@ -121,10 +117,10 @@ class TestDal(TestCase):
         up_date_new = '11/07/2019'
         colour_old = 'black'
         colour_new = 'red'
-        self.add_sample(up_date=up_date_old, grade=[
-                        'medium'], colour=colour_old)
-        self.add_sample(up_date=up_date_new, grade=[
-                        'medium'], colour=colour_new)
+        add_sample_route_set(up_date=up_date_old, grade=[
+            'medium'], colour=colour_old)
+        add_sample_route_set(up_date=up_date_new, grade=[
+            'medium'], colour=colour_new)
         dal = services.get_dal()
         data = dal.get_route_set_of_colour(colour_new, is_active=False)
 
@@ -141,12 +137,12 @@ class TestDal(TestCase):
 
         # Add dates out of order to ensure that it simply is not picking
         # up the latest and is instead ordering query by date
-        self.add_sample(up_date=up_date_active, grade=[
-                        'medium'], colour=colour_exp)
-        self.add_sample(up_date=up_date_future, grade=[
-                        'medium'], colour=colour_exp)
-        self.add_sample(up_date=up_date_old, grade=[
-                        'medium'], colour=colour_exp)
+        add_sample_route_set(up_date=up_date_active, grade=[
+            'medium'], colour=colour_exp)
+        add_sample_route_set(up_date=up_date_future, grade=[
+            'medium'], colour=colour_exp)
+        add_sample_route_set(up_date=up_date_old, grade=[
+            'medium'], colour=colour_exp)
 
         dal = services.get_dal()
         data = dal.get_route_set_of_colour(colour_exp, is_active=True)
