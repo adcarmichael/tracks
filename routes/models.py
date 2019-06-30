@@ -34,7 +34,7 @@ class Profile(Model):
 
 
 class RouteRecord(Model):
-    route_id = ForeignKey(Route, on_delete=CASCADE)
+    route = ForeignKey(Route, on_delete=CASCADE)
     user = ForeignKey(Profile, on_delete=CASCADE)
     status = IntegerField(
         verbose_name='E.g. mastered, climbed, attempted, todo')
