@@ -1,9 +1,31 @@
+{% extends "base.html" %}
+{% block title %} Routes {% endblock %}
+
+{% block content %}
+
 <p>Attempting to get colour with . indexing</p>
-{{green.get_colour.0}}
+{{black.get_colour.0}}
 <p>Attempting to get colour</p>
-{{ green.get_colour }}
+{{ black.get_colour }}
 <p>Attempting to get colour from for loop</p>
 
-{% for col in green.get_colour %}
+<!-- {% for col in black.get_route_id%}
 {{col}}
+{% endfor %} -->
+
+{% for number, grade in black %}
+{{black}}
+<div class="list-group">
+    <a href="#" class="list-group-item list-group-item-action flex-column align-items-start active">
+        <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">{{number}}</h5>
+            <small>3 days ago</small>
+        </div>
+        <p class="mb-1">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.
+        </p>
+        <small>Donec id elit non mi porta.</small>
+    </a>
+</div>
 {% endfor %}
+
+{% endblock %}

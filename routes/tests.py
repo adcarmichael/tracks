@@ -38,6 +38,8 @@ class RoutePageTest(TestCase):
     def test_user_records_route_completion(self):
         add_sample_route_set(colour='green')
 
+        response = Client().get('routes/')
+
         self.fail('Please complete the test!')
         pass
 

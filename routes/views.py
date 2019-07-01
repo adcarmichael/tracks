@@ -4,6 +4,7 @@ from django.views import View
 from django.views.generic.base import TemplateView
 from routes import services
 
+
 dal = services.get_dal()
 
 
@@ -16,7 +17,11 @@ def add_route_set(request, details):
 
 
 def routes_page(request):
-
+    data_black = dal.get_route_set_of_colour('black')
+    black = zip(data_black.get_number(),
+                data_black.get_colour(),
+                []*data_black.get_count())
+    print(black)
     data = {
         'purple': dal.get_route_set_of_colour('purple'),
         'orange': dal.get_route_set_of_colour('orange'),
@@ -25,7 +30,6 @@ def routes_page(request):
         'blue': dal.get_route_set_of_colour('blue'),
         'white': dal.get_route_set_of_colour('white'),
         'red': dal.get_route_set_of_colour('red'),
-        'black': dal.get_route_set_of_colour('black')
-    }
+        'black': black}
 
     return render(request, 'routes.html', data)

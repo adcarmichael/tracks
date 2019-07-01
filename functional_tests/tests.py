@@ -20,3 +20,4 @@ class NewUserRecord(unittest.TestCase):
         inputbox = self.browser.find_element_by_id('id_green_route_2')
         time.sleep(1)
         inputbox.send_keys(Keys.ENTER)
+        time.sleep(10)
