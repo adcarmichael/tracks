@@ -19,8 +19,7 @@ def add_route_set(request, details):
 def routes_page(request):
     data_black = dal.get_route_set_of_colour('black')
     black = zip(data_black.get_number(),
-                data_black.get_colour(),
-                []*data_black.get_count())
+                data_black.get_colour())
     print(black)
     data = {
         'purple': dal.get_route_set_of_colour('purple'),
