@@ -3,29 +3,67 @@
 
 {% block content %}
 
-<p>Attempting to get colour with . indexing</p>
-<!-- {{black.get_colour.0}} -->
-<p>Attempting to get colour</p>
-<!-- {{ black.get_colour }} -->
-<p>Attempting to get colour from for loop</p>
+
 
 <!-- {% for col in black.get_route_id%}
     {{col}}
     {% endfor %} -->
 
 {% for number, grade in black %}
-<div class="list-group">
-    <a href="#" class="list-group-item list-group-item-action flex-column align-items-start active">
-        <div class="d-flex w-100 justify-content-between">
-            <h5 class="mb-1">{{number}}</h5>
-            <span>{{grade}}</span>
-            <small>3 days ago</small>
+
+<ul class="list-group">
+    <a data-target='#_{{ forloop.counter0 }}_route_modal' data-toggle='modal'
+        class="text-secondary list-group-item-dark list-group-item list-group-item-action">
+        <div class="d-flex">
+            <div class="mr-auto p-2"><i class="fas fa-2x fa-arrow-up fa-rotate-45"></i></div>
+            <div class="p-2">{{number}}</div>
+            <div class="p-2">3 days ago</div>
+            <span class=" badge badge-primary badge-pill">2</span>
         </div>
-        <p class="mb-1">Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.
-        </p>
-        <small>Donec id elit non mi porta.</small>
     </a>
+</ul>
+<div class="modal fade" id="_{{ forloop.counter0 }}_route_modal" tabindex="-1" role="dialog"
+    aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {{forloop.counter0}}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Record Climb</button>
+            </div>
+        </div>
+    </div>
 </div>
 {% endfor %}
 
+
+<!-- Modal -->
+<div class="modal fade" id="route_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Record Climb</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -1,10 +1,13 @@
-<html>
-<title> To-Do lists </title>
+{% extends 'base.html' %}
 
+{% block title %}Home{% endblock %}
 
-
-<div>
-    <p>why will this not render?</p>
-</div>
-
-</html>
+{% block content %}
+{% if user.is_authenticated %}
+Hi {{ user.username }}!
+<p><a href="{% url 'logout' %}">logout</a></p>
+{% else %}
+<p>You are not logged in</p>
+<a href="{% url 'login' %}">login</a>
+{% endif %}
+{% endblock %}

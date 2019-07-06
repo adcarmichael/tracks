@@ -4,6 +4,9 @@ from django.db.models import Model, CASCADE
 from django.db.models import OneToOneField
 from datetime import date
 from django.utils import timezone
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class RouteSet(Model):
@@ -28,13 +31,26 @@ class Route(Model):
         return "{} {} {}".format(self.grade, self.grade_sub, self.route_set)
 
 
-class Profile(Model):
+class UserProfile(Model):
     user_id = IntegerField()
     level = IntegerField(verbose_name='Climbing level')
 
 
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    email_confirmed = models.BooleanField(default=False)
+    # other fields...
+
+
+@receiver(post_save, sender=User)
+def update_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+    instance.profile.save()
+
+
 class RouteRecord(Model):
     route = ForeignKey(Route, on_delete=CASCADE)
-    user = ForeignKey(Profile, on_delete=CASCADE)
+    user = ForeignKey(UserProfile, on_delete=CASCADE)
     status = IntegerField(
         verbose_name='E.g. mastered, climbed, attempted, todo')

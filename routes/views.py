@@ -1,9 +1,19 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.views import View
 from django.views.generic.base import TemplateView
 from routes import services
-
+from django.contrib.auth import login, authenticate
+from routes.forms import SignUpForm
+from routes.tokens import account_activation_token
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.encoding import force_text
+from django.contrib.auth import login
+from django.contrib.auth.models import User
+from django.utils.http import urlsafe_base64_decode
 
 dal = services.get_dal()
 
@@ -16,11 +26,53 @@ def add_route_set(request, details):
     pass
 
 
+def signup(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.is_active = False
+            user.save()
+            current_site = get_current_site(request)
+            subject = 'Activate Your MySite Account'
+            message = render_to_string('account_activation_email.html', {
+                'user': user,
+                'domain': current_site.domain,
+                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                'token': account_activation_token.make_token(user),
+            })
+            user.email_user(subject, message)
+            return redirect('account_activation_sent')
+    else:
+        form = SignUpForm()
+    return render(request, 'signup.html', {'form': form})
+
+
+def activate(request, uidb64, token):
+    try:
+        uid = force_text(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and account_activation_token.check_token(user, token):
+        user.is_active = True
+        user.profile.email_confirmed = True
+        user.save()
+        login(request, user)
+        return redirect('home')
+    else:
+        return render(request, 'account_activation_invalid.html')
+
+
+def account_activation_sent(request):
+    return render(request, 'account_activation_sent.html')
+
+
 def routes_page(request):
     data_black = dal.get_route_set_of_colour('black')
     black = zip(data_black.get_number(),
                 data_black.get_colour())
-    print(black)
     data = {
         'purple': dal.get_route_set_of_colour('purple'),
         'orange': dal.get_route_set_of_colour('orange'),
