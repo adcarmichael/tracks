@@ -15,3 +15,9 @@ import models
     config = config[0]
     for x in config.__dict__:
       print x
+
+## Email Signup
+Taken from https://simpleisbetterthancomplex.com/tutorial/2017/02/18/how-to-create-user-sign-up-view.html
+
+## For authentication (login lohout etc)
+https://wsvincent.com/django-user-authentication-tutorial-login-and-logout/
