@@ -253,3 +253,6 @@ class TestRouteRecord(TestCase):
 
         self.assertEqual(status[0], status_exp)
         self.assertEqual(is_climbed[0], is_climbed_exp)
+
+    def test_get_rooute_record_for_multi_routes(self):
+        self.fail()
