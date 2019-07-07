@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import time
 import unittest
+import os
 
 
 class NewUserRecord(unittest.TestCase):
@@ -21,3 +22,10 @@ class NewUserRecord(unittest.TestCase):
         time.sleep(1)
         inputbox.send_keys(Keys.ENTER)
         time.sleep(10)
+
+
+class AccountTests(unittest.TestCase):
+    def create_superuser():
+        os.system("""echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admein', 'admin@myproject.com', 'password')" | python manage.py shell""")
+
+    def user_logs_in_and_logs_out(self):

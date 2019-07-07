@@ -69,7 +69,8 @@ def account_activation_sent(request):
     return render(request, 'account_activation_sent.html')
 
 
-def routes_page(request):
+def get_route_date_for_routes_page():
+
     data_black = dal.get_route_set_of_colour('black')
     black = zip(data_black.get_number(),
                 data_black.get_colour())
@@ -82,5 +83,15 @@ def routes_page(request):
         'white': dal.get_route_set_of_colour('white'),
         'red': dal.get_route_set_of_colour('red'),
         'black': black}
+    return data
 
+
+def routes_page(request):
+    data = get_route_date_for_routes_page()
     return render(request, 'routes.html', data)
+
+
+def routes_user_page(request, user_id):
+    data = get_route_date_for_routes_page()
+    print(user_id)
+    return render(request, 'routes_user.html', data)

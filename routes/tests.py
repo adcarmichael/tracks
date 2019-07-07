@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls import resolve
 from routes.views import home_page
-from routes.models import RouteSet, Route
+from routes.models import RouteSet, Route, RouteRecord, Profile
 from django.test import Client
 import routes.services as services
 from routes.services import Utils
@@ -9,11 +9,16 @@ from datetime import datetime
 import routes.conf as conf
 from django.db.models.functions import Cast, Coalesce
 from django.db.models import DateField
+import os
 
 
 def add_sample_route_set(colour='black', grade=['high', 'medium'], down_date=None, up_date='03/06/2019'):
     dal = services.get_dal()
     dal.add_route_set(colour, grade, up_date, down_date=down_date)
+
+
+def create_superuser_named_admin():
+    os.system("""echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@myproject.com', 'password')" | python manage.py shell""")
 
 
 class HomePageTest(TestCase):
@@ -223,3 +228,28 @@ class Test_EdenRockData(TestCase):
         data = services._EdenRockData(query)
         id = data.get_route_set_id()
         self.assertEqual(id[0], 1)
+
+
+class TestRouteRecord(TestCase):
+    def test_get_route_record(self):
+        from django.contrib.auth.models import User
+        user = User.objects.create_user(
+            'Chevy Chase', 'chevy@chase.com', 'chevyspassword')
+        add_sample_route_set()
+        create_superuser_named_admin()
+        user_id = 1
+        route_id = 1
+        status_exp = 10
+        is_climbed_exp = True
+        route = Route.objects.all()
+
+        profile = Profile.objects.first()
+        RouteRecord.objects.create(
+            route=route[0], user=profile, status=status_exp, is_climbed=is_climbed_exp)
+        RouteRecord.objects.create(
+            route=route[1], user=profile, status=0, is_climbed=False)
+        status, is_climbed = services.get_route_record_for_user(
+            user_id, route_id)
+
+        self.assertEqual(status[0], status_exp)
+        self.assertEqual(is_climbed[0], is_climbed_exp)

@@ -20,6 +20,7 @@ from routes.views import routes_page
 from routes.views import signup
 from routes.views import account_activation_sent
 from routes.views import activate
+import routes.views as rv
 from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 
@@ -29,10 +30,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home_page, name='home'),
     path('routes/', routes_page, name='routes'),
-    path('routes/<int:id>', routes_page, name='route_ind'),
-    path('users/<int:id>/routes/',
-         routes_page, name='routes_for_user'),
-    path('users/<int:id>/routes/<int>/record',
+    path('routes/<int:route_id>', routes_page, name='route_ind'),
+    path('users/<int:user_id>/routes/',
+         rv.routes_user_page, name='routes_for_user'),
+    path('users/<int:_user_id>/routes/<int:route_id>/record',
          routes_page, name='routes_record_for_user'),
     url(r'^account_activation_sent/$', account_activation_sent,
         name='account_activation_sent'),

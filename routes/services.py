@@ -5,7 +5,7 @@ if __name__ == "__main__":
     os.environ['DJANGO_SETTINGS_MODULE'] = 'tracks.settings'
     django.setup()
 
-from routes.models import RouteSet, Route
+from routes.models import RouteSet, Route, RouteRecord
 from enum import Enum
 import routes.conf as conf
 from datetime import datetime
@@ -141,3 +141,12 @@ class Utils:
     def convert_str_to_datetime(date_str):
         date = datetime.strptime(date_str, "%d/%m/%Y").date()
         return date
+
+
+def get_route_record_for_user(user_id, route_id):
+    if not isinstance(route_id, (list,)):
+        route_id = [route_id]
+    rr = RouteRecord.objects.filter(user__id=user_id).filter(route__id__in=route_id)
+    status = [record.status for record in rr]
+    is_climbed = [record.is_climbed for record in rr]
+    return status, is_climbed
