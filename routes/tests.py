@@ -21,6 +21,12 @@ def create_superuser_named_admin():
     os.system("""echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@myproject.com', 'password')" | python manage.py shell""")
 
 
+def create_auth_user():
+    from django.contrib.auth.models import User
+    user = User.objects.create_user(
+        'Chevy Chase', 'chevy@chase.com', 'chevyspassword')
+
+
 class HomePageTest(TestCase):
     def test_root_url_resolves_to_home_page(self):
         found = resolve('/')
@@ -32,26 +38,26 @@ class HomePageTest(TestCase):
         self.assertTemplateUsed(response, 'home_page.html')
 
 
-class RoutePageTest(TestCase):
-    def test_route_page_returns_correct_html(self):
-        c = Client()
-        response = c.get('/')
-        html = response.content.decode('utf')
-        self.assertTrue(html.startswith('<html>'))
-        self.assertTrue(html.endswith('</html>'))
+# class RoutePageTest(TestCase):
+    # def test_route_page_returns_correct_html(self):
+    #     c = Client()
+    #     response = c.get('/')
+    #     html = response.content.decode('utf')
+    #     self.assertTrue(html.startswith('<html>'))
+    #     self.assertTrue(html.endswith('</html>'))
 
-    def test_user_records_route_completion(self):
-        add_sample_route_set(colour='green')
+    # def test_user_records_route_completion(self):
+    #     add_sample_route_set(colour='green')
 
-        response = Client().get('routes/')
+    #     response = Client().get('routes/')
 
-        self.fail('Please complete the test!')
-        pass
+    #     self.fail('Please complete the test!')
+    #     pass
 
-    def test_access_to_route_data(self):
-        r = Route()
-        r.grade = 'Green'
-        Route.objects.all()
+    # def test_access_to_route_data(self):
+    #     r = Route()
+    #     r.grade = 'Green'
+    #     Route.objects.all()
 
 
 class EdenRockMapTest(TestCase):
@@ -231,28 +237,63 @@ class Test_EdenRockData(TestCase):
 
 
 class TestRouteRecord(TestCase):
-    def test_get_route_record(self):
-        from django.contrib.auth.models import User
-        user = User.objects.create_user(
-            'Chevy Chase', 'chevy@chase.com', 'chevyspassword')
+    def create_sample_route_record(self, status=[1], is_climbed=[True], route_num=1):
+        create_auth_user()
         add_sample_route_set()
-        create_superuser_named_admin()
+        route = Route.objects.all()
+        profile = Profile.objects.first()
+
+        for ind, stat in enumerate(status):
+            RouteRecord.objects.create(
+                route=route[ind], user=profile, status=status[ind], is_climbed=is_climbed[ind])
+
+    def test_get_route_record(self):
+
         user_id = 1
         route_id = 1
-        status_exp = 10
-        is_climbed_exp = True
-        route = Route.objects.all()
 
-        profile = Profile.objects.first()
-        RouteRecord.objects.create(
-            route=route[0], user=profile, status=status_exp, is_climbed=is_climbed_exp)
-        RouteRecord.objects.create(
-            route=route[1], user=profile, status=0, is_climbed=False)
+        self.create_sample_route_record(
+            status=[1, 0], is_climbed=[True, False])
         status, is_climbed = services.get_route_record_for_user(
             user_id, route_id)
 
-        self.assertEqual(status[0], status_exp)
-        self.assertEqual(is_climbed[0], is_climbed_exp)
+        self.assertEqual(status[0], 1)
+        self.assertEqual(is_climbed[0], True)
 
     def test_get_rooute_record_for_multi_routes(self):
-        self.fail()
+        user_id = 1
+        route_id = [1, 2]
+
+        self.create_sample_route_record(
+            status=[1, 0], is_climbed=[True, False])
+        status, is_climbed = services.get_route_record_for_user(
+            user_id, route_id)
+
+        self.assertEqual(status[0], 1)
+        self.assertEqual(status[1], 0)
+        self.assertEqual(is_climbed[0], True)
+        self.assertEqual(is_climbed[1], False)
+
+    def test_get_rooute_record_for_non_existent_route(self):
+        user_id = 1
+        route_id = 100
+
+        self.create_sample_route_record(
+            status=[1, 0], is_climbed=[True, False])
+        status, is_climbed = services.get_route_record_for_user(
+            user_id, route_id)
+
+        self.assertEqual(status, [])
+        self.assertEqual(is_climbed, [])
+
+    def test_get_rooute_record_for_non_existent_user(self):
+        user_id = 100
+        route_id = 1
+
+        self.create_sample_route_record(
+            status=[1, 0], is_climbed=[True, False])
+        status, is_climbed = services.get_route_record_for_user(
+            user_id, route_id)
+
+        self.assertEqual(status, [])
+        self.assertEqual(is_climbed, [])
