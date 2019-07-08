@@ -5,7 +5,7 @@ if __name__ == "__main__":
     os.environ['DJANGO_SETTINGS_MODULE'] = 'tracks.settings'
     django.setup()
 
-from routes.models import RouteSet, Route, RouteRecord
+from routes.models import RouteSet, Route, RouteRecord, Profile
 from enum import Enum
 import routes.conf as conf
 from datetime import datetime
@@ -144,9 +144,26 @@ class Utils:
 
 
 def get_route_record_for_user(user_id, route_id):
-    if not isinstance(route_id, (list,)):
-        route_id = [route_id]
-    rr = RouteRecord.objects.filter(user__id=user_id).filter(route__id__in=route_id)
+    rr = _get_route_record_for_user(user_id, route_id)
     status = [record.status for record in rr]
     is_climbed = [record.is_climbed for record in rr]
     return status, is_climbed
+
+
+def _get_route_record_for_user(user_id, route_id):
+    if not isinstance(route_id, (list,)):
+        route_id = [route_id]
+    query = RouteRecord.objects.filter(user__id=user_id).filter(route__id__in=route_id)
+    return query
+
+
+def set_route_record_for_user(user_id, route_id, status, is_climbed):
+    rr = _get_route_record_for_user(user_id, route_id)
+    if rr:
+        pass
+        # update the data
+    else:
+        profile = Profile.objects.all().filter(user__id=user_id)
+        route = Route.objects.all().filter(id=route_id)
+        if profile and route:
+            RouteRecord.objects.create(user=profile[0],route=route[0],status=status,is_climbed=is_climbed)

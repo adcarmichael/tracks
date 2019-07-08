@@ -297,3 +297,38 @@ class TestRouteRecord(TestCase):
 
         self.assertEqual(status, [])
         self.assertEqual(is_climbed, [])
+
+    def test_set_new_route_record(self):
+        user_id = 1
+        route_id = 1
+        is_climbed = True
+        status = 101
+
+        create_auth_user()
+        add_sample_route_set()
+        services.set_route_record_for_user(
+            user_id, route_id, status, is_climbed)
+
+        rr = RouteRecord.objects.all().filter(
+            user__id=user_id).filter(route__id=route_id)
+        self.assertEqual(rr[0].status, status)
+        self.assertEqual(rr[0].is_climbed, is_climbed)
+
+    def test_set_exiting_route_record(self):
+        user_id = 1
+        route_id = 1
+        is_climbed = True
+        status = 101
+
+        create_auth_user()
+        add_sample_route_set()
+        services.set_route_record_for_user(
+            user_id, route_id, status, is_climbed)
+        services.set_route_record_for_user(
+            user_id, route_id, 123, False)
+
+        rr = RouteRecord.objects.all().filter(
+            user__id=user_id).filter(route__id=route_id)
+        self.assertEqual(rr[0].status, 123)
+        self.assertEqual(rr[0].is_climbed, False)
+        self.assertEqual(rr.count(), 1)
