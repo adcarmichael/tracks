@@ -102,11 +102,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
-routes/migrations/0001_initial.py
-routes/migrations/0002_auto_20190614_2027.py
 
 \.idea/
 
 \.vscode/
-
-routes/migrations/
