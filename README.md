@@ -1,5 +1,5 @@
 # tracks
-
+[![Build Status](https://travis-ci.org/adcarmichael/tracks.svg?branch=master)](https://travis-ci.org/adcarmichael/tracks)
 ## Accessing Django ORM outwith Django Framework
 https://stackoverflow.com/questions/34300513/using-django-model-outside-of-the-django-framework
 
