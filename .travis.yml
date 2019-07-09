@@ -7,5 +7,3 @@ install:
 
 script:
   - python manage.py test .
-virtualenv:
-  system_site_packages: true
