@@ -93,5 +93,5 @@ def routes_page(request):
 
 def routes_user_page(request, user_id):
     data = get_route_date_for_routes_page()
-    print(user_id)
+
     return render(request, 'routes_user.html', data)
