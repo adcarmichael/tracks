@@ -314,7 +314,7 @@ class TestRouteRecord(TestCase):
         self.assertEqual(rr[0].status, status)
         self.assertEqual(rr[0].is_climbed, is_climbed)
 
-    def test_set_exiting_route_record(self):
+    def test_set_existing_route_record(self):
         user_id = 1
         route_id = 1
         is_climbed = True

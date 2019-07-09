@@ -55,3 +55,6 @@ class RouteRecord(Model):
     status = IntegerField(
         verbose_name='E.g. mastered, climbed, attempted, todo')
     is_climbed = models.BooleanField(default=False)
+
+    class meta:
+        unique_together = ('route', 'user',)
