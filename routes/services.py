@@ -26,21 +26,32 @@ class _DalBase:
         query = Route.objects.all().order_by('-route_set__up_date')
         return query
 
-    @staticmethod
-    def _create_route_set_for_list_of_grade_sub(grade, grade_sub_list, up_date, down_date=None):
+    def _create_route_set_for_list_of_grade_sub(self, grade, grade_sub_list, up_date, down_date=None):
+        up_date = Cast(up_date, DateField())
+        is_dup = self._check_for_duplicate_based_on_grade_and_up_date(
+            grade, up_date)
+        if not is_dup:
+            rs = RouteSet.objects.create(up_date=up_date)
 
-        rs = RouteSet.objects.create(up_date=Cast(up_date, DateField()))
+            if down_date:
+                rs.down_date = Cast(down_date, DateField())
+                rs.save()
 
-        if down_date:
-            rs.down_date = Cast(down_date, DateField())
-            rs.save()
+            for ind, grade_sub in enumerate(grade_sub_list):
+                number = ind + 1
+                Route.objects.create(grade=grade,
+                                     grade_sub=grade_sub,
+                                     number=number,
+                                     route_set=rs)
 
-        for ind, grade_sub in enumerate(grade_sub_list):
-            number = ind + 1
-            Route.objects.create(grade=grade,
-                                 grade_sub=grade_sub,
-                                 number=number,
-                                 route_set=rs)
+    def _check_for_duplicate_based_on_grade_and_up_date(self, grade, up_date):
+        query = Route.objects.all().filter(grade=grade).filter(route_set__up_date=up_date)
+
+        if query:
+            return True
+        else:
+
+            return False
 
     def _filter_query_to_active_based_on_up_date(self, query):
         for index in range(0, query.count()):
@@ -120,10 +131,6 @@ class _EdenRockData:
         return f"Colour: {self.get_colour()[0]} \nNum Routes: {self.get_count()} "
 
 
-def _deactivate_all_active_route_sets_of_a_colour(colour):
-    Route.objects.all()
-
-
 class _EdenRockConfMapper:
 
     @staticmethod
@@ -160,17 +167,23 @@ def _get_route_record_for_user(user_id, route_id):
 
 
 def set_route_record_for_user(user_id, route_id, status, is_climbed):
-    rr_query = _get_route_record_for_user(user_id, route_id)
-    if rr_query:
-        rr = RouteRecord.objects.get(id=rr_query[0].id)
-        rr.status = status
-        rr.is_climbed = is_climbed
-        rr.save()
-        pass
-        # update the data
+    query = _get_route_record_for_user(user_id, route_id)
+    if query:
+        _update_route_record(rr_query[0].id, status, is_climbed)
     else:
-        profile = Profile.objects.all().filter(user__id=user_id)
-        route = Route.objects.all().filter(id=route_id)
-        if profile and route:
-            RouteRecord.objects.create(
-                user=profile[0], route=route[0], status=status, is_climbed=is_climbed)
+        _create_route_record(user_id, route_id, status, is_climbed)
+
+
+def _update_route_record(route_record_id, status, is_climbed):
+    rr = RouteRecord.objects.get(id=route_record_id)
+    rr.status = status
+    rr.is_climbed = is_climbed
+    rr.save()
+
+
+def _create_route_record(user_id, route_id, status, is_climbed):
+    profile = Profile.objects.all().filter(user__id=user_id)
+    route = Route.objects.all().filter(id=route_id)
+    if profile and route:
+        RouteRecord.objects.create(
+            user=profile[0], route=route[0], status=status, is_climbed=is_climbed)

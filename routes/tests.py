@@ -92,6 +92,21 @@ class TestDal(TestCase):
         self.assertEqual(dataNew.get_colour()[0], conf.Grade.black.name)
         self.assertEqual(dataNew.get_grade()[0], conf.GradeSub.high.name)
 
+    def test_add_route_set_protecting_against_duplicates(self):
+
+        dal = services.get_dal()
+        data = dal.get_routes_all()
+        self.assertEqual(data.get_count(), 0,
+                         'ensure that there is zero routes in db initially')
+
+        add_sample_route_set()
+        add_sample_route_set()
+
+        dataNew = dal.get_routes_all()
+        self.assertEqual(dataNew.get_count(), 2)
+        self.assertEqual(dataNew.get_colour()[0], conf.Grade.black.name)
+        self.assertEqual(dataNew.get_grade()[0], conf.GradeSub.high.name)
+
     def test_get_all_routes_are_ordered_by_up_date(self):
         dates = ['04/07/2019', '04/07/2021', '04/06/2019']
         add_sample_route_set(grade=['medium'], up_date=dates[0])

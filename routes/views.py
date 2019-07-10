@@ -1,19 +1,19 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from django.views import View
 from django.views.generic.base import TemplateView
-from routes import services
 from django.contrib.auth import login, authenticate
+from django.contrib.auth.models import User
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_text
+
+from routes.models import Profile
+from routes import services
 from routes.forms import SignUpForm
 from routes.tokens import account_activation_token
-from django.template.loader import render_to_string
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
-from django.contrib.sites.shortcuts import get_current_site
-from django.utils.encoding import force_text
-from django.contrib.auth import login
-from django.contrib.auth.models import User
-from django.utils.http import urlsafe_base64_decode
+
 
 dal = services.get_dal()
 
@@ -93,5 +93,17 @@ def routes_page(request):
 
 def routes_user_page(request, user_id):
     data = get_route_date_for_routes_page()
+    return render_with_user_restriction(request, 'routes_user.html', data, user_id)
 
-    return render(request, 'routes_user.html', data)
+
+def does_username_match_user_id(username, user_id):
+    prof = Profile.objects.get(id=user_id)
+    return str(username) == str(prof.user.username)
+
+
+def render_with_user_restriction(request, html, data, user_id):
+    if not does_username_match_user_id(request.user, user_id):
+        response = HttpResponseForbidden()
+        return response
+    else:
+        return render(request, 'routes_user.html', data)
