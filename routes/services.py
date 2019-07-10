@@ -169,19 +169,23 @@ def _get_route_record_for_user(user_id, route_id):
 def set_route_record_for_user(user_id, route_id, status, is_climbed):
     query = _get_route_record_for_user(user_id, route_id)
     if query:
-        _update_route_record(rr_query[0].id, status, is_climbed)
+        _update_route_record(
+            query[0].id, status=status, is_climbed=is_climbed)
     else:
-        _create_route_record(user_id, route_id, status, is_climbed)
+        _create_route_record(
+            user_id, route_id, status=status, is_climbed=is_climbed)
 
 
-def _update_route_record(route_record_id, status, is_climbed):
+def _update_route_record(route_record_id, is_climbed=[], status=[]):
     rr = RouteRecord.objects.get(id=route_record_id)
-    rr.status = status
-    rr.is_climbed = is_climbed
+    if status != []:
+        rr.status = status
+    if is_climbed != []:
+        rr.is_climbed = is_climbed
     rr.save()
 
 
-def _create_route_record(user_id, route_id, status, is_climbed):
+def _create_route_record(user_id, route_id, is_climbed=False, status=0):
     profile = Profile.objects.all().filter(user__id=user_id)
     route = Route.objects.all().filter(id=route_id)
     if profile and route:
