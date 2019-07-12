@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls import resolve
 from routes.views import home_page
-from routes.models import RouteSet, Route, RouteRecord, Profile
+from routes.models import RouteSet, Route, RouteRecord, Profile, Gym
 from django.test import Client
 import routes.services.dal as Dal
 import routes.services.utils as Utils
@@ -15,6 +15,11 @@ import os
 def add_sample_route_set(colour='black', grade=['high', 'medium'], down_date=None, up_date='03/06/2019'):
     dal = Dal.get_dal()
     dal.add_route_set(colour, grade, up_date, down_date=down_date)
+
+
+def add_sample_gym(gym_key='eden_edi', name='Eden Rocks Edinburgh', email='Eden Rock Edinburgh'):
+    dal = Dal.get_dal()
+    dal.create_gym(gym_key, name, email)
 
 
 def create_superuser_named_admin():
@@ -91,6 +96,8 @@ class TestDal(TestCase):
         self.assertEqual(dataNew.get_count(), 2)
         self.assertEqual(dataNew.get_grade()[0], conf.Grade.black.name)
         self.assertEqual(dataNew.get_grade_sub()[0], conf.GradeSub.high.name)
+
+        self.fail('need to add gym as foreign key...')
 
     def test_add_route_set_protecting_against_duplicates(self):
 
@@ -352,3 +359,37 @@ class TestRouteRecord(TestCase):
         self.assertEqual(rr[0].status, 123)
         self.assertEqual(rr[0].is_climbed, False)
         self.assertEqual(rr.count(), 1)
+
+
+class TestGym(TestCase):
+    def test_create_gym(self):
+        email = 'edinburgh@edenrockclimbing,com'
+        gym_key = 'eden_edi'
+        name = 'Eden Rock Edinburgh'
+        dal = Dal.get_dal()
+        dal.create_gym(gym_key, name, email)
+
+        gym = Gym.objects.all()
+
+        self.assertEqual(gym[0].name, name)
+        self.assertEqual(gym[0].gym_key, gym_key)
+        self.assertEqual(gym[0].email, email)
+
+    def test_update_gym(self):
+        gym_key = 'test'
+        email = 'asdf@test.com'
+        email_new = 'new@test.com'
+        add_sample_gym(gym_key=gym_key, email=email)
+
+        dal = Dal.get_dal()
+        dal.update_gym(gym_key, email=email_new)
+
+        self.assertNotEqual(email, email_new)
+
+    def test_delete_gym(self):
+        gym_key = 'test'
+        add_sample_gym(gym_key=gym_key)
+        self.assertEqual(Gym.objects.count(), 1)
+        dal = Dal.get_dal()
+        dal._delete_gym(gym_key)
+        self.assertEqual(Gym.objects.count(), 0)

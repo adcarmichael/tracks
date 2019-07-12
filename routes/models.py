@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import IntegerField, ForeignKey, DateField, BooleanField, CharField
+from django.db.models import IntegerField, EmailField, ForeignKey, DateField, BooleanField, CharField
 from django.db.models import Model, CASCADE
 from django.db.models import OneToOneField
 from datetime import date
@@ -9,7 +9,14 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
+class Gym(Model):
+    email = EmailField(null=False)
+    gym_key = CharField(max_length=10, primary_key=True)
+    name = CharField(max_length=300)
+
+
 class RouteSet(Model):
+    # gym = ForeignKey(Gym, on_delete=CASCADE, related_name='gyms')
     up_date = DateField(null=False,
                         verbose_name='This is the date that the route set was available')
     down_date = DateField(

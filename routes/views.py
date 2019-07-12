@@ -86,12 +86,12 @@ def get_route_date_for_routes_page():
     return data
 
 
-def routes_page(request):
+def routes_page(request, gym_key):
     data = get_route_date_for_routes_page()
     return render(request, 'routes.html', data)
 
 
-def routes_user_page(request, user_id):
+def routes_user_page(request, user_id, gym_key):
     data = get_route_date_for_routes_page()
     return render_with_user_restriction(request, 'routes_user.html', data, user_id)
 

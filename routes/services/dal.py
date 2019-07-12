@@ -1,4 +1,4 @@
-from routes.models import RouteSet, Route, RouteRecord, Profile
+from routes.models import RouteSet, Route, RouteRecord, Profile, Gym
 from enum import Enum
 import routes.services.conf as conf
 from datetime import datetime
@@ -123,11 +123,12 @@ class _DalBase:
 
     def _update_route_record(self, route_record_id, is_climbed=[], status=[]):
         rr = RouteRecord.objects.get(id=route_record_id)
-        if status != []:
-            rr.status = status
-        if is_climbed != []:
-            rr.is_climbed = is_climbed
-        rr.save()
+        if rr:
+            if status != []:
+                rr.status = status
+            if is_climbed != []:
+                rr.is_climbed = is_climbed
+            rr.save()
 
     def get_route_set_of_grade(self, colour, is_active=False):
         query = self._get_all_routes()
@@ -148,6 +149,21 @@ class _DalBase:
                           for grade_sub_str in grade_list]
         self._create_route_set_for_list_of_grade_sub(
             grade, grade_sub_list, up_date, down_date)
+
+    def create_gym(self, gym_key, name, email):
+        Gym.objects.create(name=name, email=email, gym_key=gym_key)
+
+    def update_gym(self, gym_key, name=[], email=[]):
+        query = Gym.objects.get(pk=gym_key)
+        if query:
+            if name != []:
+                query.name = name
+            if email != []:
+                query.email = email
+            query.save()
+
+    def _delete_gym(self, gym_key):
+        Gym.objects.get(pk=gym_key).delete()
 
 
 class _DalEdenRocks(_DalBase):
