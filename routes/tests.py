@@ -61,13 +61,13 @@ class HomePageTest(TestCase):
 
 
 class EdenRockMapTest(TestCase):
-    def test_colour(self):
+    def test_grade(self):
         for e in conf.Grade:
-            mapped_value = services._EdenRockConfMapper().colour(e.name)
+            mapped_value = services._EdenRockConfMapper().grade(e.name)
             self.assertEqual(mapped_value, e.value)
 
-    def test_colour_with_mixed_case(self):
-        mapped_value = services._EdenRockConfMapper().colour('GreeN')
+    def test_grade_with_mixed_case(self):
+        mapped_value = services._EdenRockConfMapper().grade('GreeN')
         self.assertEqual(mapped_value, conf.Grade.green.value)
 
 
@@ -89,8 +89,8 @@ class TestDal(TestCase):
 
         dataNew = dal.get_routes_all()
         self.assertEqual(dataNew.get_count(), 2)
-        self.assertEqual(dataNew.get_colour()[0], conf.Grade.black.name)
-        self.assertEqual(dataNew.get_grade()[0], conf.GradeSub.high.name)
+        self.assertEqual(dataNew.get_grade()[0], conf.Grade.black.name)
+        self.assertEqual(dataNew.get_grade_sub()[0], conf.GradeSub.high.name)
 
     def test_add_route_set_protecting_against_duplicates(self):
 
@@ -104,8 +104,8 @@ class TestDal(TestCase):
 
         dataNew = dal.get_routes_all()
         self.assertEqual(dataNew.get_count(), 2)
-        self.assertEqual(dataNew.get_colour()[0], conf.Grade.black.name)
-        self.assertEqual(dataNew.get_grade()[0], conf.GradeSub.high.name)
+        self.assertEqual(dataNew.get_grade()[0], conf.Grade.black.name)
+        self.assertEqual(dataNew.get_grade_sub()[0], conf.GradeSub.high.name)
 
     def test_get_all_routes_are_ordered_by_up_date(self):
         dates = ['04/07/2019', '04/07/2021', '04/06/2019']
@@ -140,7 +140,7 @@ class TestDal(TestCase):
         data = dal.get_routes_all()
         self.assertEqual(data.get_down_date()[0], down_date_exp)
 
-    def test_get_colour(self):
+    def test_get_grade(self):
         up_date_old = '11/06/2019'
         up_date_new = '11/07/2019'
         colour_old = 'black'
@@ -150,13 +150,13 @@ class TestDal(TestCase):
         add_sample_route_set(up_date=up_date_new, grade=[
             'medium'], colour=colour_new)
         dal = services.get_dal()
-        data = dal.get_route_set_of_colour(colour_new, is_active=False)
+        data = dal.get_route_set_of_grade(colour_new, is_active=False)
 
-        colour_act = data.get_colour()
+        colour_act = data.get_grade()
         self.assertEqual(colour_act[0], colour_new)
         self.assertEqual(data.get_count(), 1)
 
-    def test_get_colour_that_is_active(self):
+    def test_get_grade_that_is_active(self):
         ''' This test asserts that only an active date is returned'''
         up_date_old = '11/06/2019'
         up_date_active = '15/06/2019'
@@ -173,9 +173,9 @@ class TestDal(TestCase):
             'medium'], colour=colour_exp)
 
         dal = services.get_dal()
-        data = dal.get_route_set_of_colour(colour_exp, is_active=True)
+        data = dal.get_route_set_of_grade(colour_exp, is_active=True)
 
-        colour_act = data.get_colour()[0]
+        colour_act = data.get_grade()[0]
         up_date_act = data.get_up_date()[0]
         self.assertEqual(colour_act, colour_exp)
         self.assertEqual(
@@ -198,17 +198,17 @@ class Test_EdenRockData(TestCase):
                              route_set=rs)
         return Route.objects.all()
 
-    def test_get_colour(self):
-        query = self.get_query()
-        erd = services._EdenRockData(query)
-        colour = erd.get_colour()
-        self.assertEqual(colour[0], 'orange')
-
     def test_get_grade(self):
         query = self.get_query()
         erd = services._EdenRockData(query)
-        grade = erd.get_grade()
-        self.assertEqual(grade[0], 'high')
+        colour = erd.get_grade()
+        self.assertEqual(colour[0], 'orange')
+
+    def test_get_grade_sub(self):
+        query = self.get_query()
+        erd = services._EdenRockData(query)
+        grade_sub = erd.get_grade_sub()
+        self.assertEqual(grade_sub[0], 'high')
 
     def test_get_down_date(self):
         query = self.get_query()

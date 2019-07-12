@@ -72,9 +72,9 @@ class _DalEdenRocks(_DalBase):
         data = _EdenRockData(query)
         return data
 
-    def get_route_set_of_colour(self, colour, is_active=False):
+    def get_route_set_of_grade(self, colour, is_active=False):
         query = self._get_all_routes()
-        grade = _EdenRockConfMapper.colour(colour)
+        grade = _EdenRockConfMapper.grade(colour)
         query = query.filter(grade=grade)
         if is_active:
             query = self._filter_query_to_active_based_on_up_date(query)
@@ -82,12 +82,12 @@ class _DalEdenRocks(_DalBase):
         return _EdenRockData(query)
 
     def add_route_set(self, colour, grade_list, up_date, down_date=None):
-        grade = _EdenRockConfMapper().colour(colour)
+        grade = _EdenRockConfMapper().grade(colour)
         up_date = datetime.strptime(up_date, "%d/%m/%Y").date()
         if down_date:
             down_date = datetime.strptime(down_date, "%d/%m/%Y").date()
 
-        grade_sub_list = [_EdenRockConfMapper().grade(grade_sub_str)
+        grade_sub_list = [_EdenRockConfMapper().grade_sub(grade_sub_str)
                           for grade_sub_str in grade_list]
         self._create_route_set_for_list_of_grade_sub(
             grade, grade_sub_list, up_date, down_date)
@@ -101,7 +101,7 @@ class _EdenRockData:
 
         return [tmp[field_str] for tmp in self.query.values(field_str)]
 
-    def get_colour(self):
+    def get_grade(self):
         colour = [conf.Grade(
             a).name for a in self._convert_query_to_list('grade')]
         return colour
@@ -112,7 +112,7 @@ class _EdenRockData:
     def get_up_date(self):
         return [a.route_set.up_date for a in self.query]
 
-    def get_grade(self):
+    def get_grade_sub(self):
         return [conf.GradeSub(a).name for a in self._convert_query_to_list('grade_sub')]
 
     def get_count(self):
@@ -134,12 +134,12 @@ class _EdenRockData:
 class _EdenRockConfMapper:
 
     @staticmethod
-    def colour(colour):
+    def grade(colour):
         g = conf.Grade
         return g.get_value_from_name(colour)
 
     @staticmethod
-    def grade(grade):
+    def grade_sub(grade):
         g = conf.GradeSub
         return g.get_value_from_name(grade)
 
