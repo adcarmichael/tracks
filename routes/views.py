@@ -10,12 +10,12 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_text
 
 from routes.models import Profile
-from routes import services
+import routes.services.dal as Dal
 from routes.forms import SignUpForm
 from routes.tokens import account_activation_token
 
 
-dal = services.get_dal()
+dal = Dal.get_dal()
 
 
 def home_page(request):

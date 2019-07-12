@@ -1,6 +1,6 @@
 from routes.models import RouteSet, Route, RouteRecord, Profile
 from enum import Enum
-import routes.conf as conf
+import routes.services.conf as conf
 from datetime import datetime
 from django.db.models import DateField
 from django.db.models.functions import Cast, Coalesce
@@ -14,13 +14,38 @@ from django.db.models.functions import Cast, Coalesce
 
 def get_dal(key='eden'):
     if key == 'eden':
-        _dal = _DalEdenRocks()
+        _dal = _DalEdenRocks(_EdenDataMap)
     else:
-        _dal = _DalEdenRocks()
+        _dal = _DalEdenRocks(_EdenDataMap)
     return _dal
 
 
+class _DataMap():
+    @staticmethod
+    def grade(grade):
+        pass
+
+    @staticmethod
+    def grade_sub(grade_sub):
+        pass
+
+
+class _EdenDataMap(_DataMap):
+
+    @staticmethod
+    def grade(grade):
+        g = conf.Grade
+        return g.get_value_from_name(grade)
+
+    @staticmethod
+    def grade_sub(grade_sub):
+        g = conf.GradeSub
+        return g.get_value_from_name(grade_sub)
+
+
 class _DalBase:
+    def __init__(self, DataMap):
+        self.DataMap = DataMap()
 
     def _get_all_routes(self):
         query = Route.objects.all().order_by('-route_set__up_date')
@@ -62,38 +87,74 @@ class _DalBase:
                 return query
         return query
 
+    def get_route_record_for_user(self, user_id, route_id):
+        rr = self._get_route_record_for_user(user_id, route_id)
+        status = [record.status for record in rr]
+        is_climbed = [record.is_climbed for record in rr]
+        return status, is_climbed
 
-class _DalEdenRocks(_DalBase):
-    def __init__(self):
-        pass
+    def set_route_record_for_user(self, user_id, route_id, status, is_climbed):
+        query = self._get_route_record_for_user(user_id, route_id)
+        if query:
+            self._update_route_record(
+                query[0].id, status=status, is_climbed=is_climbed)
+        else:
+            self._create_route_record(
+                user_id, route_id, status=status, is_climbed=is_climbed)
 
     def get_routes_all(self):
         query = self._get_all_routes()
-        data = _EdenRockData(query)
+        data = _Data(query)
         return data
+
+    def _get_route_record_for_user(self, user_id, route_id):
+        if not isinstance(route_id, (list,)):
+            route_id = [route_id]
+        query = RouteRecord.objects.filter(
+            user__id=user_id).filter(route__id__in=route_id)
+        return query
+
+    def _create_route_record(self, user_id, route_id, is_climbed=False, status=0):
+        profile = Profile.objects.all().filter(user__id=user_id)
+        route = Route.objects.all().filter(id=route_id)
+        if profile and route:
+            RouteRecord.objects.create(
+                user=profile[0], route=route[0], status=status, is_climbed=is_climbed)
+
+    def _update_route_record(self, route_record_id, is_climbed=[], status=[]):
+        rr = RouteRecord.objects.get(id=route_record_id)
+        if status != []:
+            rr.status = status
+        if is_climbed != []:
+            rr.is_climbed = is_climbed
+        rr.save()
 
     def get_route_set_of_grade(self, colour, is_active=False):
         query = self._get_all_routes()
-        grade = _EdenRockConfMapper.grade(colour)
+        grade = self.DataMap.grade(colour)
         query = query.filter(grade=grade)
         if is_active:
             query = self._filter_query_to_active_based_on_up_date(query)
 
-        return _EdenRockData(query)
+        return _Data(query)
 
     def add_route_set(self, colour, grade_list, up_date, down_date=None):
-        grade = _EdenRockConfMapper().grade(colour)
+        grade = self.DataMap.grade(colour)
         up_date = datetime.strptime(up_date, "%d/%m/%Y").date()
         if down_date:
             down_date = datetime.strptime(down_date, "%d/%m/%Y").date()
 
-        grade_sub_list = [_EdenRockConfMapper().grade_sub(grade_sub_str)
+        grade_sub_list = [self.DataMap.grade_sub(grade_sub_str)
                           for grade_sub_str in grade_list]
         self._create_route_set_for_list_of_grade_sub(
             grade, grade_sub_list, up_date, down_date)
 
 
-class _EdenRockData:
+class _DalEdenRocks(_DalBase):
+    pass
+
+
+class _Data:
     def __init__(self, query):
         self.query = query
 
@@ -129,65 +190,3 @@ class _EdenRockData:
 
     def __repr__(self):
         return f"Colour: {self.get_colour()[0]} \nNum Routes: {self.get_count()} "
-
-
-class _EdenRockConfMapper:
-
-    @staticmethod
-    def grade(colour):
-        g = conf.Grade
-        return g.get_value_from_name(colour)
-
-    @staticmethod
-    def grade_sub(grade):
-        g = conf.GradeSub
-        return g.get_value_from_name(grade)
-
-
-class Utils:
-    @staticmethod
-    def convert_str_to_datetime(date_str):
-        date = datetime.strptime(date_str, "%d/%m/%Y").date()
-        return date
-
-
-def get_route_record_for_user(user_id, route_id):
-    rr = _get_route_record_for_user(user_id, route_id)
-    status = [record.status for record in rr]
-    is_climbed = [record.is_climbed for record in rr]
-    return status, is_climbed
-
-
-def _get_route_record_for_user(user_id, route_id):
-    if not isinstance(route_id, (list,)):
-        route_id = [route_id]
-    query = RouteRecord.objects.filter(
-        user__id=user_id).filter(route__id__in=route_id)
-    return query
-
-
-def set_route_record_for_user(user_id, route_id, status, is_climbed):
-    query = _get_route_record_for_user(user_id, route_id)
-    if query:
-        _update_route_record(
-            query[0].id, status=status, is_climbed=is_climbed)
-    else:
-        _create_route_record(
-            user_id, route_id, status=status, is_climbed=is_climbed)
-
-
-def _update_route_record(route_record_id, is_climbed=[], status=[]):
-    rr = RouteRecord.objects.get(id=route_record_id)
-    if status != []:
-        rr.status = status
-    if is_climbed != []:
-        rr.is_climbed = is_climbed
-    rr.save()
-
-
-def _create_route_record(user_id, route_id, is_climbed=False, status=0):
-    profile = Profile.objects.all().filter(user__id=user_id)
-    route = Route.objects.all().filter(id=route_id)
-    if profile and route:
-        RouteRecord.objects.create(
-            user=profile[0], route=route[0], status=status, is_climbed=is_climbed)

@@ -3,17 +3,17 @@ from django.urls import resolve
 from routes.views import home_page
 from routes.models import RouteSet, Route, RouteRecord, Profile
 from django.test import Client
-import routes.services as services
-from routes.services import Utils
-from datetime import datetime
-import routes.conf as conf
+import routes.services.dal as Dal
+import routes.services.utils as Utils
+import routes.services.conf as conf
 from django.db.models.functions import Cast, Coalesce
+from datetime import datetime
 from django.db.models import DateField
 import os
 
 
 def add_sample_route_set(colour='black', grade=['high', 'medium'], down_date=None, up_date='03/06/2019'):
-    dal = services.get_dal()
+    dal = Dal.get_dal()
     dal.add_route_set(colour, grade, up_date, down_date=down_date)
 
 
@@ -63,24 +63,24 @@ class HomePageTest(TestCase):
 class EdenRockMapTest(TestCase):
     def test_grade(self):
         for e in conf.Grade:
-            mapped_value = services._EdenRockConfMapper().grade(e.name)
+            mapped_value = Dal._EdenDataMap().grade(e.name)
             self.assertEqual(mapped_value, e.value)
 
     def test_grade_with_mixed_case(self):
-        mapped_value = services._EdenRockConfMapper().grade('GreeN')
+        mapped_value = Dal._EdenDataMap().grade('GreeN')
         self.assertEqual(mapped_value, conf.Grade.green.value)
 
 
 class TestDal(TestCase):
 
     def test_get_all_routes_with_zero_in_database(self):
-        dal = services.get_dal()
+        dal = Dal.get_dal()
         data = dal.get_routes_all()
         self.assertFalse(data.get_count())
 
     def test_add_route_set(self):
 
-        dal = services.get_dal()
+        dal = Dal.get_dal()
         data = dal.get_routes_all()
         self.assertEqual(data.get_count(), 0,
                          'ensure that there is zero routes in db initially')
@@ -94,7 +94,7 @@ class TestDal(TestCase):
 
     def test_add_route_set_protecting_against_duplicates(self):
 
-        dal = services.get_dal()
+        dal = Dal.get_dal()
         data = dal.get_routes_all()
         self.assertEqual(data.get_count(), 0,
                          'ensure that there is zero routes in db initially')
@@ -113,7 +113,7 @@ class TestDal(TestCase):
         add_sample_route_set(grade=['medium'], up_date=dates[1])
         add_sample_route_set(grade=['medium'], up_date=dates[2])
 
-        dal = services.get_dal()
+        dal = Dal.get_dal()
         data = dal.get_routes_all()
 
         self.assertEqual(data.get_up_date()[
@@ -124,7 +124,7 @@ class TestDal(TestCase):
                          2], Utils.convert_str_to_datetime(dates[2]))
 
     def test_add_route_with_down_date(self):
-        dal = services.get_dal()
+        dal = Dal.get_dal()
         down_date = '04/07/2019'
         down_date_exp = datetime.strptime(
             down_date, "%d/%m/%Y").date()
@@ -133,7 +133,7 @@ class TestDal(TestCase):
         self.assertEqual(data.get_down_date()[0], down_date_exp)
 
     def test_add_route_without_down_date(self):
-        dal = services.get_dal()
+        dal = Dal.get_dal()
         down_date_exp = datetime.strptime(
             '01/01/2000', "%d/%m/%Y").date()
         add_sample_route_set()
@@ -149,7 +149,7 @@ class TestDal(TestCase):
             'medium'], colour=colour_old)
         add_sample_route_set(up_date=up_date_new, grade=[
             'medium'], colour=colour_new)
-        dal = services.get_dal()
+        dal = Dal.get_dal()
         data = dal.get_route_set_of_grade(colour_new, is_active=False)
 
         colour_act = data.get_grade()
@@ -172,7 +172,7 @@ class TestDal(TestCase):
         add_sample_route_set(up_date=up_date_old, grade=[
             'medium'], colour=colour_exp)
 
-        dal = services.get_dal()
+        dal = Dal.get_dal()
         data = dal.get_route_set_of_grade(colour_exp, is_active=True)
 
         colour_act = data.get_grade()[0]
@@ -183,7 +183,7 @@ class TestDal(TestCase):
         self.assertEqual(data.get_count(), 1)
 
 
-class Test_EdenRockData(TestCase):
+class Test__Data(TestCase):
 
     def get_query(self):
         up_date = datetime.strptime('01/02/1989', "%d/%m/%Y").date()
@@ -200,53 +200,53 @@ class Test_EdenRockData(TestCase):
 
     def test_get_grade(self):
         query = self.get_query()
-        erd = services._EdenRockData(query)
+        erd = Dal._Data(query)
         colour = erd.get_grade()
         self.assertEqual(colour[0], 'orange')
 
     def test_get_grade_sub(self):
         query = self.get_query()
-        erd = services._EdenRockData(query)
+        erd = Dal._Data(query)
         grade_sub = erd.get_grade_sub()
         self.assertEqual(grade_sub[0], 'high')
 
     def test_get_down_date(self):
         query = self.get_query()
-        erd = services._EdenRockData(query)
+        erd = Dal._Data(query)
         down_date = erd.get_down_date()
         down_date_exp = datetime.strptime('01/01/2000', "%d/%m/%Y").date()
         self.assertEqual(down_date[0], down_date_exp)
 
     def test_get_up_date(self):
         query = self.get_query()
-        erd = services._EdenRockData(query)
+        erd = Dal._Data(query)
         up_date = erd.get_up_date()
         up_date_exp = datetime.strptime('01/02/1989', "%d/%m/%Y").date()
         self.assertEqual(up_date[0], up_date_exp)
 
     def test_get_count(self):
         query = self.get_query()
-        data = services._EdenRockData(query)
+        data = Dal._Data(query)
         count = data.get_count()
         self.assertEqual(count, 2)
 
     def test_get_number(self):
         query = self.get_query()
-        data = services._EdenRockData(query)
+        data = Dal._Data(query)
         number = data.get_number()
         self.assertEqual(number[0], 1)
         self.assertEqual(number[1], 2)
 
     def test_get_route_id(self):
         query = self.get_query()
-        data = services._EdenRockData(query)
+        data = Dal._Data(query)
         id = data.get_route_id()
         self.assertEqual(id[0], 1)
         self.assertEqual(id[1], 2)
 
     def test_get_route_set_id(self):
         query = self.get_query()
-        data = services._EdenRockData(query)
+        data = Dal._Data(query)
         id = data.get_route_set_id()
         self.assertEqual(id[0], 1)
 
@@ -269,7 +269,8 @@ class TestRouteRecord(TestCase):
 
         self.create_sample_route_record(
             status=[1, 0], is_climbed=[True, False])
-        status, is_climbed = services.get_route_record_for_user(
+        dal = Dal.get_dal()
+        status, is_climbed = dal.get_route_record_for_user(
             user_id, route_id)
 
         self.assertEqual(status[0], 1)
@@ -278,10 +279,11 @@ class TestRouteRecord(TestCase):
     def test_get_rooute_record_for_multi_routes(self):
         user_id = 1
         route_id = [1, 2]
+        dal = Dal.get_dal()
 
         self.create_sample_route_record(
             status=[1, 0], is_climbed=[True, False])
-        status, is_climbed = services.get_route_record_for_user(
+        status, is_climbed = dal = Dal.get_dal().get_route_record_for_user(
             user_id, route_id)
 
         self.assertEqual(status[0], 1)
@@ -292,10 +294,11 @@ class TestRouteRecord(TestCase):
     def test_get_rooute_record_for_non_existent_route(self):
         user_id = 1
         route_id = 100
+        dal = Dal.get_dal()
 
         self.create_sample_route_record(
             status=[1, 0], is_climbed=[True, False])
-        status, is_climbed = services.get_route_record_for_user(
+        status, is_climbed = dal.get_route_record_for_user(
             user_id, route_id)
 
         self.assertEqual(status, [])
@@ -307,7 +310,8 @@ class TestRouteRecord(TestCase):
 
         self.create_sample_route_record(
             status=[1, 0], is_climbed=[True, False])
-        status, is_climbed = services.get_route_record_for_user(
+        dal = Dal.get_dal()
+        status, is_climbed = dal.get_route_record_for_user(
             user_id, route_id)
 
         self.assertEqual(status, [])
@@ -321,8 +325,8 @@ class TestRouteRecord(TestCase):
 
         create_auth_user()
         add_sample_route_set()
-        services.set_route_record_for_user(
-            user_id, route_id, status, is_climbed)
+        dal = Dal.get_dal()
+        dal.set_route_record_for_user(user_id, route_id, status, is_climbed)
 
         rr = RouteRecord.objects.all().filter(
             user__id=user_id).filter(route__id=route_id)
@@ -337,9 +341,10 @@ class TestRouteRecord(TestCase):
 
         create_auth_user()
         add_sample_route_set()
-        services.set_route_record_for_user(
+        dal = Dal.get_dal()
+        dal.set_route_record_for_user(
             user_id, route_id, status, is_climbed)
-        services.set_route_record_for_user(
+        dal.set_route_record_for_user(
             user_id, route_id, 123, False)
 
         rr = RouteRecord.objects.all().filter(
