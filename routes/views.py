@@ -71,17 +71,17 @@ def account_activation_sent(request):
 
 def get_route_date_for_routes_page():
 
-    data_black = dal.get_route_set_of_colour('black')
+    data_black = dal.get_route_set_of_grade('black')
     black = zip(data_black.get_number(),
-                data_black.get_colour())
+                data_black.get_grade())
     data = {
-        'purple': dal.get_route_set_of_colour('purple'),
-        'orange': dal.get_route_set_of_colour('orange'),
-        'green': dal.get_route_set_of_colour('green'),
-        'yellow': dal.get_route_set_of_colour('yellow'),
-        'blue': dal.get_route_set_of_colour('blue'),
-        'white': dal.get_route_set_of_colour('white'),
-        'red': dal.get_route_set_of_colour('red'),
+        'purple': dal.get_route_set_of_grade('purple'),
+        'orange': dal.get_route_set_of_grade('orange'),
+        'green': dal.get_route_set_of_grade('green'),
+        'yellow': dal.get_route_set_of_grade('yellow'),
+        'blue': dal.get_route_set_of_grade('blue'),
+        'white': dal.get_route_set_of_grade('white'),
+        'red': dal.get_route_set_of_grade('red'),
         'black': black}
     return data
 

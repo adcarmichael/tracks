@@ -21,3 +21,7 @@ Taken from https://simpleisbetterthancomplex.com/tutorial/2017/02/18/how-to-crea
 
 ## For authentication (login lohout etc)
 https://wsvincent.com/django-user-authentication-tutorial-login-and-logout/
+
+## Test User
+username = test_user
+password = test_password
