@@ -13,9 +13,10 @@ from routes.models import Profile
 import routes.services.dal as Dal
 from routes.forms import SignUpForm
 from routes.tokens import account_activation_token
+from routes.services.conf import GymKey
 
 
-dal = Dal.get_dal()
+dal = Dal.get_dal(GymKey.eden_rock_edinburgh)
 
 
 def home_page(request):

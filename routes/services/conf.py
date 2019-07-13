@@ -10,6 +10,11 @@ class _Enum(Enum):
         return None
 
 
+class GymKey(_Enum):
+    eden_rock_edinburgh = 'eden_edi'
+    eden_rock_carlisle = 'eden_carl'
+
+
 class Grade(_Enum):
     null = 0
     purple = 1
@@ -40,4 +45,3 @@ class ClimbStatus(_Enum):
     def get_default():
         self = ClimbStatus
         return self.unclimbed
-

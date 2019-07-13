@@ -12,14 +12,21 @@ from django.db.models import DateField
 import os
 
 
-def add_sample_route_set(colour='black', grade=['high', 'medium'], down_date=None, up_date='03/06/2019'):
+def add_sample_route_set(gym_id, colour='black', grade=['high', 'medium'], down_date=None, up_date='03/06/2019'):
     dal = Dal.get_dal()
-    dal.add_route_set(colour, grade, up_date, down_date=down_date)
+    dal.add_route_set(gym_id, colour, grade, up_date, down_date=down_date)
 
 
-def add_sample_gym(gym_key='eden_edi', name='Eden Rocks Edinburgh', email='Eden Rock Edinburgh'):
+def add_sample_data(colour='black', grade=['high', 'medium'], down_date=None, up_date='03/06/2019', gym_key='eden_edi',  name='Eden Rocks Edinburgh', email='edinburgh@edenrockclimbing.com'):
+    gym = add_sample_gym(gym_key=gym_key, name=name, email=email)
+    add_sample_route_set(gym.id, colour=colour, grade=grade,
+                         down_date=down_date, up_date=up_date)
+
+
+def add_sample_gym(gym_key='eden_edi', name='Eden Rocks Edinburgh', email='edinburgh@edenrockclimbing.com'):
     dal = Dal.get_dal()
-    dal.create_gym(gym_key, name, email)
+    gym = dal.create_gym(gym_key, name, email)
+    return gym
 
 
 def create_superuser_named_admin():
@@ -90,14 +97,12 @@ class TestDal(TestCase):
         self.assertEqual(data.get_count(), 0,
                          'ensure that there is zero routes in db initially')
 
-        add_sample_route_set()
+        add_sample_data()
 
         dataNew = dal.get_routes_all()
         self.assertEqual(dataNew.get_count(), 2)
         self.assertEqual(dataNew.get_grade()[0], conf.Grade.black.name)
         self.assertEqual(dataNew.get_grade_sub()[0], conf.GradeSub.high.name)
-
-        self.fail('need to add gym as foreign key...')
 
     def test_add_route_set_protecting_against_duplicates(self):
 
@@ -106,8 +111,9 @@ class TestDal(TestCase):
         self.assertEqual(data.get_count(), 0,
                          'ensure that there is zero routes in db initially')
 
-        add_sample_route_set()
-        add_sample_route_set()
+        add_sample_gym()
+        add_sample_route_set(gym_id=1)
+        add_sample_route_set(gym_id=1)
 
         dataNew = dal.get_routes_all()
         self.assertEqual(dataNew.get_count(), 2)
@@ -116,9 +122,9 @@ class TestDal(TestCase):
 
     def test_get_all_routes_are_ordered_by_up_date(self):
         dates = ['04/07/2019', '04/07/2021', '04/06/2019']
-        add_sample_route_set(grade=['medium'], up_date=dates[0])
-        add_sample_route_set(grade=['medium'], up_date=dates[1])
-        add_sample_route_set(grade=['medium'], up_date=dates[2])
+        add_sample_data(grade=['medium'], up_date=dates[0])
+        add_sample_data(grade=['medium'], up_date=dates[1])
+        add_sample_data(grade=['medium'], up_date=dates[2])
 
         dal = Dal.get_dal()
         data = dal.get_routes_all()
@@ -135,15 +141,14 @@ class TestDal(TestCase):
         down_date = '04/07/2019'
         down_date_exp = datetime.strptime(
             down_date, "%d/%m/%Y").date()
-        add_sample_route_set(down_date=down_date)
+        add_sample_data(down_date=down_date)
         data = dal.get_routes_all()
         self.assertEqual(data.get_down_date()[0], down_date_exp)
 
     def test_add_route_without_down_date(self):
         dal = Dal.get_dal()
-        down_date_exp = datetime.strptime(
-            '01/01/2000', "%d/%m/%Y").date()
-        add_sample_route_set()
+        down_date_exp = None
+        add_sample_data()
         data = dal.get_routes_all()
         self.assertEqual(data.get_down_date()[0], down_date_exp)
 
@@ -152,9 +157,9 @@ class TestDal(TestCase):
         up_date_new = '11/07/2019'
         colour_old = 'black'
         colour_new = 'red'
-        add_sample_route_set(up_date=up_date_old, grade=[
+        add_sample_data(up_date=up_date_old, grade=[
             'medium'], colour=colour_old)
-        add_sample_route_set(up_date=up_date_new, grade=[
+        add_sample_data(up_date=up_date_new, grade=[
             'medium'], colour=colour_new)
         dal = Dal.get_dal()
         data = dal.get_route_set_of_grade(colour_new, is_active=False)
@@ -172,11 +177,11 @@ class TestDal(TestCase):
 
         # Add dates out of order to ensure that it simply is not picking
         # up the latest and is instead ordering query by date
-        add_sample_route_set(up_date=up_date_active, grade=[
+        add_sample_data(up_date=up_date_active, grade=[
             'medium'], colour=colour_exp)
-        add_sample_route_set(up_date=up_date_future, grade=[
+        add_sample_data(up_date=up_date_future, grade=[
             'medium'], colour=colour_exp)
-        add_sample_route_set(up_date=up_date_old, grade=[
+        add_sample_data(up_date=up_date_old, grade=[
             'medium'], colour=colour_exp)
 
         dal = Dal.get_dal()
@@ -194,7 +199,8 @@ class Test__Data(TestCase):
 
     def get_query(self):
         up_date = datetime.strptime('01/02/1989', "%d/%m/%Y").date()
-        rs = RouteSet.objects.create(up_date=Cast(up_date, DateField()))
+        gym = add_sample_gym()
+        rs = RouteSet.objects.create(up_date=up_date, gym=gym)
         Route.objects.create(grade=2,
                              grade_sub=4,
                              number=1,
@@ -221,7 +227,7 @@ class Test__Data(TestCase):
         query = self.get_query()
         erd = Dal._Data(query)
         down_date = erd.get_down_date()
-        down_date_exp = datetime.strptime('01/01/2000', "%d/%m/%Y").date()
+        down_date_exp = None
         self.assertEqual(down_date[0], down_date_exp)
 
     def test_get_up_date(self):
@@ -261,7 +267,7 @@ class Test__Data(TestCase):
 class TestRouteRecord(TestCase):
     def create_sample_route_record(self, status=[1], is_climbed=[True], route_num=1):
         create_auth_user()
-        add_sample_route_set()
+        add_sample_data()
         route = Route.objects.all()
         profile = Profile.objects.first()
 
@@ -331,7 +337,7 @@ class TestRouteRecord(TestCase):
         status = 101
 
         create_auth_user()
-        add_sample_route_set()
+        add_sample_data()
         dal = Dal.get_dal()
         dal.set_route_record_for_user(user_id, route_id, status, is_climbed)
 
@@ -347,7 +353,7 @@ class TestRouteRecord(TestCase):
         status = 101
 
         create_auth_user()
-        add_sample_route_set()
+        add_sample_data()
         dal = Dal.get_dal()
         dal.set_route_record_for_user(
             user_id, route_id, status, is_climbed)
@@ -382,14 +388,14 @@ class TestGym(TestCase):
         add_sample_gym(gym_key=gym_key, email=email)
 
         dal = Dal.get_dal()
-        dal.update_gym(gym_key, email=email_new)
+        dal.update_gym(1, email=email_new)
 
         self.assertNotEqual(email, email_new)
 
     def test_delete_gym(self):
         gym_key = 'test'
-        add_sample_gym(gym_key=gym_key)
+        gym = add_sample_gym(gym_key=gym_key)
         self.assertEqual(Gym.objects.count(), 1)
         dal = Dal.get_dal()
-        dal._delete_gym(gym_key)
+        dal._delete_gym(gym.id)
         self.assertEqual(Gym.objects.count(), 0)

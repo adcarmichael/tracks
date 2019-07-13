@@ -12,8 +12,8 @@ from django.db.models.functions import Cast, Coalesce
 #     django.setup()
 
 
-def get_dal(key='eden'):
-    if key == 'eden':
+def get_dal(gym_key=conf.GymKey.eden_rock_edinburgh):
+    if gym_key == conf.GymKey.eden_rock_edinburgh:
         _dal = _DalEdenRocks(_EdenDataMap)
     else:
         _dal = _DalEdenRocks(_EdenDataMap)
@@ -47,36 +47,30 @@ class _DalBase:
     def __init__(self, DataMap):
         self.DataMap = DataMap()
 
-    def _get_all_routes(self):
+    def _get_all_routes(self, gym_id=[]):
         query = Route.objects.all().order_by('-route_set__up_date')
+        query = self._filter_route_query_by_gym(query, gym_id)
         return query
 
-    def _create_route_set_for_list_of_grade_sub(self, grade, grade_sub_list, up_date, down_date=None):
-        up_date = Cast(up_date, DateField())
-        is_dup = self._check_for_duplicate_based_on_grade_and_up_date(
-            grade, up_date)
-        if not is_dup:
-            rs = RouteSet.objects.create(up_date=up_date)
+    def get_routes_all(self):
+        query = self._get_all_routes()
+        data = _Data(query)
+        return data
 
-            if down_date:
-                rs.down_date = Cast(down_date, DateField())
-                rs.save()
+    def _filter_route_query_by_gym(self, query, gym_id):
+        if gym_id:
+            query = query.filter(route_set__gym__id=gym_id)
+        return query
 
-            for ind, grade_sub in enumerate(grade_sub_list):
-                number = ind + 1
-                Route.objects.create(grade=grade,
-                                     grade_sub=grade_sub,
-                                     number=number,
-                                     route_set=rs)
+    def _filter_route_set_query_by_gym(self, query, gym_id):
+        if gym_id:
+            query = query.filter(gym__id=gym_id)
+        return query
 
-    def _check_for_duplicate_based_on_grade_and_up_date(self, grade, up_date):
-        query = Route.objects.all().filter(grade=grade).filter(route_set__up_date=up_date)
-
-        if query:
-            return True
-        else:
-
-            return False
+    def _filter_route_record_query_by_gym(self, query, gym_id):
+        if gym_id:
+            query = query.filter(route__route_set__gym__id=gym_id)
+        return query
 
     def _filter_query_to_active_based_on_up_date(self, query):
         for index in range(0, query.count()):
@@ -87,10 +81,10 @@ class _DalBase:
                 return query
         return query
 
-    def get_route_record_for_user(self, user_id, route_id):
-        rr = self._get_route_record_for_user(user_id, route_id)
-        status = [record.status for record in rr]
-        is_climbed = [record.is_climbed for record in rr]
+    def get_route_record_for_user(self, user_id, route_id, gym_id=[]):
+        query = self._get_route_record_for_user(user_id, route_id, gym_id)
+        status = [record.status for record in query]
+        is_climbed = [record.is_climbed for record in query]
         return status, is_climbed
 
     def set_route_record_for_user(self, user_id, route_id, status, is_climbed):
@@ -102,16 +96,13 @@ class _DalBase:
             self._create_route_record(
                 user_id, route_id, status=status, is_climbed=is_climbed)
 
-    def get_routes_all(self):
-        query = self._get_all_routes()
-        data = _Data(query)
-        return data
-
-    def _get_route_record_for_user(self, user_id, route_id):
+    def _get_route_record_for_user(self, user_id, route_id, gym_id=[]):
         if not isinstance(route_id, (list,)):
             route_id = [route_id]
+
         query = RouteRecord.objects.filter(
             user__id=user_id).filter(route__id__in=route_id)
+        query = self._filter_route_record_query_by_gym(query, gym_id)
         return query
 
     def _create_route_record(self, user_id, route_id, is_climbed=False, status=0):
@@ -130,16 +121,16 @@ class _DalBase:
                 rr.is_climbed = is_climbed
             rr.save()
 
-    def get_route_set_of_grade(self, colour, is_active=False):
+    def get_route_set_of_grade(self, colour, is_active=False, gym_id=[]):
         query = self._get_all_routes()
         grade = self.DataMap.grade(colour)
         query = query.filter(grade=grade)
         if is_active:
             query = self._filter_query_to_active_based_on_up_date(query)
-
+        query = self._filter_route_set_query_by_gym(query, gym_id)
         return _Data(query)
 
-    def add_route_set(self, colour, grade_list, up_date, down_date=None):
+    def add_route_set(self, gym_id, colour, grade_list, up_date, down_date=None):
         grade = self.DataMap.grade(colour)
         up_date = datetime.strptime(up_date, "%d/%m/%Y").date()
         if down_date:
@@ -148,22 +139,59 @@ class _DalBase:
         grade_sub_list = [self.DataMap.grade_sub(grade_sub_str)
                           for grade_sub_str in grade_list]
         self._create_route_set_for_list_of_grade_sub(
-            grade, grade_sub_list, up_date, down_date)
+            gym_id, grade, grade_sub_list, up_date, down_date)
+
+    def _create_route_set_for_list_of_grade_sub(self, gym_id, grade, grade_sub_list, up_date, down_date=None):
+        gym = self.get_gym(gym_id)
+        # up_date = Cast(up_date, DateField)
+        is_dup = self._check_for_duplicate_based_on_grade_and_up_date(
+            grade, up_date, gym_id)
+        if not is_dup:
+            rs = RouteSet.objects.create(up_date=up_date, gym=gym)
+            if down_date:
+                rs.down_date = Cast(down_date, DateField())
+                rs.save()
+
+            for ind, grade_sub in enumerate(grade_sub_list):
+                number = ind + 1
+                Route.objects.create(grade=grade,
+                                     grade_sub=grade_sub,
+                                     number=number,
+                                     route_set=rs)
+
+    def _check_for_duplicate_based_on_grade_and_up_date(self, grade, up_date, gym_id):
+
+        query = Route.objects.all()
+        if not query:
+            return False
+
+        query = query.filter(grade=grade).filter(route_set__up_date=up_date)
+        # breakpoint()
+        query = self._filter_route_query_by_gym(query, gym_id)
+        if query:
+            return True
+        else:
+            return False
 
     def create_gym(self, gym_key, name, email):
-        Gym.objects.create(name=name, email=email, gym_key=gym_key)
+        return Gym.objects.create(name=name, email=email, gym_key=gym_key)
 
-    def update_gym(self, gym_key, name=[], email=[]):
-        query = Gym.objects.get(pk=gym_key)
+    def update_gym(self, gym_id, gym_key=[], name=[], email=[]):
+        query = Gym.objects.get(id=gym_id)
         if query:
             if name != []:
                 query.name = name
+            if gym_key != []:
+                query.gym_key = gym_key
             if email != []:
                 query.email = email
             query.save()
 
-    def _delete_gym(self, gym_key):
-        Gym.objects.get(pk=gym_key).delete()
+    def _delete_gym(self, gym_id):
+        Gym.objects.get(id=gym_id).delete()
+
+    def get_gym(self, gym_id):
+        return Gym.objects.get(id=gym_id)
 
 
 class _DalEdenRocks(_DalBase):

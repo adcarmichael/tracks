@@ -9,18 +9,30 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
+class Gym2(Model):
+    email = EmailField(null=False)
+    key = CharField(max_length=10, unique=True)
+    name = CharField(max_length=300)
+
+
+class RouteSet2(Model):
+    gym = ForeignKey(Gym2, on_delete=CASCADE)
+    date = DateField(null=False)
+    down_date = DateField(null=True)
+    # up_date = DateField(null=False,
+    #                     verbose_name='This is the date that the route set was available')
+
+
 class Gym(Model):
     email = EmailField(null=False)
-    gym_key = CharField(max_length=10, primary_key=True)
+    gym_key = CharField(max_length=10, null=False)
     name = CharField(max_length=300)
 
 
 class RouteSet(Model):
-    # gym = ForeignKey(Gym, on_delete=CASCADE, related_name='gyms')
-    up_date = DateField(null=False,
-                        verbose_name='This is the date that the route set was available')
-    down_date = DateField(
-        null=True, verbose_name='This is the date that the route set was taken down', default=date(2000, 1, 1))
+    gym = ForeignKey(Gym, on_delete=CASCADE)
+    up_date = DateField(null=False)
+    down_date = DateField(null=True)
 
     def __str__(self):
         return "{} {}".format(self.up_date, self.down_date)
