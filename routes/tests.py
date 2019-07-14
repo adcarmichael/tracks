@@ -289,6 +289,21 @@ class TestRouteRecord(TestCase):
         self.assertEqual(status[0], 1)
         self.assertEqual(is_climbed[0], True)
 
+    def test_get_route_record_for_gym(self):
+
+        user_id = 1
+        route_id = 1
+
+        self.create_sample_route_record(
+            status=[1, 0], is_climbed=[True, False])
+        dal = Dal.get_dal()
+
+        status, is_climbed = dal.get_route_record_for_user(
+            user_id, route_id, gym_id=1)
+
+        self.assertEqual(status[0], 1)
+        self.assertEqual(is_climbed[0], True)
+
     def test_get_rooute_record_for_multi_routes(self):
         user_id = 1
         route_id = [1, 2]

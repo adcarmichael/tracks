@@ -70,9 +70,9 @@ def account_activation_sent(request):
     return render(request, 'account_activation_sent.html')
 
 
-def get_route_date_for_routes_page():
+def get_route_date_for_routes_page(gym_id):
 
-    data_black = dal.get_route_set_of_grade('black')
+    data_black = dal.get_route_set_of_grade('black', gym_id=gym_id)
     black = zip(data_black.get_number(),
                 data_black.get_grade())
     data = {
@@ -87,13 +87,21 @@ def get_route_date_for_routes_page():
     return data
 
 
-def routes_page(request, gym_key):
+def routes_page(request, gym_id):
     data = get_route_date_for_routes_page()
     return render(request, 'routes.html', data)
 
 
-def routes_user_page(request, user_id, gym_key):
-    data = get_route_date_for_routes_page()
+def routes_user_page(request, user_id, gym_id):
+    breakpoint()
+    data_black = dal.get_route_set_of_grade('black', gym_id=gym_id)
+    status, is_climbed = dal.get_route_record_for_user(
+        user_id, data_black.get_route_id())
+
+    black = zip(data_black.get_number(),
+                data_black.get_grade())
+    # data = get_route_date_for_routes_page(gym_id)
+
     return render_with_user_restriction(request, 'routes_user.html', data, user_id)
 
 
