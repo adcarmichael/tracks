@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect
 from django.views import View
 from django.views.generic.base import TemplateView
 from django.contrib.auth import login, authenticate
@@ -14,7 +14,7 @@ import routes.services.dal as Dal
 from routes.forms import SignUpForm
 from routes.tokens import account_activation_token
 from routes.services.conf import GymKey
-
+from .forms import AddRouteSetForm_Eden
 
 dal = Dal.get_dal(GymKey.eden_rock_edinburgh)
 
@@ -90,6 +90,18 @@ def get_route_date_for_routes_page(gym_id):
 def routes_page(request, gym_id):
     data = get_route_date_for_routes_page()
     return render(request, 'routes.html', data)
+
+
+def add_route_set_page(request, gym_id):
+
+    if request.method == 'POST':
+        form = AddRouteSetForm_Eden(request.POST)
+
+        if form.is_valid():
+            return HttpResponseRedirect('/')
+    else:
+        form = AddRouteSetForm_Eden()
+    return render(request, 'add_route_set_page.html', {'form': form})
 
 
 def routes_user_page(request, user_id, gym_id):
