@@ -19,20 +19,14 @@ class AddRouteSetForm_Eden(forms.Form):
 
     # ((tag.name,tag.value) for tag in GradeSub)
 
-    CHOICES = (
-        (11, 'Credit Card'),
-        (12, 'Student Loans'),
-        (13, 'Taxes'),
-        (21, 'Books'),
-        (22, 'Games'),
-        (31, 'Groceries'),
-        (32, 'Restaurants'),
-    )
     CHOICES_grade_sub = [(e.value, e.name) for e in GradeSub]
     CHOICES_grade = [(e.value, e.name) for e in Grade]
-    Colour = forms.ChoiceField(choices=CHOICES_grade)
-    amount = forms.DecimalField()
-    Up_Date = forms.DateField()
-    Down_Date = forms.DateField()
+    grade = forms.ChoiceField(choices=CHOICES_grade, widget=forms.widgets.Select(
+        attrs={'class': 'uk-select', 'uk-tooltip': 'Specify the Colour of the new route set.'}),  label='Colour')
+    up_Date = forms.DateField(
+        widget=forms.widgets.DateInput(attrs={'type': 'date', 'class': 'uk-input', 'uk-tooltip': 'The date that the route set will go live. Click on the date picker at the far right.'}), label='Up Date')
+    down_Date = forms.DateField(
+        widget=forms.widgets.DateInput(attrs={'uk-tooltip': 'The date that the route set will be taken down. Click on the date picker at the far right.', 'type': 'date', 'class': 'uk-input'}), label='Down Date')
 
-    SubGrade = forms.ChoiceField(choices=CHOICES_grade_sub)
+    grade_sub = forms.ChoiceField(
+        choices=CHOICES_grade_sub, widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
