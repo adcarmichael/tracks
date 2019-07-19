@@ -4,28 +4,33 @@
             <div class="uk-navbar-left">
                 <div class="uk-navbar-item">
                     <!-- <a class="uk-logo" href=""><img src="img/cover-logo.svg" alt="Logo"> -->
-                    <a class="uk-logo"> <span class='uk-text-muted uk-text-bold'>Chalk</span>Tracks</a>
+                    <a href="\" class="uk-logo"> <span class='uk-text-muted uk-text-bold'>Chalk</span>Tracks</a>
                 </div>
             </div>
             <div class="uk-navbar-right">
                 <ul class="uk-navbar-nav">
+                    <li class="uk-visible@s"><a href="">About</a></li>
                     <!-- <li class="uk-active uk-visible@m"><a href="" data-uk-icon="home"></a></li> -->
                     {% if user.is_authenticated %}
                     <li>
                         <a href="#">Tracks</a>
                         <div class="uk-navbar-dropdown">
                             <ul class="uk-nav uk-navbar-dropdown-nav">
-                                <li class=""><a href="\1\routes">Eden Rock</a></li>
+                                <li class=""><a href="\users\{{ user.id }}\routes\1">Eden Rock</a></li>
                                 <li><a>More Gyms to Follow</a></li>
                             </ul>
                         </div>
 
                     </li>
-                    {% endif %}
-
-                    <li class="uk-visible@s"><a href="">About</a></li>
-
-                    {% if user.is_authenticated %}
+                    <li>
+                        <a href="#">{{ user.username }}</a>
+                        <div class="uk-navbar-dropdown">
+                            <ul class="uk-nav uk-navbar-dropdown-nav">
+                                <li class=""><a href="\users\{{ user.id }}\routes\1">Dashboard</a></li>
+                                <li><a href="\accounts\logout">Logout</a></li>
+                            </ul>
+                        </div>
+                    </li>
                     <li>
                         <a class="uk-navbar-toggle" data-uk-toggle data-uk-navbar-toggle-icon href="#offcanvas-nav"></a>
                     </li>
