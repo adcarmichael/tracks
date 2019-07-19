@@ -1,15 +1,9 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Home{% endblock %}
+{% block title %}ChalkTracks{% endblock %}
 
-{% block content %}
-{% if user.is_authenticated %}
-Hi {{ user.username }}!
-<p><a href="{% url 'logout' %}">logout</a></p>
-{% else %}
-<p>You are not logged in</p>
-<a href="{% url 'login' %}">login</a>
-{% endif %}
+{% block navbar %}
 {% endblock %}
 {% block body %}
 
@@ -70,9 +64,10 @@ Hi {{ user.username }}!
         </div>
 
     </div>
-
+    <!-- footer -->
     {% block footer %}
     {% include "footer.html" %}
     {% endblock %}
+
 </body>
 {% endblock %}
