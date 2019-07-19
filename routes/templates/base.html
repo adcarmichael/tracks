@@ -5,30 +5,44 @@
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.6/css/uikit.min.css" />
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css"
+        href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.6/css/uikit.min.css" />
 
     <script src="https://kit.fontawesome.com/0b8b109b75.js"></script>
+    <link rel="icon" href="img/favicon.ico">
     <link rel='stylesheet' href="{% static 'routes/base.css' %}">
-    <title>{% block title %}Hello, world!{% endblock %}</title>
+
+    <title>{% block title %}ChalkTracks{% endblock %}</title>
 
     {% block navbar %}
     {% include "navbar.html" %}
     {% endblock %}
+
 </head>
 
+{% block body %}
+
 <body>
+
     <div class="uk-container uk-container-small">
         {% block content %}
         <h1>Hello, world!</h1>
         {% endblock %}
     </div>
+
+
+    <!-- footer -->
+    {% block footer %}
+    {% include "footer.html" %}
+    {% endblock %}
+
+    <!-- java  -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.6/js/uikit.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.6/js/uikit-icons.min.js"></script>
-
-
 </body>
+{% endblock %}
 
 </html>
