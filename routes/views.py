@@ -11,7 +11,7 @@ from django.utils.encoding import force_bytes, force_text
 
 from routes.models import Profile
 import routes.services.dal as Dal
-from routes.forms import SignUpForm
+from routes.forms import SignUpForm, GymCreateForm
 from routes.tokens import account_activation_token
 from routes.services.conf import GymKey
 from .forms import AddRouteSetForm_Eden
@@ -25,6 +25,29 @@ def home_page(request):
 
 def add_route_set(request, details):
     pass
+
+
+def gyms_page(request):
+    pass
+
+
+def gyms_add(request):
+    if request.user.is_superuser:
+        if request.method == 'POST':
+            form = GymCreateForm(request.POST)
+
+            if form.is_valid():
+                name = form.cleaned_data['Name']
+                email = form.cleaned_data['Email']
+                city = form.cleaned_data['City']
+                dal.create_gym(name, email, city)
+                return HttpResponseRedirect('/')
+
+        else:
+            form = GymCreateForm()
+        return render(request, 'gym_add_page.html', {'form': form})
+    else:
+        return HttpResponseForbidden()
 
 
 def signup(request):

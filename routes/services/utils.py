@@ -11,9 +11,17 @@ def convert_str_to_datetime(date_str):
 class SampleDb:
     apps = ['routes']
 
+    def __init__(self):
+
     def delete_db(self):
         for app_name in self.apps:
             self._delete_migration_for_app(app_name)
+        if os.path.isfile('db.sqlite3'):
+            try:
+                os.remove('db.sqlite3')
+                print('Deleted db')
+            except:
+                print('Failed to delete file')
 
     def _delete_migration_for_app(self, app_name):
         fileList = glob.glob(f'{app_name}/migrations/*.py', recursive=False)
@@ -26,10 +34,9 @@ class SampleDb:
                 except OSError:
                     print("Error while deleting file")
 
-    def create_new(self):
+    def new_migrations(self):
+        os.system('python manage.py makemigrations')
         os.system('python manage.py migrate --fake core zero')
         pass
 
-
-db = SampleDb()
-db.delete_db()
+    def add_gym(self):

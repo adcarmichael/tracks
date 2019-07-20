@@ -173,16 +173,16 @@ class _DalBase:
         else:
             return False
 
-    def create_gym(self, gym_key, name, email):
-        return Gym.objects.create(name=name, email=email, gym_key=gym_key)
+    def create_gym(self, name, email, city):
+        return Gym.objects.create(name=name, email=email, city=city)
 
-    def update_gym(self, gym_id, gym_key=[], name=[], email=[]):
+    def update_gym(self, gym_id, city=[], name=[], email=[]):
         query = Gym.objects.get(id=gym_id)
         if query:
             if name != []:
                 query.name = name
-            if gym_key != []:
-                query.gym_key = gym_key
+            if city != []:
+                query.city = city
             if email != []:
                 query.email = email
             query.save()

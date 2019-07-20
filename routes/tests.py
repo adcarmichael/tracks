@@ -17,15 +17,15 @@ def add_sample_route_set(gym_id, colour='black', grade=['high', 'medium'], down_
     dal.add_route_set(gym_id, colour, grade, up_date, down_date=down_date)
 
 
-def add_sample_data(colour='black', grade=['high', 'medium'], down_date=None, up_date='03/06/2019', gym_key='eden_edi',  name='Eden Rocks Edinburgh', email='edinburgh@edenrockclimbing.com'):
-    gym = add_sample_gym(gym_key=gym_key, name=name, email=email)
+def add_sample_data(colour='black', grade=['high', 'medium'], down_date=None, up_date='03/06/2019', city='Edinburgh',  name='Eden Rocks Edinburgh', email='edinburgh@edenrockclimbing.com'):
+    gym = add_sample_gym(city=city, name=name, email=email)
     add_sample_route_set(gym.id, colour=colour, grade=grade,
                          down_date=down_date, up_date=up_date)
 
 
-def add_sample_gym(gym_key='eden_edi', name='Eden Rocks Edinburgh', email='edinburgh@edenrockclimbing.com'):
+def add_sample_gym(city='Edinburgh', name='Eden Rocks Edinburgh', email='edinburgh@edenrockclimbing.com'):
     dal = Dal.get_dal()
-    gym = dal.create_gym(gym_key, name, email)
+    gym = dal.create_gym(name, email, city)
     return gym
 
 
@@ -385,22 +385,22 @@ class TestRouteRecord(TestCase):
 class TestGym(TestCase):
     def test_create_gym(self):
         email = 'edinburgh@edenrockclimbing,com'
-        gym_key = 'eden_edi'
+        city = 'Edinburgh'
         name = 'Eden Rock Edinburgh'
         dal = Dal.get_dal()
-        dal.create_gym(gym_key, name, email)
+        dal.create_gym(name, email, city)
 
         gym = Gym.objects.all()
 
         self.assertEqual(gym[0].name, name)
-        self.assertEqual(gym[0].gym_key, gym_key)
+        self.assertEqual(gym[0].city, city)
         self.assertEqual(gym[0].email, email)
 
     def test_update_gym(self):
-        gym_key = 'test'
+        city = 'test'
         email = 'asdf@test.com'
         email_new = 'new@test.com'
-        add_sample_gym(gym_key=gym_key, email=email)
+        add_sample_gym(city=city, email=email)
 
         dal = Dal.get_dal()
         dal.update_gym(1, email=email_new)
@@ -408,8 +408,8 @@ class TestGym(TestCase):
         self.assertNotEqual(email, email_new)
 
     def test_delete_gym(self):
-        gym_key = 'test'
-        gym = add_sample_gym(gym_key=gym_key)
+        city = 'test'
+        gym = add_sample_gym(city=city)
         self.assertEqual(Gym.objects.count(), 1)
         dal = Dal.get_dal()
         dal._delete_gym(gym.id)

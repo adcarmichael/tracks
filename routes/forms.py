@@ -13,6 +13,12 @@ class SignUpForm(UserCreationForm):
         fields = ('username', 'email', 'password1', 'password2', )
 
 
+class GymCreateForm(forms.Form):
+    Name = forms.CharField(max_length=300, help_text='Name of Climbing Gym')
+    City = forms.CharField(max_length=300, help_text='City of Climbing Gym')
+    Email = forms.EmailField(help_text='Email of Climbing Gym')
+
+
 class AddRouteSetForm_Eden(forms.Form):
     # grade = forms.CharField(label='grade', max_length=100)
     # grade_sub = forms.CharField(label='grade', max_length=100)
