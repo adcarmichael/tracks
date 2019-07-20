@@ -15,6 +15,7 @@ from routes.forms import SignUpForm, GymCreateForm
 from routes.tokens import account_activation_token
 from routes.services.conf import GymKey
 from .forms import AddRouteSetForm_Eden
+import routes.services.utils as util
 
 dal = Dal.get_dal(GymKey.eden_rock_edinburgh)
 
@@ -123,15 +124,32 @@ def routes_page(request, gym_id):
 
 
 def add_route_set_page(request, gym_id):
+    if request.user.is_superuser:
+        if request.method == 'POST':
+            form = AddRouteSetForm_Eden(request.POST)
 
-    if request.method == 'POST':
-        form = AddRouteSetForm_Eden(request.POST)
-
-        if form.is_valid():
-            return HttpResponseRedirect('/')
+            if form.is_valid():
+                grade = int(form.cleaned_data['grade'])
+                up_date = form.cleaned_data['up_Date']
+                down_date = form.cleaned_data['down_Date']
+                grade_sub = []
+                number = []
+                for ind, field in enumerate(form.fields):
+                    if 'grade_sub' in field:
+                        grade_sub_temp = int(form.cleaned_data[field])
+                        if grade_sub_temp != 0:
+                            grade_sub.append(grade_sub_temp)
+                            number.append(ind)
+                # colour = util.get_grade_name_from_value(grade)
+                # grade_sub = util.get_grade_sub_name_from_value(grade_sub)
+                dal._create_route_set_for_list_of_grade_sub(
+                    gym_id, grade, grade_sub, up_date, down_date=down_date)
+                return HttpResponseRedirect('/')
+        else:
+            form = AddRouteSetForm_Eden()
+        return render(request, 'add_route_set_page.html', {'form': form})
     else:
-        form = AddRouteSetForm_Eden()
-    return render(request, 'add_route_set_page.html', {'form': form})
+        return HttpResponseForbidden()
 
 
 def routes_user_page(request, user_id, gym_id):

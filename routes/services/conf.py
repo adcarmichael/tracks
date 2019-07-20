@@ -27,6 +27,7 @@ class Grade(_Enum):
 
 
 class GradeSub(_Enum):
+    null = 0
     lowest = 1
     low = 2
     medium = 3

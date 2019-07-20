@@ -1,11 +1,29 @@
 from datetime import datetime
 import os
 import glob
+import routes.services.conf as conf
 
 
 def convert_str_to_datetime(date_str):
     date = datetime.strptime(date_str, "%d/%m/%Y").date()
     return date
+
+
+def get_name_from_value_for_enum(enum, value):
+    if not isinstance(value, (list,)):
+        value = [value]
+    name = []
+    for val in value:
+        name.append(enum(val).name)
+    return name
+
+
+def get_grade_name_from_value(value):
+    return get_name_from_value_for_enum(conf.Grade, value)
+
+
+def get_grade_sub_name_from_value(value):
+    return get_name_from_value_for_enum(conf.GradeSub, value)
 
 
 class SampleDb:

@@ -414,3 +414,18 @@ class TestGym(TestCase):
         dal = Dal.get_dal()
         dal._delete_gym(gym.id)
         self.assertEqual(Gym.objects.count(), 0)
+
+
+class TestEnumMapping(TestCase):
+    def test_get_grade_name_from_value(self):
+        name = Utils.get_grade_name_from_value(1)
+        self.assertEqual(name[0], 'purple')
+
+    def test_get_grade_sub_name_from_value(self):
+        name = Utils.get_grade_sub_name_from_value(1)
+        self.assertEqual(name[0], 'lowest')
+
+    def test_get_grade_sub_name_from_value_multi(self):
+        name = Utils.get_grade_sub_name_from_value([1, 2])
+        self.assertEqual(name[0], 'lowest')
+        self.assertEqual(name[1], 'low')
