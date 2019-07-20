@@ -123,7 +123,7 @@ def routes_page(request, gym_id):
     return render(request, 'routes.html', data)
 
 
-def add_route_set_page(request, gym_id):
+def route_set_add_page(request, gym_id):
     if request.user.is_superuser:
         if request.method == 'POST':
             form = AddRouteSetForm_Eden(request.POST)
@@ -147,7 +147,7 @@ def add_route_set_page(request, gym_id):
                 return HttpResponseRedirect('/')
         else:
             form = AddRouteSetForm_Eden()
-        return render(request, 'add_route_set_page.html', {'form': form})
+        return render(request, 'route_set_add_page.html', {'form': form})
     else:
         return HttpResponseForbidden()
 
