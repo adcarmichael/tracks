@@ -13,6 +13,7 @@ class Gym(Model):
     email = EmailField(null=False)
     name = CharField(max_length=300)
     city = CharField(max_length=300)
+    # website = CharField(max_length=300)
 
 
 class RouteSet(Model):

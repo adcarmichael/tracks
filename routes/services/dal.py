@@ -193,18 +193,27 @@ class _DalBase:
     def get_gym(self, gym_id):
         return Gym.objects.get(id=gym_id)
 
+    def _get_gym_all(self):
+        return Gym.objects.all()
+
+    def get_gym_all(self):
+        return _GymData(self._get_gym_all())
+
 
 class _DalEdenRocks(_DalBase):
     pass
 
 
-class _Data:
+class _DataBase:
     def __init__(self, query):
         self.query = query
 
     def _convert_query_to_list(self, field_str):
 
         return [tmp[field_str] for tmp in self.query.values(field_str)]
+
+
+class _Data(_DataBase):
 
     def get_grade(self):
         colour = [conf.Grade(
@@ -234,3 +243,20 @@ class _Data:
 
     def __repr__(self):
         return f"Colour: {self.get_colour()[0]} \nNum Routes: {self.get_count()} "
+
+
+class _GymData(_DataBase):
+    def __init__(self, query):
+        self.query = query
+
+    def get_id(self):
+        return self._convert_query_to_list('id')
+
+    def get_city(self):
+        return self._convert_query_to_list('city')
+
+    def get_name(self):
+        return self._convert_query_to_list('name')
+
+    def get_email(self):
+        return self._convert_query_to_list('email')

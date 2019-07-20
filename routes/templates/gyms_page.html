@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<div class="uk-card uk-card-default uk-card-body">
+    <table class="uk-table">
+        <caption>Climbing Gyms</caption>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>City</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for id,name,city,email in gym %}
+            <tr>
+                <td>{{id}}</td>
+                <td>{{name}}</td>
+                <td>{{city}}</td>
+                <td>{{email}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

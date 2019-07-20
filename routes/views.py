@@ -28,10 +28,17 @@ def add_route_set(request, details):
 
 
 def gyms_page(request):
-    pass
+    gym_data = dal.get_gym_all()
+    gym = zip(gym_data.get_id(),
+              gym_data.get_name(),
+              gym_data.get_city(),
+              gym_data.get_email())
+
+    return render(request, 'gyms_page.html', {'gym': gym})
 
 
 def gyms_add(request):
+    # Adding gyms is restricted to
     if request.user.is_superuser:
         if request.method == 'POST':
             form = GymCreateForm(request.POST)
