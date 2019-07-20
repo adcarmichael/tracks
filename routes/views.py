@@ -105,7 +105,7 @@ def add_route_set_page(request, gym_id):
 
 
 def routes_user_page(request, user_id, gym_id):
-    breakpoint()
+
     data_black = dal.get_route_set_of_grade('black', gym_id=gym_id)
     status, is_climbed = dal.get_route_record_for_user(
         user_id, data_black.get_route_id())

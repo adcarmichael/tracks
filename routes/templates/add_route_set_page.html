@@ -8,4 +8,39 @@
     {{ form.as_p }}
     <input class="uk-button" type="submit" value="Submit">
 </form>
+
+<form action="{{request.path}}" method="post" enctype="multipart/form-data" id="upload_form">
+    {%csrf_token%}
+    <input type="text" name="name" id="name" value="{{request.POST.name}}" placeholder="Person Name" />
+    <input type="text" name="categorie" id="categorie" value="{{request.POST.categorie}}" placeholder="Categorie" />
+
+    <div class="file_inputs" id="file_inputs">
+        <!-- <-- field where im adding multiple files initially empty -->
+
+    </div>
+
+    <input type="submit" value="Upload">
+
+</form>
+
+<!-- link to add new file input box when clicked on it -->
+<a href="#" onClick="addformelement()">add new item</a>
+
+
+<script type="text/javascript">
+    // method to add an file input box when clicked on add new item link
+    function addformelement() {
+        a = document.getElementById('file_inputs')
+
+        divx = document.createElement('div')
+        divx.class = 'file_inputs'
+
+        x = document.createElement('input');
+        x.type = 'file';
+        x.name = 'docfile';
+
+        divx.appendChild(x);
+        a.appendChild(divx);
+    }
+</script>
 {% endblock %}
