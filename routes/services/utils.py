@@ -12,6 +12,7 @@ class SampleDb:
     apps = ['routes']
 
     def __init__(self):
+        pass
 
     def delete_db(self):
         for app_name in self.apps:
@@ -40,3 +41,4 @@ class SampleDb:
         pass
 
     def add_gym(self):
+        pass
