@@ -30,9 +30,9 @@ class AddRouteSetForm_Eden(forms.Form):
 
     grade = forms.ChoiceField(choices=CHOICES_grade, widget=forms.widgets.Select(
         attrs={'class': 'uk-select', 'uk-tooltip': 'Specify the Colour of the new route set.'}),  label='Colour')
-    up_Date = forms.DateField(
+    up_date = forms.DateField(
         widget=forms.widgets.DateInput(attrs={'type': 'date', 'class': 'uk-input', 'uk-tooltip': 'The date that the route set will go live. Click on the date picker at the far right.'}), label='Up Date')
-    down_Date = forms.DateField(
+    down_date = forms.DateField(
         widget=forms.widgets.DateInput(attrs={'uk-tooltip': 'The date that the route set will be taken down. Click on the date picker at the far right.', 'type': 'date', 'class': 'uk-input'}), label='Down Date')
 
     grade_sub_1 = forms.ChoiceField(
