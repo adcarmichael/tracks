@@ -16,6 +16,7 @@ from routes.tokens import account_activation_token
 from routes.services.conf import GymKey
 from .forms import AddRouteSetForm_Eden
 import routes.services.utils as util
+from routes.services.conf import GradeSub, Grade
 
 dal = Dal.get_dal(GymKey.eden_rock_edinburgh)
 
@@ -121,6 +122,19 @@ def get_route_date_for_routes_page(gym_id):
 def routes_page(request, gym_id):
     data = get_route_date_for_routes_page()
     return render(request, 'routes.html', data)
+
+
+def test_page(request):
+    CHOICES_grade_sub = [(e.value, e.name) for e in GradeSub]
+    CHOICES_grade = [(e.value, e.name) for e in Grade]
+    grade_data = zip(CHOICES_grade, CHOICES_grade_sub)
+    data = {'grade_data': grade_data}
+    if request.method == 'POST':
+        pass
+
+    else:
+        pass
+    return render(request, 'test_page.html', data)
 
 
 def route_set_add_page(request, gym_id):

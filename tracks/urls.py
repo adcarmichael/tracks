@@ -30,6 +30,7 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
     path('', home_page, name='home'),
+    path('test', rv.test_page),
     path('gyms', rv.gyms_page),
     path('gyms/add/', rv.gyms_add, name='add_new_gym'),
     path('gyms/<int:gym_id>/routes', routes_page, name='routes'),
