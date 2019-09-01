@@ -58,7 +58,7 @@ def update_user_profile(sender, instance, created, **kwargs):
 class RouteRecord(Model):
     route = ForeignKey(Route, on_delete=CASCADE)
     user = ForeignKey(Profile, on_delete=CASCADE)
-    date = DateField(null=False)
+    date = DateField(null=False, auto_now=True)
     status = IntegerField(
         verbose_name='E.g. mastered, climbed, attempted, todo')
     is_climbed = models.BooleanField(default=False)
