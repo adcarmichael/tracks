@@ -63,7 +63,7 @@ class _DalBase:
         return query
 
     def _filter_route_set_query_by_gym(self, query, gym_id):
-        if gym_id:
+        if gym_id and query:
             query = query.filter(gym__id=gym_id)
         return query
 
