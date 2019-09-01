@@ -167,15 +167,67 @@ def route_set_add_page(request, gym_id):
 
 
 def routes_user_page(request, user_id, gym_id):
-    data_black = dal.get_route_set_of_grade('black', gym_id=gym_id)
+    route_data_all = dal.get_route_set_of_grade('purple', gym_id=gym_id)
     status, is_climbed = dal.get_route_record_for_user(
-        user_id, data_black.get_route_id())
+        user_id, route_data_all.get_route_id())
 
-    black = zip(data_black.get_number(),
-                data_black.get_grade())
+    grade = route_data_all.get_grade()
+    sub_grade = route_data_all.get_grade_sub()
+    route_data = zip(route_data_all.get_number(),
+                     grade,
+                     sub_grade,
+                     get_grade_colour(grade),
+                     get_sub_grade_icon_class(sub_grade))
+    # breakpoint()
     # data = get_route_date_for_routes_page(gym_id)
-    data = {'black': black}
+    data = {'route_data': route_data}
     return render_with_user_restriction(request, 'routes_user.html', data, user_id)
+
+
+def get_grade_colour(grade_list):
+    class_text = []
+    # Colours came from https://htmlcolorcodes.com/
+    for grade in grade_list:
+
+        if grade == 'purple':
+            class_text.append('#A569BD')
+        elif grade == 'orange':
+            class_text.append('#E67E22')
+        elif grade == 'green':
+            class_text.append('#58D68D')
+        elif grade == 'yellow':
+            class_text.append('#F1C40F')
+        elif grade == 'blue':
+            class_text.append('#3498DB')
+        elif grade == 'white':
+            class_text.append('#D0D3D4')
+        elif grade == 'black':
+            class_text.append('#34495E')
+        elif grade == 'red':
+            class_text.append('#E74C3C')
+        else:
+            class_text.append('#784212')
+    return class_text
+
+
+def get_sub_grade_icon_class(sub_grade_list):
+    class_text = []
+
+    for sub_grade in sub_grade_list:
+
+        if sub_grade == 'lowest':
+            class_text.append('fa fa-arrow-circle-down fa-2x')
+        elif sub_grade == 'low':
+            class_text.append('fa fa-arrow-circle-right fa-2x rotate-45-right')
+        elif sub_grade == 'medium':
+            class_text.append('fa fa-arrow-circle-right fa-2x')
+        elif sub_grade == 'high':
+            class_text.append('fa fa-arrow-circle-up fa-2x rotate-45-right')
+        elif sub_grade == 'highest':
+            class_text.append('fa fa-arrow-circle-up fa-2x')
+        else:
+            class_text.append('fa fa-exclamation-triangle fa-2x')
+    return class_text
 
 
 def does_username_match_user_id(username, user_id):

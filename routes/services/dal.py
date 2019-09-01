@@ -58,13 +58,15 @@ class _DalBase:
         return data
 
     def _filter_route_query_by_gym(self, query, gym_id):
-        if gym_id:
-            query = query.filter(route_set__gym__id=gym_id)
+        if query:
+            if gym_id:
+                query = query.filter(route_set__gym__id=gym_id)
         return query
 
     def _filter_route_set_query_by_gym(self, query, gym_id):
-        if gym_id and query:
-            query = query.filter(gym__id=gym_id)
+        if query:
+            if gym_id:
+                query = query.filter(gym__id=gym_id)
         return query
 
     def _filter_route_record_query_by_gym(self, query, gym_id):
@@ -127,7 +129,7 @@ class _DalBase:
         query = query.filter(grade=grade)
         if is_active:
             query = self._filter_query_to_active_based_on_up_date(query)
-        query = self._filter_route_set_query_by_gym(query, gym_id)
+        query = self._filter_route_query_by_gym(query, gym_id)
         return _Data(query)
 
     def add_route_set(self, gym_id, colour, grade_list, up_date, down_date=None):
