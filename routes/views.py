@@ -176,7 +176,7 @@ def routes_user_page(request, user_id, gym_id):
     route_data = zip(route_data_all.get_number(),
                      grade,
                      sub_grade,
-                     get_grade_colour(grade),
+                     get_grade_hex_colour(grade),
                      get_sub_grade_icon_class(sub_grade))
     # breakpoint()
     # data = get_route_date_for_routes_page(gym_id)
@@ -184,7 +184,7 @@ def routes_user_page(request, user_id, gym_id):
     return render_with_user_restriction(request, 'routes_user.html', data, user_id)
 
 
-def get_grade_colour(grade_list):
+def get_grade_hex_colour(grade_list):
     class_text = []
     # Colours came from https://htmlcolorcodes.com/
     for grade in grade_list:
