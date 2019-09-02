@@ -40,7 +40,6 @@
         <div class="uk-grid uk-grid-small uk-padding-remove uk-child-width-auto uk-grid-match js-filter"
             data-uk-grid="masonry: true" data-uk-sortable="handle: .drag-icon">
 
-            <!--  -->
             <!-- card -->
             {% for route_id, number, grade, grade_sub, colour, icon in route_data %}
             <div class="{{grade}}-grade" data-tags="">
@@ -66,10 +65,12 @@
             <div id="modal-sections" uk-modal>
                 <div class="uk-modal-dialog">
                     <button class="uk-modal-close-default" type="button" uk-close></button>
+
                     <div class="uk-modal-header">
                         <i class=" fa fa-arrow-circle-down fa-2x" style="color: {{colour}}"></i>
                         <span class="uk-modal-title">Route #{{number}}</span>
                     </div>
+
                     <div class="uk-modal-body">
                         <div class="uk-container uk-flex-center uk-text-center ">
                             <div class="uk-grid uk-grid-small  uk-child-width-1-2@s">
@@ -98,7 +99,8 @@
                                     </div>
                                 </a>
 
-                                <a class='uk-link-reset' href="/">
+                                <a class='uk-link-reset'
+                                    href="/users/{{user_id}}/{{gym_id}}/routes/{{route_id}}/record/">
                                     <div class=" uk-card uk-card-hover uk-card-header">
                                         <i class=" far fa-hand-rock fa-lg fa-3x" style="color: #2471A3"></i>
                                         <p class="uk-margin-remove-bottom">Record Climb</p>

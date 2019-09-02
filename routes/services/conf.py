@@ -39,6 +39,8 @@ class ClimbStatus(_Enum):
     unclimbed = 0
     attempted = 1
     climbed = 2
+    flashed = 3
+    onsight = 4
 
     @staticmethod
     def get_default():

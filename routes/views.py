@@ -17,7 +17,7 @@ from routes.services.conf import GymKey
 from .forms import AddRouteSetForm_Eden
 import routes.services.utils as util
 from routes.services.conf import GradeSub, Grade
-
+from routes.services import conf as conf
 dal = Dal.get_dal(GymKey.eden_rock_edinburgh)
 
 
@@ -182,8 +182,19 @@ def routes_user_page(request, user_id, gym_id):
                      get_sub_grade_icon_class(sub_grade))
     # breakpoint()
     # data = get_route_date_for_routes_page(gym_id)
-    data = {'route_data': route_data}
+    data = {'route_data': route_data,
+            'user_id': user_id,
+            'gym_id': gym_id}
+
+    # I am intentionally failing this as the get_route ids are returning out of order with respect other items... why... this is seen in the hyperlink for recording a climb
+
     return render_with_user_restriction(request, 'routes_user.html', data, user_id)
+
+
+def record_route(request, user_id, gym_id, route_id):
+    dal.set_route_record_for_user(
+        user_id, route_id, conf.ClimbStatus.climbed.value, True)
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
 def get_grade_hex_colour(grade_list):
@@ -232,13 +243,13 @@ def get_sub_grade_icon_class(sub_grade_list):
     return class_text
 
 
-def does_username_match_user_id(username, user_id):
+def is_username_match_user_id(username, user_id):
     prof = Profile.objects.get(id=user_id)
     return str(username) == str(prof.user.username)
 
 
 def render_with_user_restriction(request, html, data, user_id):
-    if not does_username_match_user_id(request.user, user_id):
+    if not is_username_match_user_id(request.user, user_id):
         response = HttpResponseForbidden()
         return response
     else:
