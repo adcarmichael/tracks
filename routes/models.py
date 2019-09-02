@@ -9,24 +9,11 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
-class Gym2(Model):
-    email = EmailField(null=False)
-    key = CharField(max_length=10, unique=True)
-    name = CharField(max_length=300)
-
-
-class RouteSet2(Model):
-    gym = ForeignKey(Gym2, on_delete=CASCADE)
-    date = DateField(null=False)
-    down_date = DateField(null=True)
-    # up_date = DateField(null=False,
-    #                     verbose_name='This is the date that the route set was available')
-
-
 class Gym(Model):
     email = EmailField(null=False)
-    gym_key = CharField(max_length=10, null=False)
     name = CharField(max_length=300)
+    city = CharField(max_length=300)
+    # website = CharField(max_length=300)
 
 
 class RouteSet(Model):
@@ -71,6 +58,7 @@ def update_user_profile(sender, instance, created, **kwargs):
 class RouteRecord(Model):
     route = ForeignKey(Route, on_delete=CASCADE)
     user = ForeignKey(Profile, on_delete=CASCADE)
+    date = DateField(null=False, auto_now=True)
     status = IntegerField(
         verbose_name='E.g. mastered, climbed, attempted, todo')
     is_climbed = models.BooleanField(default=False)

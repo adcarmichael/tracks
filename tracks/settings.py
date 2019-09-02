@@ -37,6 +37,7 @@ EMAIL_PORT = '2525'
 
 INSTALLED_APPS = [
     'routes',
+    'accounts',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

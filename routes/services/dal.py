@@ -58,13 +58,15 @@ class _DalBase:
         return data
 
     def _filter_route_query_by_gym(self, query, gym_id):
-        if gym_id:
-            query = query.filter(route_set__gym__id=gym_id)
+        if query:
+            if gym_id:
+                query = query.filter(route_set__gym__id=gym_id)
         return query
 
     def _filter_route_set_query_by_gym(self, query, gym_id):
-        if gym_id:
-            query = query.filter(gym__id=gym_id)
+        if query:
+            if gym_id:
+                query = query.filter(gym__id=gym_id)
         return query
 
     def _filter_route_record_query_by_gym(self, query, gym_id):
@@ -127,7 +129,7 @@ class _DalBase:
         query = query.filter(grade=grade)
         if is_active:
             query = self._filter_query_to_active_based_on_up_date(query)
-        query = self._filter_route_set_query_by_gym(query, gym_id)
+        query = self._filter_route_query_by_gym(query, gym_id)
         return _Data(query)
 
     def add_route_set(self, gym_id, colour, grade_list, up_date, down_date=None):
@@ -173,16 +175,16 @@ class _DalBase:
         else:
             return False
 
-    def create_gym(self, gym_key, name, email):
-        return Gym.objects.create(name=name, email=email, gym_key=gym_key)
+    def create_gym(self, name, email, city):
+        return Gym.objects.create(name=name, email=email, city=city)
 
-    def update_gym(self, gym_id, gym_key=[], name=[], email=[]):
+    def update_gym(self, gym_id, city=[], name=[], email=[]):
         query = Gym.objects.get(id=gym_id)
         if query:
             if name != []:
                 query.name = name
-            if gym_key != []:
-                query.gym_key = gym_key
+            if city != []:
+                query.city = city
             if email != []:
                 query.email = email
             query.save()
@@ -193,18 +195,27 @@ class _DalBase:
     def get_gym(self, gym_id):
         return Gym.objects.get(id=gym_id)
 
+    def _get_gym_all(self):
+        return Gym.objects.all()
+
+    def get_gym_all(self):
+        return _GymData(self._get_gym_all())
+
 
 class _DalEdenRocks(_DalBase):
     pass
 
 
-class _Data:
+class _DataBase:
     def __init__(self, query):
         self.query = query
 
     def _convert_query_to_list(self, field_str):
 
         return [tmp[field_str] for tmp in self.query.values(field_str)]
+
+
+class _Data(_DataBase):
 
     def get_grade(self):
         colour = [conf.Grade(
@@ -234,3 +245,20 @@ class _Data:
 
     def __repr__(self):
         return f"Colour: {self.get_colour()[0]} \nNum Routes: {self.get_count()} "
+
+
+class _GymData(_DataBase):
+    def __init__(self, query):
+        self.query = query
+
+    def get_id(self):
+        return self._convert_query_to_list('id')
+
+    def get_city(self):
+        return self._convert_query_to_list('city')
+
+    def get_name(self):
+        return self._convert_query_to_list('name')
+
+    def get_email(self):
+        return self._convert_query_to_list('email')

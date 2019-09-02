@@ -26,18 +26,21 @@
 
 <body>
     <br>
+
     <div class=" uk-padding-large uk-container uk-container-small">
         {% block content %}
         <h1>Hello, world!</h1>
         {% endblock %}
     </div>
 
-    <!-- footer -->
-    {% block footer %}
-    {% include "footer.html" %}
-    {% endblock %}
 
 </body>
 {% endblock %}
+<!-- footer -->
+<footer>
+    {% block footer %}
+    {% include "footer.html" %}
+    {% endblock %}
+</footer>
 
 </html>

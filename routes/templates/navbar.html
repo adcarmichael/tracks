@@ -10,13 +10,28 @@
             <div class="uk-navbar-right">
                 <ul class="uk-navbar-nav">
                     <li class="uk-visible@s"><a href="">About</a></li>
+
                     <!-- <li class="uk-active uk-visible@m"><a href="" data-uk-icon="home"></a></li> -->
                     {% if user.is_authenticated %}
+                    {% if user.is_superuser %}
+                    <li>
+                        <a href="#">Admin</a>
+                        <div class="uk-navbar-dropdown">
+                            <ul class="uk-nav uk-navbar-dropdown-nav">
+                                <li class=""><a href="\gyms\1\routes\set\add/">Add New Route Set for Eden Rocks</a></li>
+                            </ul>
+                            <ul class="uk-nav uk-navbar-dropdown-nav">
+                                <li class=""><a href="\gyms\add">Add New Gym</a></li>
+                            </ul>
+                        </div>
+
+                    </li>
+                    {% endif %}
                     <li>
                         <a href="#">Tracks</a>
                         <div class="uk-navbar-dropdown">
                             <ul class="uk-nav uk-navbar-dropdown-nav">
-                                <li class=""><a href="\users\{{ user.id }}\1\routes\">Eden Rock</a></li>
+                                <li class=""><a href="\users\{{ user.id }}\1\routes">Eden Rock</a></li>
                                 <li><a>More Gyms to Follow</a></li>
                             </ul>
                         </div>

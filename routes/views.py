@@ -11,10 +11,12 @@ from django.utils.encoding import force_bytes, force_text
 
 from routes.models import Profile
 import routes.services.dal as Dal
-from routes.forms import SignUpForm
+from routes.forms import SignUpForm, GymCreateForm
 from routes.tokens import account_activation_token
 from routes.services.conf import GymKey
 from .forms import AddRouteSetForm_Eden
+import routes.services.utils as util
+from routes.services.conf import GradeSub, Grade
 
 dal = Dal.get_dal(GymKey.eden_rock_edinburgh)
 
@@ -25,6 +27,36 @@ def home_page(request):
 
 def add_route_set(request, details):
     pass
+
+
+def gyms_page(request):
+    gym_data = dal.get_gym_all()
+    gym = zip(gym_data.get_id(),
+              gym_data.get_name(),
+              gym_data.get_city(),
+              gym_data.get_email())
+
+    return render(request, 'gyms_page.html', {'gym': gym})
+
+
+def gyms_add(request):
+    # Adding gyms is restricted to
+    if request.user.is_superuser:
+        if request.method == 'POST':
+            form = GymCreateForm(request.POST)
+
+            if form.is_valid():
+                name = form.cleaned_data['Name']
+                email = form.cleaned_data['Email']
+                city = form.cleaned_data['City']
+                dal.create_gym(name, email, city)
+                return HttpResponseRedirect('/')
+
+        else:
+            form = GymCreateForm()
+        return render(request, 'gym_add_page.html', {'form': form})
+    else:
+        return HttpResponseForbidden()
 
 
 def signup(request):
@@ -92,29 +124,110 @@ def routes_page(request, gym_id):
     return render(request, 'routes.html', data)
 
 
-def add_route_set_page(request, gym_id):
-
+def test_page(request):
+    CHOICES_grade_sub = [(e.value, e.name) for e in GradeSub]
+    CHOICES_grade = [(e.value, e.name) for e in Grade]
+    grade_data = zip(CHOICES_grade, CHOICES_grade_sub)
+    data = {'grade_data': grade_data}
     if request.method == 'POST':
-        form = AddRouteSetForm_Eden(request.POST)
+        pass
 
-        if form.is_valid():
-            return HttpResponseRedirect('/')
     else:
-        form = AddRouteSetForm_Eden()
-    return render(request, 'add_route_set_page.html', {'form': form})
+        pass
+    return render(request, 'test_page.html', data)
+
+
+def route_set_add_page(request, gym_id):
+    if request.user.is_superuser:
+        if request.method == 'POST':
+            form = AddRouteSetForm_Eden(request.POST)
+
+            if form.is_valid():
+                grade = int(form.cleaned_data['grade'])
+                up_date = form.cleaned_data['up_date']
+                down_date = form.cleaned_data['down_date']
+                grade_sub = []
+                number = []
+
+                for ind, field in enumerate(form.fields):
+                    if 'grade_sub' in field:
+                        grade_sub_temp = int(form.cleaned_data[field])
+                        if grade_sub_temp != 0:
+                            grade_sub.append(grade_sub_temp)
+                            number.append(ind)
+
+                dal._create_route_set_for_list_of_grade_sub(
+                    gym_id, grade, grade_sub, up_date, down_date=down_date)
+                return HttpResponseRedirect('/')
+        else:
+            form = AddRouteSetForm_Eden()
+        return render(request, 'route_set_add_page.html', {'form': form})
+    else:
+        return HttpResponseForbidden()
 
 
 def routes_user_page(request, user_id, gym_id):
-    breakpoint()
-    data_black = dal.get_route_set_of_grade('black', gym_id=gym_id)
+    route_data_all = dal.get_route_set_of_grade('purple', gym_id=gym_id)
     status, is_climbed = dal.get_route_record_for_user(
-        user_id, data_black.get_route_id())
+        user_id, route_data_all.get_route_id())
 
-    black = zip(data_black.get_number(),
-                data_black.get_grade())
+    grade = route_data_all.get_grade()
+    sub_grade = route_data_all.get_grade_sub()
+    route_data = zip(route_data_all.get_number(),
+                     grade,
+                     sub_grade,
+                     get_grade_hex_colour(grade),
+                     get_sub_grade_icon_class(sub_grade))
+    # breakpoint()
     # data = get_route_date_for_routes_page(gym_id)
-
+    data = {'route_data': route_data}
     return render_with_user_restriction(request, 'routes_user.html', data, user_id)
+
+
+def get_grade_hex_colour(grade_list):
+    class_text = []
+    # Colours came from https://htmlcolorcodes.com/
+    for grade in grade_list:
+
+        if grade == 'purple':
+            class_text.append('#A569BD')
+        elif grade == 'orange':
+            class_text.append('#E67E22')
+        elif grade == 'green':
+            class_text.append('#58D68D')
+        elif grade == 'yellow':
+            class_text.append('#F1C40F')
+        elif grade == 'blue':
+            class_text.append('#3498DB')
+        elif grade == 'white':
+            class_text.append('#D0D3D4')
+        elif grade == 'black':
+            class_text.append('#34495E')
+        elif grade == 'red':
+            class_text.append('#E74C3C')
+        else:
+            class_text.append('#784212')
+    return class_text
+
+
+def get_sub_grade_icon_class(sub_grade_list):
+    class_text = []
+
+    for sub_grade in sub_grade_list:
+
+        if sub_grade == 'lowest':
+            class_text.append('fa fa-arrow-circle-down fa-2x')
+        elif sub_grade == 'low':
+            class_text.append('fa fa-arrow-circle-right fa-2x rotate-45-right')
+        elif sub_grade == 'medium':
+            class_text.append('fa fa-arrow-circle-right fa-2x')
+        elif sub_grade == 'high':
+            class_text.append('fa fa-arrow-circle-up fa-2x rotate-45-right')
+        elif sub_grade == 'highest':
+            class_text.append('fa fa-arrow-circle-up fa-2x')
+        else:
+            class_text.append('fa fa-exclamation-triangle fa-2x')
+    return class_text
 
 
 def does_username_match_user_id(username, user_id):
