@@ -173,7 +173,9 @@ def routes_user_page(request, user_id, gym_id):
 
     grade = route_data_all.get_grade()
     sub_grade = route_data_all.get_grade_sub()
-    route_data = zip(route_data_all.get_number(),
+    route_id = route_data_all.get_route_id()
+    route_data = zip(route_id,
+                     route_data_all.get_number(),
                      grade,
                      sub_grade,
                      get_grade_hex_colour(grade),

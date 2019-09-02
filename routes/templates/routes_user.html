@@ -42,7 +42,7 @@
 
             <!--  -->
             <!-- card -->
-            {% for number, grade, grade_sub, colour, icon in route_data %}
+            {% for route_id, number, grade, grade_sub, colour, icon in route_data %}
             <div class="{{grade}}-grade" data-tags="">
                 <div href="#modal-sections" uk-toggle class="uk-card uk-card-small uk-card-hover uk-margin-remove">
                     <div class="uk-card-header">
@@ -73,26 +73,39 @@
                     <div class="uk-modal-body">
                         <div class="uk-container uk-flex-center uk-text-center ">
                             <div class="uk-grid uk-grid-small  uk-child-width-1-2@s">
-                                <div class="uk-card uk-card-hover uk-card-header uk-margin-remove">
-                                    <i class=" fas fa-eye fa-lg fa-3x" style="color: #16A085"></i>
-                                    <p class="uk-margin-remove-bottom">View Route</p>
-                                    <span class=" uk-text-meta">Route Details and Statistics</span>
-                                </div>
-                                <div class="uk-card uk-card-hover uk-card-header">
-                                    <i class=" fas fa-bullseye fa-lg fa-3x" style="color: #C0392B "></i>
-                                    <p class="uk-margin-remove-bottom">Climbed On-Sight!</p>
-                                    <span class="uk-text-meta">In one with no Beta</span>
-                                </div>
-                                <div class="uk-card uk-card-hover uk-card-header ">
-                                    <i class=" fas fa-bolt fa-lg fa-3x" style="color: #F4D03F"></i>
-                                    <p class="uk-margin-remove-bottom">Record a Flash! </p>
-                                    <span class=" uk-text-meta">In one with Beta</span>
-                                </div>
-                                <div class=" uk-card uk-card-hover uk-card-header">
-                                    <i class=" far fa-hand-rock fa-lg fa-3x" style="color: #2471A3"></i>
-                                    <p class="uk-margin-remove-bottom">Record Climb</p>
-                                    <span class="uk-text-meta">Climbed in N Attempts</span>
-                                </div>
+
+                                <a class='uk-link-reset' href="/">
+                                    <div class="uk-card uk-card-hover uk-card-header uk-margin-remove">
+                                        <i class=" fas fa-eye fa-lg fa-3x" style="color: #16A085"></i>
+                                        <p class="uk-margin-remove-bottom">View Route</p>
+                                        <span class=" uk-text-meta">Route Details and Statistics</span>
+                                    </div>
+                                </a>
+
+                                <a class='uk-link-reset' href="/">
+                                    <div class="uk-card uk-card-hover uk-card-header">
+                                        <i class=" fas fa-bullseye fa-lg fa-3x" style="color: #C0392B "></i>
+                                        <p class="uk-margin-remove-bottom">Climbed On-Sight!</p>
+                                        <span class="uk-text-meta">In one with no Beta</span>
+                                    </div>
+                                </a>
+
+                                <a class='uk-link-reset' href="/">
+                                    <div class="uk-card uk-card-hover uk-card-header ">
+                                        <i class=" fas fa-bolt fa-lg fa-3x" style="color: #F4D03F"></i>
+                                        <p class="uk-margin-remove-bottom">Record a Flash! </p>
+                                        <span class=" uk-text-meta">In one with Beta</span>
+                                    </div>
+                                </a>
+
+                                <a class='uk-link-reset' href="/">
+                                    <div class=" uk-card uk-card-hover uk-card-header">
+                                        <i class=" far fa-hand-rock fa-lg fa-3x" style="color: #2471A3"></i>
+                                        <p class="uk-margin-remove-bottom">Record Climb</p>
+                                        <span class="uk-text-meta">Climbed in N Attempts</span>
+                                    </div>
+                                </a>
+
                             </div>
                         </div>
                     </div>
