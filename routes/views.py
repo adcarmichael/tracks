@@ -168,7 +168,7 @@ def route_set_add_page(request, gym_id):
 
 def routes_user_page(request, user_id, gym_id):
     route_data_all = dal.get_route_set_of_grade('purple', gym_id=gym_id)
-    status, is_climbed = dal.get_route_record_for_user(
+    route_record = dal.get_route_record_for_user(
         user_id, route_data_all.get_route_id())
 
     grade = route_data_all.get_grade()
@@ -179,14 +179,17 @@ def routes_user_page(request, user_id, gym_id):
                      grade,
                      sub_grade,
                      get_grade_hex_colour(grade),
-                     get_sub_grade_icon_class(sub_grade))
+                     get_sub_grade_icon_class(sub_grade),
+                     route_record['is_climbed'],
+                     route_record['date'])
     # breakpoint()
     # data = get_route_date_for_routes_page(gym_id)
     data = {'route_data': route_data,
             'user_id': user_id,
             'gym_id': gym_id}
 
-    # I am intentionally failing this as the get_route ids are returning out of order with respect other items... why... this is seen in the hyperlink for recording a climb
+    # I am intentionally failing
+    # this as the get_route ids are returning out of order with respect other items... why... this is seen in the hyperlink for recording a climb
 
     return render_with_user_restriction(request, 'routes_user.html', data, user_id)
 
