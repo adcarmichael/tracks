@@ -84,10 +84,37 @@ class _DalBase:
         return query
 
     def get_route_record_for_user(self, user_id, route_id, gym_id=[]):
+        if not isinstance(route_id, (list,)):
+            route_id = [route_id]
+
         query = self._get_route_record_for_user(user_id, route_id, gym_id)
         status = [record.status for record in query]
         is_climbed = [record.is_climbed for record in query]
-        return status, is_climbed
+        date_climbed = [record.date for record in query]
+        route_id_returned = [a.route.id for a in query]
+
+        is_climbed_list = [False] * len(route_id)
+        status_list = [0] * len(route_id)
+        date_climbed_list = [0] * len(route_id)
+
+        # Ensure that the returned is_climbed and status are in sync with input route ids
+        for num, i_route_id in enumerate(route_id_returned):
+            index = route_id.index(i_route_id)
+            is_climbed_list[index] = is_climbed[num]
+            status_list[index] = status[num]
+            date_climbed_list[index] = date_climbed[num]
+
+        if not status_list:
+            status_list = [0]
+        if not is_climbed_list:
+            is_climbed_list = [False]
+        if not is_climbed_list:
+            date_climbed_list = []
+
+        record = {'status': status_list, 'is_climbed':
+                  is_climbed_list, 'date': date_climbed_list}
+
+        return record
 
     def set_route_record_for_user(self, user_id, route_id, status, is_climbed):
         query = self._get_route_record_for_user(user_id, route_id)
