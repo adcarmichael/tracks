@@ -8,16 +8,6 @@
     <div class="uk-container uk-container-expand uk-margin-large-bottom">
 
         <div class="uk-grid-small uk-grid-divider uk-child-width-auto " uk-grid>
-            <!-- <div> -->
-            <!-- <ul class="uk-subnav uk-subnav-pill" uk-margin> -->
-            <!-- <li class="uk-active" uk-filter-control="filter: [data-climbed='True']"><a href="#">All</a></li> -->
-            <!-- </ul> -->
-            <!-- </div> -->
-            <div>
-                <ul class="uk-subnav uk-subnav-pill" uk-margin>
-                    <li uk-filter-control><a href="#">All</a></li>
-                </ul>
-            </div>
             <div class='uk-visible@l'>
                 <ul class="uk-subnav uk-subnav-pill" uk-margin>
                     {% for grade_name in grade_names %}
@@ -29,7 +19,7 @@
                 </ul>
             </div>
             <div class='uk-hidden@l'>
-                <button class="uk-button uk-button-default" type="button">Colour</button>
+                <button class="uk-button uk-button-default" type="button">Grade</button>
                 <div uk-dropdown>
                     <ul class="uk-nav uk-dropdown-nav">
                         {% for grade_name in grade_names %}
@@ -45,6 +35,7 @@
                 <button class="uk-button uk-button-default" type="button">Filter</button>
                 <div uk-dropdown>
                     <ul class="uk-nav uk-dropdown-nav">
+                        <li uk-filter-control><a href="#">Clear Filters</a></li>
                         <li class="uk-nav-header">Sub Grades</li>
                         {% for grade_sub_name in grade_sub_names %}
                         <li uk-filter-control="filter: [data-sub-grade='{{grade_sub_name}}']; group: data-sub-grade">
@@ -54,7 +45,8 @@
                         <li class="uk-nav-header">Climb Status</li>
                         <li uk-filter-control="filter: [data-climbed='True']; group: climbed"><a href="#">Climbed</a>
                         </li>
-                        <li uk-filter-control="filter: [data-climbed='False']; group: climbed"><a href="#">Unclimbed</a>
+                        <li class="uk-active" uk-filter-control="filter: [data-climbed='False']; group: climbed"><a
+                                href="#">Unclimbed</a>
                     </ul>
                 </div>
             </div>
