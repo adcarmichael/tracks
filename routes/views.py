@@ -174,6 +174,10 @@ def routes_user_page(request, user_id, gym_id):
     grade = route_data_all.get_grade()
     sub_grade = route_data_all.get_grade_sub()
     route_id = route_data_all.get_route_id()
+    grade_names = conf.get_grade_names()
+    grade_sub_names = get_grade_sub_names_clean()
+    active_grade = get_active_grade_for_filter(user_id, gym_id)
+
     route_data = zip(route_id,
                      route_data_all.get_number(),
                      grade,
@@ -182,16 +186,28 @@ def routes_user_page(request, user_id, gym_id):
                      get_sub_grade_icon_class(sub_grade),
                      route_record['is_climbed'],
                      route_record['date'])
-    # breakpoint()
+
     # data = get_route_date_for_routes_page(gym_id)
     data = {'route_data': route_data,
             'user_id': user_id,
-            'gym_id': gym_id}
-
-    # I am intentionally failing
-    # this as the get_route ids are returning out of order with respect other items... why... this is seen in the hyperlink for recording a climb
+            'gym_id': gym_id,
+            'active_grade': active_grade,
+            'grade_names': grade_names,
+            'grade_sub_names': grade_sub_names}
 
     return render_with_user_restriction(request, 'routes_user.html', data, user_id)
+
+
+def get_active_grade_for_filter(user_id, gym_id):
+    dal.get_grade_of_last_recorded_climb(user_id, gym_id)
+    return 'purple'
+
+
+def get_grade_sub_names_clean():
+    grade_sub_names = conf.get_grade_sub_names()
+    if 'null' in grade_sub_names:
+        grade_sub_names.remove('null')
+    return grade_sub_names
 
 
 def record_route(request, user_id, gym_id, route_id):
@@ -230,19 +246,8 @@ def get_sub_grade_icon_class(sub_grade_list):
     class_text = []
 
     for sub_grade in sub_grade_list:
+        class_text.append(conf.GradeSubIcon.get_value_from_name(sub_grade))
 
-        if sub_grade == 'lowest':
-            class_text.append('fa fa-arrow-circle-down fa-2x')
-        elif sub_grade == 'low':
-            class_text.append('fa fa-arrow-circle-right fa-2x rotate-45-right')
-        elif sub_grade == 'medium':
-            class_text.append('fa fa-arrow-circle-right fa-2x')
-        elif sub_grade == 'high':
-            class_text.append('fa fa-arrow-circle-up fa-2x rotate-45-right')
-        elif sub_grade == 'highest':
-            class_text.append('fa fa-arrow-circle-up fa-2x')
-        else:
-            class_text.append('fa fa-exclamation-triangle fa-2x')
     return class_text
 
 

@@ -13,74 +13,52 @@
             <!-- <li class="uk-active" uk-filter-control="filter: [data-climbed='True']"><a href="#">All</a></li> -->
             <!-- </ul> -->
             <!-- </div> -->
-
-            <div class='uk-visible@m'>
+            <div>
                 <ul class="uk-subnav uk-subnav-pill" uk-margin>
-                    <li uk-filter-control="filter: [data-grade='purple']; group: data-grade"><a href="#">purple</a></li>
-                    <li uk-filter-control="filter: [data-grade='orange']; group: data-grade"><a href="#">orange</a></li>
-                    <li uk-filter-control="filter: [data-grade='green']; group: data-grade"><a href="#">green</a></li>
-                    <li uk-filter-control="filter: [data-grade='yellow']; group: data-grade"><a href="#">yellow</a></li>
-                    <li uk-filter-control="filter: [data-grade='blue']; group: data-grade"><a href="#">blue</a></li>
-                    <li uk-filter-control="filter: [data-grade='white']; group: data-grade"><a href="#">white</a></li>
-                    <li uk-filter-control="filter: [data-grade='red']; group: data-grade"><a href="#">red</a></li>
-                    <li uk-filter-control="filter: [data-grade='black']; group: data-grade"><a href="#">Black</a></li>
+                    <li uk-filter-control><a href="#">All</a></li>
                 </ul>
             </div>
-            <div class='uk-hidden@m'>
+            <div class='uk-visible@l'>
+                <ul class="uk-subnav uk-subnav-pill" uk-margin>
+                    {% for grade_name in grade_names %}
+                    <li {% if active_grade == grade_name %} class="uk-active" {% endif %}
+                        uk-filter-control="filter: [data-grade='{{grade_name}}']; group: data-grade"><a
+                            href="#">{{grade_name}}</a></li>
+
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class='uk-hidden@l'>
                 <button class="uk-button uk-button-default" type="button">Colour</button>
                 <div uk-dropdown>
                     <ul class="uk-nav uk-dropdown-nav">
-                        <li uk-filter-control="filter: [data-grade='purple']; group: data-grade"><a href="#">purple</a>
+                        {% for grade_name in grade_names %}
+                        <li uk-filter-control="filter: [data-grade='{{grade_name}}']; group: data-grade"><a
+                                href="#">{{grade_name}}</a>
                         </li>
-                        <li uk-filter-control="filter: [data-grade='orange']; group: data-grade"><a href="#">orange</a>
-                        </li>
-                        <li uk-filter-control="filter: [data-grade='green']; group: data-grade"><a href="#">green</a>
-                        </li>
-                        <li uk-filter-control="filter: [data-grade='yellow']; group: data-grade"><a href="#">yellow</a>
-                        </li>
-                        <li uk-filter-control="filter: [data-grade='blue']; group: data-grade"><a href="#">blue</a></li>
-                        <li uk-filter-control="filter: [data-grade='white']; group: data-grade"><a href="#">white</a>
-                        </li>
-                        <li uk-filter-control="filter: [data-grade='red']; group: data-grade"><a href="#">red</a></li>
-                        <li uk-filter-control="filter: [data-grade='black']; group: data-grade"><a href="#">Black</a>
-                        </li>
+                        {% endfor %}
+
                     </ul>
                 </div>
             </div>
             <div>
-                <ul class="uk-subnav uk-subnav-pill" uk-margin>
-                    <!-- <li uk-filter-control="sort: data-climbed; order: asc;group: climbed"><a href="#">as</a></li> -->
-                    <li uk-filter-control="filter: [data-climbed='True']; group: climbed"><a href="#">Climbed</a></li>
-                    <li uk-filter-control="filter: [data-climbed='False']; group: climbed"><a href="#">Unclimbed</a>
-                        <!-- <li uk-filter-control="group: climbed"><a href="#">All</a> -->
-
-                    </li>
-
-                </ul>
-            </div>
-            <!-- <div>
-                <button class="uk-button uk-button-default" type="button">Filter Climbed</button>
+                <button class="uk-button uk-button-default" type="button">Filter</button>
                 <div uk-dropdown>
                     <ul class="uk-nav uk-dropdown-nav">
-                        <li uk-filter-control="group: climbed"><a href="#">All</a></li>
+                        <li class="uk-nav-header">Sub Grades</li>
+                        {% for grade_sub_name in grade_sub_names %}
+                        <li uk-filter-control="filter: [data-sub-grade='{{grade_sub_name}}']; group: data-sub-grade">
+                            <a href="#">{{grade_sub_name}}</a>
+                        </li>
+                        {% endfor %}
+                        <li class="uk-nav-header">Climb Status</li>
                         <li uk-filter-control="filter: [data-climbed='True']; group: climbed"><a href="#">Climbed</a>
                         </li>
-                        <li uk-filter-control="filter: [data-climbed='True']; group: climbed"><a href="#">Unclimbed</a>
-                        </li>
+                        <li uk-filter-control="filter: [data-climbed='False']; group: climbed"><a href="#">Unclimbed</a>
                     </ul>
                 </div>
-            </div> -->
+            </div>
         </div>
-        <!-- </div> -->
-        <!-- <div> -->
-        <!-- <div uk-sticky>
-            <ul class="uk-iconnav uk-iconnav-vertical">
-                <li><a href="#" uk-icon="icon: plus"></a></li>
-                <li><a href="#"></a>10</li>
-                <li><a href="#"></a>20</li>
-                <li><a href="#"></a></li30>
-            </ul>
-        </div> -->
 
         <style>
             .rotate-45-right:before {
@@ -96,8 +74,8 @@
             uk-height-match="target: > div > .uk-card; row: false">
             <!-- card -->
             {% for route_id, number, grade, grade_sub, colour, icon, is_climbed, date_climbed in route_data %}
-            <div data-grade='{{grade}}' data-climbed='{{is_climbed}}' class="{{grade}}-grade is_climbed_{{is_climbed}}"
-                data-tags="">
+            <div data-grade='{{grade}}' data-sub-grade={{grade_sub}} data-climbed='{{is_climbed}}'
+                class="{{grade}}-grade is_climbed_{{is_climbed}}" data-tags="">
                 <div href="#modal-sections-{{route_id}}" uk-toggle
                     class="uk-card uk-card-small uk-card-hover uk-margin-remove {%if is_climbed %} uk-background-muted{% endif %}">
                     <div class="uk-card-header">
