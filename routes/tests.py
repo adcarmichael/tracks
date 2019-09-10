@@ -345,6 +345,41 @@ class TestRouteRecord(TestCase):
         self.assertEqual(route_record['status'], [0])
         self.assertEqual(route_record['is_climbed'], [False])
 
+    def test_get_grade_name_of_last_recorded_climb(self):
+        user_id = 1
+        route_id = 1
+        gym_id = 1
+        self.create_sample_route_record(
+            status=[1, 0], is_climbed=[True, False])
+
+        dal = Dal.get_dal()
+        grade_name = dal.get_grade_name_of_last_recorded_climb(
+            user_id, gym_id)
+        grade_name_check, id = dal._get_grade_name_of_last_recorded_climb(
+            user_id, gym_id)
+
+        # breakpoint()
+        self.assertEqual(grade_name, grade_name_check)
+        self.assertEqual(grade_name, 'black')
+        self.assertEqual(id, 2)
+
+    def test_get_grade_name_of_last_recorded_climb__no_climbs_recorded(self):
+        user_id = 10
+        gym_id = 1
+
+        self.create_sample_route_record(
+            status=[1, 0], is_climbed=[True, False])
+
+        dal = Dal.get_dal()
+        grade_name = dal.get_grade_name_of_last_recorded_climb(
+            user_id, gym_id)
+        grade_name_check, id = dal._get_grade_name_of_last_recorded_climb(
+            user_id, gym_id)
+
+        self.assertEqual(grade_name, grade_name_check)
+        self.assertEqual(grade_name, [])
+        self.assertEqual(id, [])
+
     def test_set_new_route_record(self):
         user_id = 1
         route_id = 1

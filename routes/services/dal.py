@@ -116,6 +116,21 @@ class _DalBase:
 
         return record
 
+    def _get_grade_name_of_last_recorded_climb(self, user_id, gym_id):
+        query = RouteRecord.objects.filter(user__id=user_id)
+        query = self._filter_route_record_query_by_gym(query, gym_id)
+        if query:
+            name = conf.Grade(query.last().route.grade).name
+            id = query.last().id
+        else:
+            name = []
+            id = []
+        return name, id
+
+    def get_grade_name_of_last_recorded_climb(self, user_id, gym_id):
+        name, id = self._get_grade_name_of_last_recorded_climb(user_id, gym_id)
+        return name
+
     def set_route_record_for_user(self, user_id, route_id, status, is_climbed):
         query = self._get_route_record_for_user(user_id, route_id)
         if query:
