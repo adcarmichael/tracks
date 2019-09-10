@@ -199,8 +199,8 @@ def routes_user_page(request, user_id, gym_id):
 
 
 def get_active_grade_for_filter(user_id, gym_id):
-    dal.get_grade_of_last_recorded_climb(user_id, gym_id)
-    return 'purple'
+
+    return dal.get_grade_name_of_last_recorded_climb(user_id, gym_id)
 
 
 def get_grade_sub_names_clean():
