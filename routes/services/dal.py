@@ -286,7 +286,7 @@ class _Data(_DataBase):
         return [a.route_set.id for a in self.query]
 
     def __repr__(self):
-        return f"Colour: {self.get_colour()[0]} \nNum Routes: {self.get_count()} "
+        return f"Colour: {self.get_grade()[0]} \nNum Routes: {self.get_count()} "
 
 
 class _GymData(_DataBase):

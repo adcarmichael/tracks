@@ -49,16 +49,16 @@
 
                 {% if user.is_authenticated %}
                 <a href="\accounts\logout"
-                    class="uk-button uk-button-default uk-button-large uk-width-2-3 uk-width-auto@s"
+                    class="uk-button uk-button-default uk-button-large uk-width-2-3 uk-width-auto@s" id="logout"
                     title="Learn More">Logout</a>
 
                 {% else %}
                 <a href="\accounts\login"
                     class="uk-button uk-button-default uk-button-large uk-width-2-3 uk-width-auto@s"
-                    data-uk-icon="arrow-right" title="Learn More">Login</a>
+                    data-uk-icon="arrow-right" id="login" title="Learn More">Login</a>
                 <a href="\accounts\signup"
                     class="uk-button uk-button-primary uk-button-large uk-width-2-3 uk-width-auto@s"
-                    data-uk-icon="check" title="Learn More">Sign Up</a>
+                    data-uk-icon="check" id="sign-up" title="Learn More">Sign Up</a>
                 {% endif %}
             </div>
         </div>

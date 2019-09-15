@@ -168,6 +168,7 @@ def route_set_add_page(request, gym_id):
 
 def routes_user_page(request, user_id, gym_id):
     route_data_all = dal.get_route_set_of_grade('purple', gym_id=gym_id)
+    # breakpoint()
     route_record = dal.get_route_record_for_user(
         user_id, route_data_all.get_route_id())
 

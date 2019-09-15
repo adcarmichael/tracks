@@ -68,7 +68,7 @@
             {% for route_id, number, grade, grade_sub, colour, icon, is_climbed, date_climbed in route_data %}
             <div data-grade='{{grade}}' data-sub-grade={{grade_sub}} data-climbed='{{is_climbed}}'
                 class="{{grade}}-grade is_climbed_{{is_climbed}}" data-tags="">
-                <div href="#modal-sections-{{route_id}}" uk-toggle
+                <div id='id-card-{{route_id}}' href="#modal-sections-{{route_id}}" uk-toggle
                     class="uk-card uk-card-small uk-card-hover uk-margin-remove {%if is_climbed %} uk-background-muted{% endif %}">
                     <div class="uk-card-header">
                         <div class="uk-grid uk-grid-small uk-flex-middle" data-uk-grid>
@@ -133,7 +133,7 @@
                                     </div>
                                 </a>
 
-                                <a class='uk-link-reset'
+                                <a id="modal-sections-record-climb-{{route_id}}" class='uk-link-reset'
                                     href="/users/{{user_id}}/{{gym_id}}/routes/{{route_id}}/record/">
                                     <div class=" uk-card uk-card-hover uk-card-header">
                                         <i class=" far fa-hand-rock fa-lg fa-3x" style="color: #2471A3"></i>
