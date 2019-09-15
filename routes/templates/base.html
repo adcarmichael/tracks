@@ -7,10 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel='stylesheet' href="{% static 'routes/base.css' %}">
 
-    <link rel="stylesheet" type="text/css"
-        href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.6/css/uikit.min.css" />
+    <link rel="stylesheet" type="text/css" href="{% static 'routes/css/uikit.min.css' %}">
 
-    <script src="https://kit.fontawesome.com/0b8b109b75.js"></script>
+    <script src="{% static 'routes/js/font-awesome.js' %}"></script>
 
     <title>{% block title %}ChalkTracks{% endblock %}</title>
 
@@ -18,8 +17,8 @@
     {% include "navbar.html" %}
     {% endblock %}
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.6/js/uikit.min.js" async></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.1.6/js/uikit-icons.min.js" async></script>
+    <script src="{% static 'routes/js/uikit.min.js' %}" async></script>
+    <script src="{% static 'routes/js/uikit-icons.min.js' %}" async></script>
 </head>
 
 {% block body %}
