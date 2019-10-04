@@ -25,3 +25,16 @@ https://wsvincent.com/django-user-authentication-tutorial-login-and-logout/
 ## Test User
 username = test_user
 password = test_password
+
+## SSL Certification
+from https://certbot.eff.org/lets-encrypt/ubuntubionic-nginx
+Then execlent guide from https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-16-04 allowed me to set up nginx config to have chalktracks domain
+
+Had issues with nginx not starting found solution from (https://www.digitalocean.com/community/questions/can-t-start-nginx-job-for-nginx-service-failed)
+
+  Try to run the following two commands:
+  sudo fuser -k 80/tcp
+  sudo fuser -k 443/tcp
+  Then execute
+  sudo service nginx restart
+  https://stackoverflow.com/questions/35868976/nginx-not-started-and-cant-start/51684856#51684856
