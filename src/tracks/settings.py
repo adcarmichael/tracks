@@ -25,7 +25,7 @@ SECRET_KEY = 'gb5^fb3$!l@@&9$r-+&9lgrhn9p@ui_e^v^)n52um-apu=q5)@'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['web']
+ALLOWED_HOSTS = ['*']
 
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.mailtrap.io'
