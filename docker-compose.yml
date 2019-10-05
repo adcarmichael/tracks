@@ -2,7 +2,7 @@ version: '2'
 services:  
   nginx:
     image: nginx:alpine
-    container_name: nz02
+    container_name: nginx_container
     ports:
       - "80:80"
     volumes:
@@ -12,7 +12,7 @@ services:
       - web
   web:
     build: .
-    container_name: dz02
+    container_name: web_container
     depends_on:
       - db
     volumes:
@@ -21,9 +21,9 @@ services:
       - redis
   db:
     image: postgres:alpine
-    container_name: pz02
+    container_name: postgres_container
   redis:
     image: redis:alpine
-    container_name: rz02
+    container_name: redis_container
     ports:
      - '6379:6379'
