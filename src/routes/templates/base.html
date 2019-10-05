@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+{% load static %}
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel='stylesheet' href="{% static 'routes/base.css' %}">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'routes/css/uikit.min.css' %}">
+
+    <script src="{% static 'routes/js/font-awesome.js' %}"></script>
+
+    <title>{% block title %}ChalkTracks{% endblock %}</title>
+
+    {% block navbar %}
+    {% include "navbar.html" %}
+    {% endblock %}
+
+    <script src="{% static 'routes/js/uikit.min.js' %}" async></script>
+    <script src="{% static 'routes/js/uikit-icons.min.js' %}" async></script>
+</head>
+
+{% block body %}
+
+<body>
+    <br>
+
+    <div class=" uk-padding-large uk-container uk-container-small">
+        {% block content %}
+        <h1>Hello, world!</h1>
+        {% endblock %}
+    </div>
+
+
+</body>
+{% endblock %}
+<!-- footer -->
+<footer>
+    {% block footer %}
+    {% include "footer.html" %}
+    {% endblock %}
+</footer>
+
+</html>
