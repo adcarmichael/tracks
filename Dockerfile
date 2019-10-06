@@ -15,4 +15,5 @@ RUN apk update \
 ADD ./src /src
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
-CMD python manage.py collectstatic --no-input;python manage.py migrate; gunicorn tracks.wsgi -b 0.0.0.0:8000 & celery worker
+# CMD python manage.py collectstatic --no-input;python manage.py migrate; gunicorn tracks.wsgi -b 0.0.0.0:8000 & celery worker
+CMD python manage.py collectstatic --no-input;python manage.py migrate; gunicorn tracks.wsgi -b 0.0.0.0:8000
