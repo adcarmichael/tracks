@@ -47,8 +47,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'widget_tweaks',
-    # 'celery',
 ]
+    # 'celery',
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
