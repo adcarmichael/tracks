@@ -17,13 +17,7 @@ services:
       - db
     volumes:
       - ./src:/src
-    links:
-      - redis
   db:
     image: postgres:alpine
     container_name: postgres_container
-  redis:
-    image: redis:alpine
-    container_name: redis_container
-    ports:
-     - '6379:6379'
+
