@@ -107,3 +107,4 @@ venv.bak/
 
 \.vscode/
 src/static
+update_web_production.sh
