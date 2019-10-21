@@ -2,7 +2,7 @@ build:
 	docker-compose build
 
 up:
-	docker-compose up -d
+	docker-compose up -d --build
 
 up-non-daemon:
 	docker-compose up
@@ -12,6 +12,9 @@ start:
 
 stop:
 	docker-compose stop
+
+down:
+	docker-compose down -v
 
 restart:
 	docker-compose stop && docker-compose start
