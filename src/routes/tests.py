@@ -10,6 +10,7 @@ from django.db.models.functions import Cast, Coalesce
 from datetime import datetime
 from django.db.models import DateField
 import os
+import ipdb
 
 
 def add_sample_route_set(gym_id, colour='black', grade=['high', 'medium'], down_date=None, up_date='03/06/2019'):
@@ -114,7 +115,8 @@ class TestDal(TestCase):
         add_sample_gym()
         add_sample_route_set(gym_id=1)
         add_sample_route_set(gym_id=1)
-
+        ipdb.set_trace()
+        # breakpoint()
         dataNew = dal.get_routes_all()
         self.assertEqual(dataNew.get_count(), 2)
         self.assertEqual(dataNew.get_grade()[0], conf.Grade.black.name)

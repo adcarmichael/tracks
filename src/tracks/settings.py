@@ -19,7 +19,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
-is_production = config('DJANGO_DEBUG_FALSE', default=False, cast=bool)
+is_production = config('IS_PRODUCTION', default=False, cast=bool)
 if is_production:
     DEBUG = False
     SECRET_KEY = config('DJANGO_SECRET_KEY')
@@ -39,7 +39,7 @@ else:
     EMAIL_HOST_USER = 'ff422522572a0f'
     EMAIL_HOST_PASSWORD = config('EMAIL_PASSWORD_TRAP')
     EMAIL_PORT = '2525'
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_BACKEND = 'dja\ngo.core.mail.backends.smtp.EmailBackend'
 
 
 # breakpoint()
@@ -93,19 +93,24 @@ WSGI_APPLICATION = 'tracks.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
+# if is_production:
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'postgres',
         'USER': 'postgres',
         'HOST': 'db',
+        "PASSWORD": 'passowrd',
         'PORT': 5432,
     },
-    'default_sqlite': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
 }
+# else:
+#     DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.sqlite3',
+#             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#         }
+#     }
 
 
 # Password validation
