@@ -11,38 +11,18 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
-from decouple import config
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+DEBUG = int(os.environ.get("DEBUG", default=0))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
-is_production = config('IS_PRODUCTION', default=False, cast=bool)
-if is_production:
-    DEBUG = False
-    SECRET_KEY = config('DJANGO_SECRET_KEY')
-    ALLOWED_HOSTS = [config('SITENAME')]
-    EMAIL_USE_TLS = True
-    EMAIL_HOST = 'smtp.sendgrid.net'
-    EMAIL_HOST_USER = 'apikey'
-    EMAIL_HOST_PASSWORD = config('EMAIL_PASSWORD')
-    EMAIL_PORT = '587'
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-else:
-    DEBUG = False
-    SECRET_KEY = 'insecure-key-for-dev'
-    ALLOWED_HOSTS = ['*']
-    EMAIL_USE_TLS = True
-    EMAIL_HOST = 'smtp.mailtrap.io'
-    EMAIL_HOST_USER = 'ff422522572a0f'
-    EMAIL_HOST_PASSWORD = config('EMAIL_PASSWORD_TRAP')
-    EMAIL_PORT = '2525'
-    EMAIL_BACKEND = 'dja\ngo.core.mail.backends.smtp.EmailBackend'
+# 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
+# For example: 'DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
-
-# breakpoint()
 # Application definition
 
 INSTALLED_APPS = [
@@ -93,25 +73,16 @@ WSGI_APPLICATION = 'tracks.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-# if is_production:
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'HOST': 'db',
-        "PASSWORD": 'passowrd',
-        'PORT': 5432,
-    },
+    "default": {
+        "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.environ.get("SQL_DATABASE", os.path.join(BASE_DIR, "db.sqlite3")),
+        "USER": os.environ.get("SQL_USER", "user"),
+        "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
+        "HOST": os.environ.get("SQL_HOST", "localhost"),
+        "PORT": os.environ.get("SQL_PORT", "5432"),
+    }
 }
-# else:
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.sqlite3',
-#             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#         }
-#     }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -157,6 +128,13 @@ MEDIA_ROOT = './media/'
 
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
+
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS")
+EMAIL_HOST = os.environ.get("EMAIL_HOST")
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+EMAIL_PORT = os.environ.get("EMAIL_PORT")
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND")
 
 # CELERY
 # CELERY_BROKER_URL = 'redis://redis:6379/0'

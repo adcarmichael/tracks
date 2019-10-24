@@ -10,7 +10,6 @@ from django.db.models.functions import Cast, Coalesce
 from datetime import datetime
 from django.db.models import DateField
 import os
-import ipdb
 
 
 def add_sample_route_set(gym_id, colour='black', grade=['high', 'medium'], down_date=None, up_date='03/06/2019'):
