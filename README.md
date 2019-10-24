@@ -51,7 +51,13 @@ https://wsvincent.com/django-user-authentication-tutorial-login-and-logout/
 
 
 ## Nuke Docker
-Use sparingly...
+Use sparingly... 
+
+  docker system prune --volumes
+  docker image prune -a  
+  docker volume prune 
+  docker container prune 
+[Resource](https://linuxize.com/post/how-to-remove-docker-images-containers-volumes-and-networks/)
 
 ## Test User
 username = test_user
