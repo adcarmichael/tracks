@@ -16,11 +16,42 @@ import models
     for x in config.__dict__:
       print x
 
+## Env Variables
+Secrets are injected into the docker containers through docker-compose. docker-compose.yaml expects a file called .env to be at the root of the repo:
+
+  DEBUG=1
+  SECRET_KEY=foo
+  DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+
+  SQL_ENGINE=django.db.backends.postgresql
+  SQL_DATABASE=tracks
+  SQL_USER=admin
+  SQL_PASSWORD=password
+  SQL_HOST=db
+  SQL_PORT=5432
+
+  POSTGRES_USER=admin
+  POSTGRES_PASSWORD=password
+  POSTGRES_DB=tracks
+
+  EMAIL_USE_TLS=true
+  EMAIL_HOST=smtp.mailtrap.io
+  EMAIL_HOST_USER=userrname
+  EMAIL_HOST_PASSWORD=password
+  EMAIL_PORT=587
+  EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+
+Note that the above POSTGRES_* variables are interpreted by the postgres container on build and are used to create the user.
+
 ## Email Signup
 Taken from https://simpleisbetterthancomplex.com/tutorial/2017/02/18/how-to-create-user-sign-up-view.html
 
 ## For authentication (login lohout etc)
 https://wsvincent.com/django-user-authentication-tutorial-login-and-logout/
+
+
+## Nuke Docker
+Use sparingly...
 
 ## Test User
 username = test_user
