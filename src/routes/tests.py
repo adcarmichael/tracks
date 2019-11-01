@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.urls import resolve
+from django.db import connection
 from routes.views import home_page
 from routes.models import RouteSet, Route, RouteRecord, Profile, Gym
 from django.test import Client
@@ -10,6 +11,14 @@ from django.db.models.functions import Cast, Coalesce
 from datetime import datetime
 from django.db.models import DateField
 import os
+
+
+def truncate_tables():
+    with connection.cursor() as cursor:
+        cursor.execute('TRUNCATE routes_gym RESTART IDENTITY CASCADE;')
+        cursor.execute('TRUNCATE routes_routerecord RESTART IDENTITY CASCADE;')
+        cursor.execute('TRUNCATE routes_profile RESTART IDENTITY CASCADE;')
+        cursor.execute('TRUNCATE auth_user RESTART IDENTITY CASCADE;')
 
 
 def add_sample_route_set(gym_id, colour='black', grade=['high', 'medium'], down_date=None, up_date='03/06/2019'):
@@ -85,6 +94,9 @@ class EdenRockMapTest(TestCase):
 
 class TestDal(TestCase):
 
+    def setUp(self):
+        truncate_tables()
+
     def test_get_all_routes_with_zero_in_database(self):
         dal = Dal.get_dal()
         data = dal.get_routes_all()
@@ -110,12 +122,11 @@ class TestDal(TestCase):
         data = dal.get_routes_all()
         self.assertEqual(data.get_count(), 0,
                          'ensure that there is zero routes in db initially')
-
+        # breakpoint()
         add_sample_gym()
         add_sample_route_set(gym_id=1)
         add_sample_route_set(gym_id=1)
-        ipdb.set_trace()
-        # breakpoint()
+        
         dataNew = dal.get_routes_all()
         self.assertEqual(dataNew.get_count(), 2)
         self.assertEqual(dataNew.get_grade()[0], conf.Grade.black.name)
@@ -197,6 +208,8 @@ class TestDal(TestCase):
 
 
 class Test__Data(TestCase):
+    def setUp(self):
+        truncate_tables()
 
     def get_query(self):
         up_date = datetime.strptime('01/02/1989', "%d/%m/%Y").date()
@@ -265,23 +278,28 @@ class Test__Data(TestCase):
         self.assertEqual(id[0], 1)
 
 
-class TestRouteRecord(TestCase):
-    def create_sample_route_record(self, status=[1], is_climbed=[True], route_num=1):
-        create_auth_user()
-        add_sample_data()
-        route = Route.objects.all()
-        profile = Profile.objects.first()
 
-        for ind, stat in enumerate(status):
-            RouteRecord.objects.create(
-                route=route[ind], user=profile, status=status[ind], is_climbed=is_climbed[ind])
+def create_sample_route_record( status=[1], is_climbed=[True], route_num=1):
+    create_auth_user()
+    add_sample_data()
+    route = Route.objects.all()
+    profile = Profile.objects.first()
+
+    for ind, stat in enumerate(status):
+        RouteRecord.objects.create(
+            route=route[ind], user=profile, status=status[ind], is_climbed=is_climbed[ind])
+
+class TestRouteRecord(TestCase):
+
+    def setUp(self):
+        truncate_tables()
 
     def test_get_route_record(self):
 
         user_id = 1
         route_id = 1
 
-        self.create_sample_route_record(
+        create_sample_route_record(
             status=[1, 0], is_climbed=[True, False])
         dal = Dal.get_dal()
         route_record = dal.get_route_record_for_user(
@@ -295,7 +313,7 @@ class TestRouteRecord(TestCase):
         user_id = 1
         route_id = 1
 
-        self.create_sample_route_record(
+        create_sample_route_record(
             status=[1, 0], is_climbed=[True, False])
         dal = Dal.get_dal()
 
@@ -310,11 +328,11 @@ class TestRouteRecord(TestCase):
         route_id = [1, 2]
         dal = Dal.get_dal()
 
-        self.create_sample_route_record(
+        create_sample_route_record(
             status=[1, 0], is_climbed=[True, False])
         route_record = dal = Dal.get_dal().get_route_record_for_user(
             user_id, route_id)
-
+        # breakpoint()
         self.assertEqual(route_record['status'][0], 1)
         self.assertEqual(route_record['status'][1], 0)
         self.assertEqual(route_record['is_climbed'][0], True)
@@ -325,7 +343,7 @@ class TestRouteRecord(TestCase):
         route_id = 100
         dal = Dal.get_dal()
 
-        self.create_sample_route_record(
+        create_sample_route_record(
             status=[1, 0], is_climbed=[True, False])
         route_record = dal.get_route_record_for_user(
             user_id, route_id)
@@ -337,7 +355,7 @@ class TestRouteRecord(TestCase):
         user_id = 100
         route_id = 1
 
-        self.create_sample_route_record(
+        create_sample_route_record(
             status=[1, 0], is_climbed=[True, False])
         dal = Dal.get_dal()
         route_record = dal.get_route_record_for_user(
@@ -350,7 +368,7 @@ class TestRouteRecord(TestCase):
         user_id = 1
         route_id = 1
         gym_id = 1
-        self.create_sample_route_record(
+        create_sample_route_record(
             status=[1, 0], is_climbed=[True, False])
 
         dal = Dal.get_dal()
@@ -368,7 +386,7 @@ class TestRouteRecord(TestCase):
         user_id = 10
         gym_id = 1
 
-        self.create_sample_route_record(
+        create_sample_route_record(
             status=[1, 0], is_climbed=[True, False])
 
         dal = Dal.get_dal()
@@ -394,6 +412,7 @@ class TestRouteRecord(TestCase):
 
         rr = RouteRecord.objects.all().filter(
             user__id=user_id).filter(route__id=route_id)
+        # breakpoint()
         self.assertEqual(rr[0].status, status)
         self.assertEqual(rr[0].is_climbed, is_climbed)
 
@@ -419,6 +438,11 @@ class TestRouteRecord(TestCase):
 
 
 class TestGym(TestCase):
+    def setUp(self):
+        with connection.cursor() as cursor:
+            cursor.execute('TRUNCATE routes_gym RESTART IDENTITY CASCADE;')
+        # breakpoint()
+
     def test_create_gym(self):
         email = 'edinburgh@edenrockclimbing,com'
         city = 'Edinburgh'
@@ -436,6 +460,7 @@ class TestGym(TestCase):
         city = 'test'
         email = 'asdf@test.com'
         email_new = 'new@test.com'
+        Gym.objects.raw('TRUNCATE TABLE route,routeset,gym RESTART IDENTITY;')
         add_sample_gym(city=city, email=email)
 
         dal = Dal.get_dal()
