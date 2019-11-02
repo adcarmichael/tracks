@@ -115,6 +115,7 @@ class TestDal(TestCase):
         self.assertEqual(dataNew.get_count(), 2)
         self.assertEqual(dataNew.get_grade()[0], conf.Grade.black.name)
         self.assertEqual(dataNew.get_grade_sub()[0], conf.GradeSub.high.name)
+        self.fail()
 
     def test_add_route_set_protecting_against_duplicates(self):
 
