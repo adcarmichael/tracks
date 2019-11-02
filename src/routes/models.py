@@ -65,7 +65,6 @@ class RouteRecord(Model):
 
     status = IntegerField(
         verbose_name='E.g. mastered, climbed, attempted, todo')
-    is_climbed = models.BooleanField(default=False)
     # is_on_sight = models.BooleanField(default=False)
 
     # climb_count = IntegerField(default=0,
