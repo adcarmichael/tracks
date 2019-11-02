@@ -2,11 +2,10 @@ dist: xenial
 language: python
 python:
   - "3.7.3"
-install:
-  - pip install -r ./src/requirements.txt
+services:
+  - docker
 
 script:
-  - cd src
-  - python manage.py makemigrations auth
-  - python manage.py migrate --run-syncdb
-  - python manage.py test .
+  - cp .env.travis .env
+  - docker-compose up -d
+  - docker-compose  exec  web python manage.py test .
