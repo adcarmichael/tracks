@@ -289,6 +289,7 @@ def create_sample_route_record( status=[1], is_climbed=[True], route_num=1):
         RouteRecord.objects.create(
             route=route[ind], user=profile, status=status[ind], is_climbed=is_climbed[ind])
 
+
 class TestRouteRecord(TestCase):
 
     def setUp(self):
