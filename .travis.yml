@@ -7,5 +7,6 @@ services:
 
 script:
   - cp .env.travis .env
-  - docker-compose up -d
-  - docker-compose  exec  web python manage.py test .
+  - sudo docker-compose build web
+  - sudo docker-compose up -d
+  - sudo docker-compose  exec  web python manage.py test .
