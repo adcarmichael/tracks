@@ -60,7 +60,7 @@ class RouteRecord(Model):
     user = ForeignKey(Profile, on_delete=CASCADE)
     date = DateField(null=False, auto_now=True,
                      verbose_name='Date of completed climb')
-    type = IntegerField(
+    record_type = IntegerField(
         verbose_name='E.g. mastered, climbed, attempted, todo')
     # date_last_failed_attempt = DateField(
     # null=False, auto_now=True, verbose_name='Date of last attempted climb')

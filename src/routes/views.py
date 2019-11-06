@@ -102,7 +102,7 @@ def account_activation_sent(request):
     return render(request, 'account_activation_sent.html')
 
 
-def get_route_date_for_routes_page(gym_id):
+def get_route_data_for_routes_page(gym_id):
 
     data_black = dal.get_route_set_of_grade('black', gym_id=gym_id)
     black = zip(data_black.get_number(),
@@ -120,7 +120,7 @@ def get_route_date_for_routes_page(gym_id):
 
 
 def routes_page(request, gym_id):
-    data = get_route_date_for_routes_page()
+    data = get_route_data_for_routes_page()
     return render(request, 'routes.html', data)
 
 

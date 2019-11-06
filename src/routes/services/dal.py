@@ -4,6 +4,7 @@ import routes.services.conf as conf
 from datetime import datetime
 from django.db.models import DateField
 from django.db.models.functions import Cast, Coalesce
+from django.db.models import Count
 # if __name__ == "__main__":
 #     import django
 #     import os
@@ -74,7 +75,7 @@ class _DalBase:
             query = query.filter(route__route_set__gym__id=gym_id)
         return query
 
-    def _filter_query_to_active_based_on_up_date(self, query):
+    def _filter_route_query_to_active_based_on_up_date(self, query):
         for index in range(0, query.count()):
             date_search = query[index].route_set.up_date
             if date_search < datetime.now().date():
@@ -82,6 +83,40 @@ class _DalBase:
                 query = query.filter(route_set__id=id)
                 return query
         return query
+
+    # def check_if_route_is_climbed(self, user_id, route_id):
+
+    #     is_climbed, count = self._check_if_route_is_generic(
+    #         user_id, route_id, conf.ClimbStatus.climbed)
+
+    #     return is_climbed, count
+
+    # def check_if_route_is_attempted(self, user_id, route_id):
+
+    #     is_attempted, count = self._check_if_route_is_generic(
+    #         user_id, route_id, conf.ClimbStatus.attempted)
+
+    #     return is_attempted, count
+
+    # def check_if_route_is_onsight(self, user_id, route_id):
+
+    #     is_onsight, count = self._check_if_route_is_generic(
+    #         user_id, route_id, conf.ClimbStatus.onsight)
+
+    #     return is_onsight, count
+
+    # def _check_if_route_is_generic(self, user_id, route_id, record_type_val):
+    #     query = self._get_route_record_for_user(user_id, route_id)
+    #     if query:
+    #         record_type = [rr.record_type ==
+    #                        record_type_val for rr in query]
+    #         is_x = any(record_type)
+    #         n_x = sum(record_type)
+    #     else:
+    #         is_x = False
+    #         n_x = 0
+
+    #     return is_x, n_x
 
     def get_route_record_for_user(self, user_id, route_id, gym_id=[]):
         if not isinstance(route_id, (list,)):
@@ -131,14 +166,11 @@ class _DalBase:
         name, id = self._get_grade_name_of_last_recorded_climb(user_id, gym_id)
         return name
 
-    def set_route_record_for_user(self, user_id, route_id, status, is_climbed):
+    def set_route_record_for_user(self, user_id, route_id, record_type):
         query = self._get_route_record_for_user(user_id, route_id)
-        if query:
-            self._update_route_record(
-                query[0].id, status=status, is_climbed=is_climbed)
-        else:
-            self._create_route_record(
-                user_id, route_id, status=status, is_climbed=is_climbed)
+
+        self._create_route_record(
+            user_id, route_id, record_type=record_type)
 
     def _get_route_record_for_user(self, user_id, route_id, gym_id=[]):
         if not isinstance(route_id, (list,)):
@@ -149,12 +181,12 @@ class _DalBase:
         query = self._filter_route_record_query_by_gym(query, gym_id)
         return query
 
-    def _create_route_record(self, user_id, route_id, is_climbed=False, status=0):
+    def _create_route_record(self, user_id, route_id, record_type):
         profile = Profile.objects.all().filter(user__id=user_id)
         route = Route.objects.all().filter(id=route_id)
         if profile and route:
             RouteRecord.objects.create(
-                user=profile[0], route=route[0], status=status, is_climbed=is_climbed)
+                user=profile[0], route=route[0], record_type=record_type)
 
     def _update_route_record(self, route_record_id, is_climbed=[], status=[]):
         rr = RouteRecord.objects.get(id=route_record_id)
@@ -165,13 +197,18 @@ class _DalBase:
                 rr.is_climbed = is_climbed
             rr.save()
 
-    def get_route_set_of_grade(self, colour, is_active=False, gym_id=[]):
+    def _get_route_set_of_grade(self, colour, is_active=False, gym_id=[]):
         query = self._get_all_routes()
         grade = self.DataMap.grade(colour)
         query = query.filter(grade=grade)
         if is_active:
-            query = self._filter_query_to_active_based_on_up_date(query)
+            query = self._filter_route_query_to_active_based_on_up_date(query)
         query = self._filter_route_query_by_gym(query, gym_id)
+        return query
+
+    def get_route_set_of_grade(self, colour, is_active=False, gym_id=[]):
+        self._get_route_set_of_grade(
+            colour, is_active=is_active, gym_id=gym_id)
         return _Data(query)
 
     def add_route_set(self, gym_id, colour, grade_list, up_date, down_date=None):
@@ -242,6 +279,51 @@ class _DalBase:
 
     def get_gym_all(self):
         return _GymData(self._get_gym_all())
+
+# class RouteRecordData:
+#     def __init__(self, user_id,route_id):
+#         self.query = query
+# class _RouteRecordData:
+#     def __init__(self, user_id,route_id,record_type_val):
+#         self.query = _get_route_record_for_user(user_id, route_id)
+
+#     def _get_record(self):
+#         if self.query:
+#             record_type = [rr.record_type ==
+#                            record_type_val for rr in self.query]
+#             is_x = any(record_type)
+#             n_x = sum(record_type)
+#         else:
+#             is_x = False
+#             n_x = 0
+
+
+# def get_user_record_for_set(user_id, route_set_id):
+#     record = get_record_for_route_set(user_id, route_id)
+#     return record
+
+
+# def get_record_for_route_set(route_set_id, user_id):
+#     query = _get_route_record_for_route_set_and_user(route_set_id, user_id)
+#     record = _get_record(query)
+#     return record
+
+
+# def _get_record(user_id, route_id):
+#     if not isinstance(route_id, (list,)):
+#         route_id = [route_id]
+
+#     query = RouteRecord.objects.all().filter(user__id=user_id)
+#     query = query.filter(route__id__in=route_id)
+#     query = query.filter(record_type=conf.ClimbStatus.climbed)
+#     query = query.annotate(n_climbs=Count('record_type'))
+
+
+# def _get_route_record_for_route_set_and_user(route_set_id, user_id):
+#     query = Route.objects.filter(route__route_set_id=route_set_id)
+#     query = RouteRecord.objects.filter(user__user_id=user_id)
+
+#     return query
 
 
 class _DalEdenRocks(_DalBase):
