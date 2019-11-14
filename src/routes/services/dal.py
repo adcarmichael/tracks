@@ -49,7 +49,8 @@ class _DalBase:
         self.DataMap = DataMap()
 
     def _get_all_routes(self, gym_id=[]):
-        query = Route.objects.all().order_by('-route_set__up_date')
+        query = Route.objects.all().order_by(
+            '-route_set__up_date')
         query = self._filter_route_query_by_gym(query, gym_id)
         return query
 
@@ -280,6 +281,71 @@ class _DalBase:
     def get_gym_all(self):
         return _GymData(self._get_gym_all())
 
+    def get_route_set_records(self, route_set_id):
+        qq = Route.objects.all()
+        qq_all = qq.filter(route_set=route_set_id)
+        record = self._get_record_from_route_query(qq_all)
+        return record
+
+    def _get_record_from_route_query(self, query, user_id=[]):
+        route_id_list = [tmp.id for tmp in query]
+        grade_list = [tmp.grade for tmp in query]
+        grade_sub_list = [tmp.grade_sub for tmp in query]
+        number_list = [tmp.number for tmp in query]
+        is_climbed_list, num_climbed_list = _get_record_type_count(
+            query, route_id_list, conf.ClimbStatus.climbed.value, user_id=user_id)
+        is_attempted_list, num_attempted_list = _get_record_type_count(
+            query, route_id_list, conf.ClimbStatus.attempted.value, user_id=user_id)
+        is_onsight_list, _ = _get_record_type_count(
+            query, route_id_list, conf.ClimbStatus.onsight.value, user_id=user_id)
+        data = {'id': route_id_list, 'grade': grade_list, 'grade_sub': grade_sub_list,
+                'is_climbed': is_climbed_list, 'num_climbed': num_climbed_list,
+                'is_attempted': is_attempted_list, 'num_attempted': num_attempted_list,
+                'is_onsight': is_onsight_list}
+        return data
+
+    def get_records_for_active_routes(self, gym_id=[], user_id=[]):
+        query = self._get_all_routes(gym_id)
+        query = self._filter_route_query_to_active_based_on_up_date(query)
+        data = self._get_record_from_route_query(query, user_id=user_id)
+        return data
+
+
+def _get_record_type_count(query_route, route_id_list, record_type, user_id=[]):
+
+    is_rt_list = [False] * len(route_id_list)
+    num_rt_list = [0] * len(route_id_list)
+    # breakpoint()
+    if query_route:
+        query = _filter_route_query_by_record_type_and_user(
+            query_route, record_type, user_id)
+        query = query.annotate(n_record_type_val=Count('routerecord'))
+        # breakpoint()
+        num_rt = [tmp.n_record_type_val for tmp in query]
+        route_id_rt_list = [tmp.id for tmp in query]
+        for num, i_route_id in enumerate(route_id_rt_list):
+            index = route_id_list.index(i_route_id)
+            is_rt_list[index] = True
+            num_rt_list[index] = num_rt[num]
+
+    return is_rt_list, num_rt_list
+
+
+def _filter_route_query_by_record_for_user(query, user_id):
+    if query and user_id:
+        query = query.filter(routerecord__user=user_id)
+    return query
+
+
+def _filter_route_query_by_record_type_and_user(query, record_type, user_id=[]):
+
+    if query:
+        if user_id:
+            query = query.filter(
+                routerecord__record_type=record_type, routerecord__user=user_id)
+        else:
+            query = query.filter(routerecord__record_type=record_type)
+    return query
 # class RouteRecordData:
 #     def __init__(self, user_id,route_id):
 #         self.query = query
