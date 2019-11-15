@@ -440,6 +440,48 @@ class TestRouteRecord(TestCase):
         self.assertEqual(rr[0].record_type, 101)
         self.assertEqual(rr.count(), 2)
 
+    def test_get_active_route_set_ids(self):
+        
+        add_sample_data(up_date = '03/06/2019')
+        add_sample_data(colour='red',up_date = '03/06/2019')
+        add_sample_data(colour='red',up_date = '03/02/2019')
+        self.fail()
+        
+    def test_record_for_multi_route_sets(self):
+        user_id = 1
+        route_id = 1
+        record_type_arb = 1
+
+        user_2 = 2
+        route_id_2 = 2
+        record_type_is_climbed = conf.ClimbStatus.climbed.value
+
+        route_id_for_2nd_set = 3
+
+        create_auth_user()
+        add_sample_data()
+        add_sample_data(colour='red')
+
+        dal = Dal.get_dal()
+        dal.set_route_record_for_user(user_2, route_id, record_type_arb)
+
+        dal.set_route_record_for_user(
+            user_2, route_id_2, record_type_is_climbed)
+        dal.set_route_record_for_user(
+            user_2, route_id_2, record_type_is_climbed)
+        dal.set_route_record_for_user(
+            user_2, route_id_2, record_type_is_climbed)
+
+        dal.set_route_record_for_user(
+            user_2, route_id_for_2nd_set, record_type_is_climbed)
+
+        data_2 = dal.get_records_for_active_routes(user_id=user_2)
+        num_climbed = data_2['num_climbed']
+        self.assertEqual(num_climbed[0], 1)
+        self.assertEqual(num_climbed[1], 3)
+        self.fail()
+    
+
     def test_record_num_climbed_for_user(self):
         user_id = 1
         route_id = 1
@@ -466,8 +508,6 @@ class TestRouteRecord(TestCase):
         num_climbed = data_2['num_climbed']
         self.assertEqual(num_climbed[0], 1)
         self.assertEqual(num_climbed[1], 3)
-        Route.objects.filter(routerecord__user=2).annotate(
-            a=Count('routerecord'))[1].a
 
     def test_record_is_climbed(self):
         user_id = 1
@@ -492,6 +532,39 @@ class TestRouteRecord(TestCase):
 
         self.assertEqual(is_climbed[0], False)
         self.assertEqual(is_climbed[1], True)
+
+    def test_record_is_attempted(self):
+        user_id = 1
+        route_id = 1
+        record_type_arb = conf.ClimbStatus.attempted.value
+
+        create_auth_user()
+        add_sample_data()
+        dal = Dal.get_dal()
+
+        dal.set_route_record_for_user(user_id, route_id, record_type_arb)
+
+        data = dal.get_records_for_active_routes()
+        is_att = data['is_attempted']
+
+        self.assertEqual(is_att[0], True)
+        self.assertEqual(data['num_attempted'][0], 1)
+
+    def test_record_is_onsight(self):
+        user_id = 1
+        route_id = 1
+        record_type_arb = conf.ClimbStatus.onsight.value
+
+        create_auth_user()
+        add_sample_data()
+        dal = Dal.get_dal()
+
+        dal.set_route_record_for_user(user_id, route_id, record_type_arb)
+
+        data = dal.get_records_for_active_routes()
+        is_onsight = data['is_onsight']
+
+        self.assertEqual(is_onsight[0], True)
 
     def test_record_is_climbed_for_user(self):
         user_id = 1
