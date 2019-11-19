@@ -9,12 +9,12 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_text
 
-from routes.models import Profile
+from routes.models import Profile, RouteSet
 import routes.services.dal as Dal
 from routes.forms import SignUpForm, GymCreateForm
 from routes.tokens import account_activation_token
 from routes.services.conf import GymKey
-from .forms import AddRouteSetForm_Eden
+from .forms import AddRouteSetForm_Eden, RouteSetForm
 import routes.services.utils as util
 from routes.services.conf import GradeSub, Grade
 from routes.services import conf as conf
@@ -137,33 +137,91 @@ def test_page(request):
     return render(request, 'test_page.html', data)
 
 
+def route_set_page(request, gym_id):
+
+    gym_query = dal.get_gym(gym_id)
+    if gym_query and request.user.is_superuser:
+        data_dict = dal.get_route_set_data(gym_id)
+        print(data_dict)
+        data = zip(data_dict['id'], data_dict['up_date'],
+                   data_dict['down_date'], data_dict['num_routes'])
+        context = {'route_set_data': data,
+                   'gym_id': gym_id, 'gym_name': gym_query.name}
+
+        return render(request, 'route_set.html', context)
+    else:
+        return HttpResponseForbidden()
+
+
 def route_set_add_page(request, gym_id):
     if request.user.is_superuser:
         if request.method == 'POST':
             form = AddRouteSetForm_Eden(request.POST)
 
             if form.is_valid():
-                grade = int(form.cleaned_data['grade'])
-                up_date = form.cleaned_data['up_date']
-                down_date = form.cleaned_data['down_date']
-                grade_sub = []
-                number = []
-
-                for ind, field in enumerate(form.fields):
-                    if 'grade_sub' in field:
-                        grade_sub_temp = int(form.cleaned_data[field])
-                        if grade_sub_temp != 0:
-                            grade_sub.append(grade_sub_temp)
-                            number.append(ind)
-
-                dal._create_route_set_for_list_of_grade_sub(
-                    gym_id, grade, grade_sub, up_date, down_date=down_date)
+                process_route_set_form(form, gym_id)
                 return HttpResponseRedirect('/')
         else:
             form = AddRouteSetForm_Eden()
         return render(request, 'route_set_add_page.html', {'form': form})
     else:
         return HttpResponseForbidden()
+
+
+def route_set_update_page(request, gym_id, route_set_id):
+    rs = RouteSet.objects.get(pk=route_set_id)
+    if rs and request.user.is_superuser:
+        if request.method == 'POST':
+            form = RouteSetForm(request.POST)
+
+            if form.is_valid():
+                up_date = form.cleaned_data['up_date']
+                down_date = form.cleaned_data['down_date']
+                rs = RouteSet.objects.get(pk=route_set_id)
+                if rs:
+                    rs.up_date = up_date
+                    rs.down_date = down_date
+                    rs.save()
+
+                return HttpResponseRedirect(f'/gyms/{gym_id}/routes/set')
+        else:
+
+            init_form = {'up_date': rs.up_date, 'down_date': rs.down_date}
+
+            form = RouteSetForm(initial=init_form)
+        return render(request, 'route_set_update.html', {'form': form, 'route_set_id': route_set_id})
+    else:
+        return HttpResponseForbidden()
+
+
+def get_init_route_set_form_data(route_set_id):
+    query = RouteSet.objects.get(pk=route_set_id)
+    query_routes = query.routes.order_by('number').all()
+
+    data = {'up_date': query.up_date, 'down_date': query.down_date}
+    for ind in range(len(query_routes)):
+        field_name = f'grade_sub_{ind}'
+        data[field_name] = query_routes[ind].grade_sub
+    return data
+
+
+def process_route_set_form(form, gym_id):
+
+    grade = int(form.cleaned_data['grade'])
+    up_date = form.cleaned_data['up_date']
+    down_date = form.cleaned_data['down_date']
+    grade_sub = []
+    number = []
+
+    for ind, field in enumerate(form.fields):
+        if 'grade_sub' in field:
+            grade_sub_temp = int(form.cleaned_data[field])
+            if grade_sub_temp != 0:
+                grade_sub.append(grade_sub_temp)
+                number.append(ind)
+
+    dal._create_route_set_for_list_of_grade_sub(
+        gym_id, grade, grade_sub, up_date, down_date=down_date)
 
 
 def routes_user_page(request, user_id, gym_id):

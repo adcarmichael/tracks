@@ -71,27 +71,20 @@ class HomePageTest(TestCase):
         self.assertTemplateUsed(response, 'home_page.html')
 
 
-# class RoutePageTest(TestCase):
-    # def test_route_page_returns_correct_html(self):
-    #     c = Client()
-    #     response = c.get('/')
-    #     html = response.content.decode('utf')
-    #     self.assertTrue(html.startswith('<html>'))
-    #     self.assertTrue(html.endswith('</html>'))
+class TestRouteSet(TestCase):
+    def setUp(self):
+        truncate_tables()
 
-    # def test_user_records_route_completion(self):
-    #     add_sample_route_set(colour='green')
-
-    #     response = Client().get('routes/')
-
-    #     self.fail('Please complete the test!')
-    #     pass
-
-    # def test_access_to_route_data(self):
-    #     r = Route()
-    #     r.grade = 'Green'
-    #     Route.objects.all()
-
+    def test_get_route_set(self):
+        dates = ['04/07/2019', '04/07/2021', '04/06/2019']
+        add_sample_data(grade=['medium'], up_date=dates[0])
+        add_sample_route_set(1)
+        dal = Dal.get_dal()
+        data = dal.get_route_set_data(gym_id=1)
+        self.assertEqual(data['up_date'][0], Utils.convert_str_to_datetime(dates[0]))
+        self.assertEqual(data['num_routes'][0], 1)
+        self.assertEqual(data['num_routes'][1], 2)
+        breakpoint()
 
 class EdenRockMapTest(TestCase):
     def test_grade(self):
@@ -301,6 +294,7 @@ def create_sample_route_record(record_type=[1], route_num=1):
             route=route[ind], user=profile, record_type=record_type[ind])
 
 
+
 class TestRouteRecord(TestCase):
 
     def setUp(self):
@@ -479,6 +473,7 @@ class TestRouteRecord(TestCase):
         num_climbed = data_2['num_climbed']
         self.assertEqual(num_climbed[0], 1)
         self.assertEqual(num_climbed[1], 3)
+        
         self.fail()
     
 
@@ -650,3 +645,6 @@ class TestEnumMapping(TestCase):
         name = Utils.get_grade_sub_name_from_value([1, 2])
         self.assertEqual(name[0], 'lowest')
         self.assertEqual(name[1], 'low')
+
+
+

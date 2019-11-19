@@ -59,6 +59,25 @@ class _DalBase:
         data = _Data(query)
         return data
 
+    def _get_route_set_for_gym(self, gym_id):
+        query = RouteSet.objects.all()
+        query = self._filter_route_set_query_by_gym(query, gym_id)
+        return query
+
+    def get_route_set_data(self, gym_id=[]):
+        query = self._get_route_set_for_gym(gym_id)
+        num_routes = self.get_number_of_routes_in_set(query)
+        route_set_id = [q.id for q in query]
+        up_date = [q.up_date for q in query]
+        down_date = [q.down_date for q in query]
+        data = {'id':route_set_id,'up_date':up_date,'down_date':down_date,'num_routes':num_routes}
+        return data
+
+    def get_number_of_routes_in_set(self, route_set_query):
+        query = route_set_query.annotate(num_routes=Count('routes'))
+
+        return [q.num_routes for q in query]
+
     def _filter_route_query_by_gym(self, query, gym_id):
         if query:
             if gym_id:
