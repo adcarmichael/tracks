@@ -18,6 +18,7 @@ from .forms import AddRouteSetForm_Eden, RouteSetForm
 import routes.services.utils as util
 from routes.services.conf import GradeSub, Grade
 from routes.services import conf as conf
+from datetime import datetime
 dal = Dal.get_dal(GymKey.eden_rock_edinburgh)
 
 
@@ -141,16 +142,27 @@ def route_set_page(request, gym_id):
 
     gym_query = dal.get_gym(gym_id)
     if gym_query and request.user.is_superuser:
+        
         data_dict = dal.get_route_set_data(gym_id)
-        print(data_dict)
+
+        is_active = list(map(check_if_active_dates,
+                             data_dict['up_date'],
+                             data_dict['down_date']))
+
         data = zip(data_dict['id'], data_dict['up_date'],
-                   data_dict['down_date'], data_dict['num_routes'])
+                   data_dict['down_date'], data_dict['num_routes'], is_active)
+
         context = {'route_set_data': data,
                    'gym_id': gym_id, 'gym_name': gym_query.name}
 
         return render(request, 'route_set.html', context)
     else:
         return HttpResponseForbidden()
+
+
+def check_if_active_dates(up_date, down_date):
+    is_active = up_date < datetime.now().date() < down_date
+    return is_active
 
 
 def route_set_add_page(request, gym_id):
