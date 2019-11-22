@@ -4,7 +4,7 @@ import routes.services.conf as conf
 from datetime import datetime, timedelta
 from django.db.models import DateField
 from django.db.models.functions import Cast, Coalesce
-from django.db.models import Count
+from django.db.models import Avg, Count, Min, Sum
 # if __name__ == "__main__":
 #     import django
 #     import os
@@ -277,46 +277,82 @@ class _DalBase:
         grade_sub_list = [tmp.grade_sub for tmp in query]
         number_list = [tmp.number for tmp in query]
 
-        is_climbed_list, num_climbed_list = _get_record_type_count(
+        is_climbed_list, num_climbed_list, date_climbed = _get_record_type_count(
             query, route_id_list, conf.ClimbStatus.climbed.value, user_id=user_id)
-        is_attempted_list, num_attempted_list = _get_record_type_count(
+
+        is_attempted_list, num_attempted_list, date_attempted = _get_record_type_count(
             query, route_id_list, conf.ClimbStatus.attempted.value, user_id=user_id)
-        is_onsight_list, _ = _get_record_type_count(
+
+        is_onsight_list, num_onsight, date_onsight = _get_record_type_count(
             query, route_id_list, conf.ClimbStatus.onsight.value, user_id=user_id)
 
-        data = {'id': route_id_list, 'grade': grade_list, 'grade_sub': grade_sub_list,
-                'is_climbed': is_climbed_list, 'num_climbed': num_climbed_list,
-                'is_attempted': is_attempted_list, 'num_attempted': num_attempted_list,
-                'is_onsight': is_onsight_list}
+
+        # total_climbs = [num_climbed_list[ind] + num_onsight[ind] for ind in range(len(num_onsight))] 
+        # is_climbed_combined_list = [is_climbed_list[ind] or is_onsight_list[ind] for ind in range(len(num_onsight))]
+             
+        for iroute in range(len(num_onsight)):
+            if is_onsight_list[iroute]:
+                num_climbed_list[iroute] += 1
+                is_climbed_list[iroute] = True
+                if not date_climbed[iroute]:
+                    date_climbed[iroute] = date_onsight[iroute]
+
+        # q = _filter_route_query_by_record_type_and_user(query, record_type, user_id)
+
+        data = {'id': route_id_list,
+                'number': number_list,
+                'grade': grade_list,
+                'grade_sub': grade_sub_list,
+                'is_climbed': is_climbed_list,
+                'num_climbed': num_climbed_list,
+                'date_climbed': date_climbed,
+                'is_attempted': is_attempted_list,
+                'num_attempted': num_attempted_list,
+                'date_attempted': date_attempted,
+                'is_onsight': is_onsight_list, 'date_onsight': date_onsight}
+                
         return data
 
     def get_records_for_active_routes(self, gym_id=[], user_id=[]):
         query = self._get_all_routes(gym_id)
-        # breakpoint()
-        query = self._filter_route_query_to_active_based_on_up_date(query)
+        
+        query = self._filter_to_only_active_routes(query)
+        print(query)
         data = self._get_record_data_from_route_query(query, user_id=user_id)
         return data
+
+    def _filter_to_only_active_routes(self, query):
+        date_now = datetime.now().date()
+        print(date_now)
+        query = query.filter(route_set__up_date__lt=date_now)
+        print(query)
+        query = query.filter(route_set__down_date__gt=date_now)
+        print(query)
+        return query
 
 
 def _get_record_type_count(query_route, route_id_list, record_type, user_id=[]):
 
-    is_rt_list = [False] * len(route_id_list)
-    num_rt_list = [0] * len(route_id_list)
+    num_routes = len(route_id_list)
+    is_rt_list = [False] * num_routes
+    num_rt_list = [0] * num_routes
+    date_list = [None] * num_routes
     if query_route:
         query = _filter_route_query_by_record_type_and_user(
             query_route, record_type, user_id)
         # ABSOLUTE WORLD OF PAIN - cannot dor filter().filter() then aan annotate as you get a bug (square of the count!!!)
         query = query.annotate(n_record_type_val=Count('routerecord'))
-
         # Ensure that data is populated for all records and unrecorded
         num_rt = [tmp.n_record_type_val for tmp in query]
         route_id_rt_list = [tmp.id for tmp in query]
+        date = [tmp.date for tmp in query]
         for num, i_route_id in enumerate(route_id_rt_list):
             index = route_id_list.index(i_route_id)
             is_rt_list[index] = True
             num_rt_list[index] = num_rt[num]
+            date_list[index] = date[num]
 
-    return is_rt_list, num_rt_list
+    return is_rt_list, num_rt_list, date_list
 
 
 def _filter_route_query_by_record_for_user(query, user_id):

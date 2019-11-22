@@ -142,7 +142,7 @@ def route_set_page(request, gym_id):
 
     gym_query = dal.get_gym(gym_id)
     if gym_query and request.user.is_superuser:
-        
+
         data_dict = dal.get_route_set_data(gym_id)
 
         is_active = list(map(check_if_active_dates,
@@ -237,26 +237,31 @@ def process_route_set_form(form, gym_id):
 
 
 def routes_user_page(request, user_id, gym_id):
-    route_data_all = dal.get_route_set_of_grade('purple', gym_id=gym_id)
+    # route_data_all = dal.get_route_set_of_grade('purple', gym_id=gym_id)
     # breakpoint()
-    route_record = dal.get_route_record_for_user(
-        user_id, route_data_all.get_route_id())
+    # route_record = dal.get_route_record_for_user(
+    #     user_id, route_data_all.get_route_id())
 
-    grade = route_data_all.get_grade()
-    sub_grade = route_data_all.get_grade_sub()
-    route_id = route_data_all.get_route_id()
+    record_data = dal.get_records_for_active_routes(gym_id, user_id)
+
+    print(record_data)
+    print(gym_id)
+    print(user_id)
+    # grade = data.get_grade()
+    # sub_grade = route_data_all.get_grade_sub()
+    # route_id = route_data_all.get_route_id()
     grade_names = conf.get_grade_names()
     grade_sub_names = get_grade_sub_names_clean()
     active_grade = get_active_grade_for_filter(user_id, gym_id)
 
-    route_data = zip(route_id,
-                     route_data_all.get_number(),
-                     grade,
-                     sub_grade,
-                     get_grade_hex_colour(grade),
-                     get_sub_grade_icon_class(sub_grade),
-                     route_record['is_climbed'],
-                     route_record['date'])
+    route_data = zip(record_data['id'],
+                     record_data['number'],
+                     record_data['grade'],
+                     record_data['grade_sub'],
+                     get_grade_hex_colour(record_data['grade']),
+                     get_sub_grade_icon_class(record_data['grade_sub']),
+                     record_data['is_climbed'],
+                     record_data['date_climbed'])
 
     # data = get_route_date_for_routes_page(gym_id)
     data = {'route_data': route_data,
@@ -292,21 +297,21 @@ def get_grade_hex_colour(grade_list):
     # Colours came from https://htmlcolorcodes.com/
     for grade in grade_list:
 
-        if grade == 'purple':
+        if grade == conf.Grade.purple.value:
             class_text.append('#A569BD')
-        elif grade == 'orange':
+        elif grade == conf.Grade.orange.value:
             class_text.append('#E67E22')
-        elif grade == 'green':
+        elif grade == conf.Grade.green.value:
             class_text.append('#58D68D')
-        elif grade == 'yellow':
+        elif grade == conf.Grade.yellow.value:
             class_text.append('#F1C40F')
-        elif grade == 'blue':
+        elif grade == conf.Grade.blue.value:
             class_text.append('#3498DB')
-        elif grade == 'white':
+        elif grade == conf.Grade.white.value:
             class_text.append('#D0D3D4')
-        elif grade == 'black':
+        elif grade == conf.Grade.black.value:
             class_text.append('#34495E')
-        elif grade == 'red':
+        elif grade == conf.Grade.red.value:
             class_text.append('#E74C3C')
         else:
             class_text.append('#784212')
@@ -315,9 +320,10 @@ def get_grade_hex_colour(grade_list):
 
 def get_sub_grade_icon_class(sub_grade_list):
     class_text = []
-
     for sub_grade in sub_grade_list:
-        class_text.append(conf.GradeSubIcon.get_value_from_name(sub_grade))
+        sub_grade_name = conf.GradeSub(sub_grade).name
+        class_text.append(
+            conf.GradeSubIcon.get_value_from_name(sub_grade_name))
 
     return class_text
 
