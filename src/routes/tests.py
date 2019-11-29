@@ -8,7 +8,7 @@ import routes.services.dal as Dal
 import routes.services.utils as Utils
 import routes.services.conf as conf
 from django.db.models.functions import Cast, Coalesce
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.db.models import DateField
 import os
 import tracks
@@ -84,7 +84,7 @@ class TestRouteSet(TestCase):
         self.assertEqual(data['up_date'][0], Utils.convert_str_to_datetime(dates[0]))
         self.assertEqual(data['num_routes'][0], 1)
         self.assertEqual(data['num_routes'][1], 2)
-        breakpoint()
+        self.fail()
 
 class EdenRockMapTest(TestCase):
     def test_grade(self):
@@ -202,7 +202,7 @@ class TestDal(TestCase):
             'medium'], colour=colour_exp)
 
         dal = Dal.get_dal()
-        data = dal.get_route_set_of_grade(colour_exp, is_active=True)
+        data = dal.get_active_route_set (colour_exp, is_active=True)
 
         colour_act = data.get_grade()[0]
         up_date_act = data.get_up_date()[0]
@@ -434,13 +434,66 @@ class TestRouteRecord(TestCase):
         self.assertEqual(rr[0].record_type, 101)
         self.assertEqual(rr.count(), 2)
 
-    def test_get_active_route_set_ids(self):
+    def test_get_records_for_active_routes(self):
+
+        self.add_sample_data_active()
+        self.add_sample_data_inactive(colour='black')
         
-        add_sample_data(up_date = '03/06/2019')
-        add_sample_data(colour='red',up_date = '03/06/2019')
-        add_sample_data(colour='red',up_date = '03/02/2019')
-        self.fail()
-        
+        dal = Dal.get_dal()
+        data = dal.get_records_for_active_routes(gym_id=1,user_id=1)
+
+        self.assertEqual(data['grade'],[conf.Grade.red.value]*2)
+
+    def test_get_records_for_active_routes_with_record(self):
+        user_id = 1
+        route_id = 1
+        record_type = conf.ClimbStatus.climbed.value
+
+        self.add_sample_data_active()
+        create_auth_user()
+
+        dal = Dal.get_dal()
+        dal.set_route_record_for_user(user_id,route_id,record_type)
+        data = dal.get_records_for_active_routes(gym_id=1,user_id=1)
+
+        self.assertEqual(data['is_climbed'],[True,False])
+
+    def test_get_records_for_active_routes_with_record_date(self):
+        user_id = 1
+        route_id = 1
+        record_type = conf.ClimbStatus.climbed.value
+
+        self.add_sample_data_active()
+        create_auth_user()
+        dal = Dal.get_dal()
+
+        profile = Profile.objects.all().filter(user__id=user_id)[0]
+        route = Route.objects.all().filter(id=route_id)[0]
+
+        td = timedelta(days=30)
+        date_base = datetime.now().date()
+
+        RouteRecord.objects.create(user=profile, route=route, record_type=record_type)
+        RouteRecord.objects.create(user=profile, route=route, record_type=record_type)
+        RouteRecord.objects.filter(id=1).update(date=(date_base-td))
+
+        data = dal.get_records_for_active_routes(gym_id=1,user_id=1)
+        self.assertEqual(data['date_climbed'][0],datetime.now().date())
+
+    def add_sample_data_active(self,colour='red'):
+        now = datetime.now().date()
+        td = timedelta(days=30)
+        up_date_active = (now - td).strftime('%d/%m/%Y')
+        down_date_active = (now + td).strftime('%d/%m/%Y')
+        add_sample_data(colour=colour, up_date = up_date_active , down_date=down_date_active)
+    
+    def add_sample_data_inactive(self,colour='red'):
+        now = datetime.now().date()
+        td = timedelta(days=30)
+        up_date_active = (now - td).strftime('%d/%m/%Y')
+        down_date_active = (now - td).strftime('%d/%m/%Y')
+        add_sample_data(colour=colour, up_date = up_date_active , down_date=down_date_active)
+
     def test_record_for_multi_route_sets(self):
         user_id = 1
         route_id = 1
@@ -498,7 +551,7 @@ class TestRouteRecord(TestCase):
             user_2, route_id_2, record_type_is_climbed)
         dal.set_route_record_for_user(
             user_2, route_id_2, record_type_is_climbed)
-
+        breakpoint()
         data_2 = dal.get_records_for_active_routes(user_id=user_2)
         num_climbed = data_2['num_climbed']
         self.assertEqual(num_climbed[0], 1)

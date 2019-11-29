@@ -4,7 +4,7 @@ import routes.services.conf as conf
 from datetime import datetime, timedelta
 from django.db.models import DateField
 from django.db.models.functions import Cast, Coalesce
-from django.db.models import Avg, Count, Min, Sum
+from django.db.models import Avg, Count, Min, Sum,Max
 # if __name__ == "__main__":
 #     import django
 #     import os
@@ -158,10 +158,10 @@ class _DalBase:
         return name
 
     def set_route_record_for_user(self, user_id, route_id, record_type):
-        query = self._get_route_record_for_user(user_id, route_id)
 
         self._create_route_record(
             user_id, route_id, record_type=record_type)
+
 
     def _get_route_record_for_user(self, user_id, route_id, gym_id=[]):
         if not isinstance(route_id, (list,)):
@@ -285,10 +285,6 @@ class _DalBase:
 
         is_onsight_list, num_onsight, date_onsight = _get_record_type_count(
             query, route_id_list, conf.ClimbStatus.onsight.value, user_id=user_id)
-
-
-        # total_climbs = [num_climbed_list[ind] + num_onsight[ind] for ind in range(len(num_onsight))] 
-        # is_climbed_combined_list = [is_climbed_list[ind] or is_onsight_list[ind] for ind in range(len(num_onsight))]
              
         for iroute in range(len(num_onsight)):
             if is_onsight_list[iroute]:
@@ -296,6 +292,7 @@ class _DalBase:
                 is_climbed_list[iroute] = True
                 if not date_climbed[iroute]:
                     date_climbed[iroute] = date_onsight[iroute]
+                    
 
         # q = _filter_route_query_by_record_type_and_user(query, record_type, user_id)
 
@@ -317,17 +314,13 @@ class _DalBase:
         query = self._get_all_routes(gym_id)
         
         query = self._filter_to_only_active_routes(query)
-        print(query)
         data = self._get_record_data_from_route_query(query, user_id=user_id)
         return data
 
     def _filter_to_only_active_routes(self, query):
         date_now = datetime.now().date()
-        print(date_now)
         query = query.filter(route_set__up_date__lt=date_now)
-        print(query)
         query = query.filter(route_set__down_date__gt=date_now)
-        print(query)
         return query
 
 
@@ -341,11 +334,14 @@ def _get_record_type_count(query_route, route_id_list, record_type, user_id=[]):
         query = _filter_route_query_by_record_type_and_user(
             query_route, record_type, user_id)
         # ABSOLUTE WORLD OF PAIN - cannot dor filter().filter() then aan annotate as you get a bug (square of the count!!!)
-        query = query.annotate(n_record_type_val=Count('routerecord'))
+        
+        query = query.annotate(n_record_type_val=Count('routerecord'),date_max=Max('routerecord__date'))
+        
         # Ensure that data is populated for all records and unrecorded
         num_rt = [tmp.n_record_type_val for tmp in query]
         route_id_rt_list = [tmp.id for tmp in query]
-        date = [tmp.date for tmp in query]
+        date = [tmp.date_max for tmp in query]
+
         for num, i_route_id in enumerate(route_id_rt_list):
             index = route_id_list.index(i_route_id)
             is_rt_list[index] = True

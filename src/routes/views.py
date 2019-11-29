@@ -288,7 +288,7 @@ def get_grade_sub_names_clean():
 
 def record_route(request, user_id, gym_id, route_id):
     dal.set_route_record_for_user(
-        user_id, route_id, conf.ClimbStatus.climbed.value, True)
+        user_id, route_id, conf.ClimbStatus.climbed.value)
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
