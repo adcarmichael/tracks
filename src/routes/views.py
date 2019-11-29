@@ -271,7 +271,10 @@ def routes_user_page(request, user_id, gym_id):
             'gym_id': gym_id,
             'active_grade': active_grade,
             'grade_names': grade_names,
-            'grade_sub_names': grade_sub_names}
+            'grade_sub_names': grade_sub_names,
+            'climb_status_climbed': conf.ClimbStatus.climbed.value,
+            'climb_status_attempt': conf.ClimbStatus.attempted.value,
+            'climb_status_onsight': conf.ClimbStatus.onsight.value}
     print(grade_names)
 
     return render_with_user_restriction(request, 'routes_user.html', data, user_id)
@@ -289,9 +292,9 @@ def get_grade_sub_names_clean():
     return grade_sub_names
 
 
-def record_route(request, user_id, gym_id, route_id):
+def record_route(request, user_id, gym_id, route_id,record_type):
     dal.set_route_record_for_user(
-        user_id, route_id, conf.ClimbStatus.climbed.value)
+        user_id, route_id, record_type)
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
