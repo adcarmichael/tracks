@@ -253,16 +253,18 @@ def routes_user_page(request, user_id, gym_id):
     grade_names = conf.get_grade_names()
     grade_sub_names = get_grade_sub_names_clean()
     active_grade = get_active_grade_for_filter(user_id, gym_id)
-
+    grade_names_all = [conf.Grade(val).name for val in record_data['grade']]
+    grade_sub_names_all = [conf.GradeSub(val).name for val in record_data['grade_sub']]
+    
     route_data = zip(record_data['id'],
                      record_data['number'],
-                     record_data['grade'],
-                     record_data['grade_sub'],
+                     grade_names_all,
+                     grade_sub_names_all,
                      get_grade_hex_colour(record_data['grade']),
                      get_sub_grade_icon_class(record_data['grade_sub']),
                      record_data['is_climbed'],
                      record_data['date_climbed'])
-
+    
     # data = get_route_date_for_routes_page(gym_id)
     data = {'route_data': route_data,
             'user_id': user_id,
@@ -270,6 +272,7 @@ def routes_user_page(request, user_id, gym_id):
             'active_grade': active_grade,
             'grade_names': grade_names,
             'grade_sub_names': grade_sub_names}
+    print(grade_names)
 
     return render_with_user_restriction(request, 'routes_user.html', data, user_id)
 
