@@ -43,7 +43,7 @@ urlpatterns = [
          routes_page, name='route_ind'),
     path('users/<int:user_id>/<int:gym_id>/routes',
          rv.routes_user_page, name='routes_for_user'),
-    path('users/<int:user_id>/<int:gym_id>/routes/<int:route_id>/record/',
+    path('users/<int:user_id>/<int:gym_id>/routes/<int:route_id>/record/<int:record_type>/',
          rv.record_route, name='routes_record_for_user'),
     url(r'^account_activation_sent/$', account_activation_sent,
         name='account_activation_sent'),
