@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<br>
+<h2 class="uk-heading-line"><span>{{gym_name}} Route Sets</span></h2>
+<p>Use this portal to manage the active routes. Active routes are decided by the up date and down date so be sure to
+    keep them up to date. </p>
+
+<a class="uk-button uk-button-default" href="/gyms/{{gym_id}}/routes/set/add/">Create a New Route Set</a>
+
+<table class="uk-table">
+    <caption>The below table lists all the Route Sets for the current Gym</caption>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Status</th>
+            <th>Up</th>
+            <th>Down</th>
+            <th>Edit</th>
+            <th>View Routes</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        {% for route_set_id,up_date,down_date,num_routes, is_active in route_set_data reversed %}
+
+        <tr>
+            <td>{{route_set_id}}</td>
+            <td>{% if is_active %}<span class="uk-label uk-label-success">ACTIVE</span> {% else %}<span
+                    class="uk-label uk-label-danger">CLOSED</span>
+                {% endif %}</td>
+            <td>{{up_date}}</td>
+            <td>{{down_date}}</td>
+            <td><a class="uk-button-small uk-button-default"
+                    href="/gyms/{{gym_id}}/routes/set/{{route_set_id}}/update/">Edit</a></td>
+            <td><a class="uk-button-small uk-button-default" uk-toggle="target: #routes-{{route_set_id}}"
+                    type="button">View
+                    ({{num_routes}})</a></td>
+        </tr>
+
+        <div id="routes-{{route_set_id}}" uk-modal>
+            <div class="uk-modal-dialog uk-modal-body">
+                <button class="uk-modal-close-default" type="button" uk-close></button>
+                <h3 class=" uk-modal-title">Route Set #{{route_set_id}}</h3>
+                <p>TBD List</p>
+            </div>
+        </div>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% block footer %}
+{% endblock %}
+{% endblock %}

@@ -9,15 +9,16 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_text
 
-from routes.models import Profile
+from routes.models import Profile, RouteSet
 import routes.services.dal as Dal
 from routes.forms import SignUpForm, GymCreateForm
 from routes.tokens import account_activation_token
 from routes.services.conf import GymKey
-from .forms import AddRouteSetForm_Eden
+from .forms import AddRouteSetForm_Eden, RouteSetForm
 import routes.services.utils as util
 from routes.services.conf import GradeSub, Grade
 from routes.services import conf as conf
+from datetime import datetime
 dal = Dal.get_dal(GymKey.eden_rock_edinburgh)
 
 
@@ -102,7 +103,7 @@ def account_activation_sent(request):
     return render(request, 'account_activation_sent.html')
 
 
-def get_route_date_for_routes_page(gym_id):
+def get_route_data_for_routes_page(gym_id):
 
     data_black = dal.get_route_set_of_grade('black', gym_id=gym_id)
     black = zip(data_black.get_number(),
@@ -120,7 +121,7 @@ def get_route_date_for_routes_page(gym_id):
 
 
 def routes_page(request, gym_id):
-    data = get_route_date_for_routes_page()
+    data = get_route_data_for_routes_page()
     return render(request, 'routes.html', data)
 
 
@@ -137,27 +138,40 @@ def test_page(request):
     return render(request, 'test_page.html', data)
 
 
+def route_set_page(request, gym_id):
+
+    gym_query = dal.get_gym(gym_id)
+    if gym_query and request.user.is_superuser:
+
+        data_dict = dal.get_route_set_data(gym_id)
+
+        is_active = list(map(check_if_active_dates,
+                             data_dict['up_date'],
+                             data_dict['down_date']))
+
+        data = zip(data_dict['id'], data_dict['up_date'],
+                   data_dict['down_date'], data_dict['num_routes'], is_active)
+
+        context = {'route_set_data': data,
+                   'gym_id': gym_id, 'gym_name': gym_query.name}
+
+        return render(request, 'route_set.html', context)
+    else:
+        return HttpResponseForbidden()
+
+
+def check_if_active_dates(up_date, down_date):
+    is_active = up_date < datetime.now().date() < down_date
+    return is_active
+
+
 def route_set_add_page(request, gym_id):
     if request.user.is_superuser:
         if request.method == 'POST':
             form = AddRouteSetForm_Eden(request.POST)
 
             if form.is_valid():
-                grade = int(form.cleaned_data['grade'])
-                up_date = form.cleaned_data['up_date']
-                down_date = form.cleaned_data['down_date']
-                grade_sub = []
-                number = []
-
-                for ind, field in enumerate(form.fields):
-                    if 'grade_sub' in field:
-                        grade_sub_temp = int(form.cleaned_data[field])
-                        if grade_sub_temp != 0:
-                            grade_sub.append(grade_sub_temp)
-                            number.append(ind)
-
-                dal._create_route_set_for_list_of_grade_sub(
-                    gym_id, grade, grade_sub, up_date, down_date=down_date)
+                process_route_set_form(form, gym_id)
                 return HttpResponseRedirect('/')
         else:
             form = AddRouteSetForm_Eden()
@@ -166,27 +180,88 @@ def route_set_add_page(request, gym_id):
         return HttpResponseForbidden()
 
 
-def routes_user_page(request, user_id, gym_id):
-    route_data_all = dal.get_route_set_of_grade('purple', gym_id=gym_id)
-    # breakpoint()
-    route_record = dal.get_route_record_for_user(
-        user_id, route_data_all.get_route_id())
+def route_set_update_page(request, gym_id, route_set_id):
+    rs = RouteSet.objects.get(pk=route_set_id)
+    if rs and request.user.is_superuser:
+        if request.method == 'POST':
+            form = RouteSetForm(request.POST)
 
-    grade = route_data_all.get_grade()
-    sub_grade = route_data_all.get_grade_sub()
-    route_id = route_data_all.get_route_id()
+            if form.is_valid():
+                up_date = form.cleaned_data['up_date']
+                down_date = form.cleaned_data['down_date']
+                rs = RouteSet.objects.get(pk=route_set_id)
+                if rs:
+                    rs.up_date = up_date
+                    rs.down_date = down_date
+                    rs.save()
+
+                return HttpResponseRedirect(f'/gyms/{gym_id}/routes/set')
+        else:
+
+            init_form = {'up_date': rs.up_date, 'down_date': rs.down_date}
+
+            form = RouteSetForm(initial=init_form)
+        return render(request, 'route_set_update.html', {'form': form, 'route_set_id': route_set_id})
+    else:
+        return HttpResponseForbidden()
+
+
+def get_init_route_set_form_data(route_set_id):
+    query = RouteSet.objects.get(pk=route_set_id)
+    query_routes = query.routes.order_by('number').all()
+
+    data = {'up_date': query.up_date, 'down_date': query.down_date}
+    for ind in range(len(query_routes)):
+        field_name = f'grade_sub_{ind}'
+        data[field_name] = query_routes[ind].grade_sub
+    return data
+
+
+def process_route_set_form(form, gym_id):
+
+    grade = int(form.cleaned_data['grade'])
+    up_date = form.cleaned_data['up_date']
+    down_date = form.cleaned_data['down_date']
+    grade_sub = []
+    number = []
+
+    for ind, field in enumerate(form.fields):
+        if 'grade_sub' in field:
+            grade_sub_temp = int(form.cleaned_data[field])
+            if grade_sub_temp != 0:
+                grade_sub.append(grade_sub_temp)
+                number.append(ind)
+
+    dal._create_route_set_for_list_of_grade_sub(
+        gym_id, grade, grade_sub, up_date, down_date=down_date)
+
+
+def routes_user_page(request, user_id, gym_id):
+    # route_data_all = dal.get_route_set_of_grade('purple', gym_id=gym_id)
+    # breakpoint()
+    # route_record = dal.get_route_record_for_user(
+    #     user_id, route_data_all.get_route_id())
+
+    record_data = dal.get_records_for_active_routes(gym_id, user_id)
+
+    print(record_data)
+    print(gym_id)
+    print(user_id)
+    # grade = data.get_grade()
+    # sub_grade = route_data_all.get_grade_sub()
+    # route_id = route_data_all.get_route_id()
     grade_names = conf.get_grade_names()
     grade_sub_names = get_grade_sub_names_clean()
     active_grade = get_active_grade_for_filter(user_id, gym_id)
 
-    route_data = zip(route_id,
-                     route_data_all.get_number(),
-                     grade,
-                     sub_grade,
-                     get_grade_hex_colour(grade),
-                     get_sub_grade_icon_class(sub_grade),
-                     route_record['is_climbed'],
-                     route_record['date'])
+    route_data = zip(record_data['id'],
+                     record_data['number'],
+                     record_data['grade'],
+                     record_data['grade_sub'],
+                     get_grade_hex_colour(record_data['grade']),
+                     get_sub_grade_icon_class(record_data['grade_sub']),
+                     record_data['is_climbed'],
+                     record_data['date_climbed'])
 
     # data = get_route_date_for_routes_page(gym_id)
     data = {'route_data': route_data,
@@ -213,7 +288,7 @@ def get_grade_sub_names_clean():
 
 def record_route(request, user_id, gym_id, route_id):
     dal.set_route_record_for_user(
-        user_id, route_id, conf.ClimbStatus.climbed.value, True)
+        user_id, route_id, conf.ClimbStatus.climbed.value)
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
@@ -222,21 +297,21 @@ def get_grade_hex_colour(grade_list):
     # Colours came from https://htmlcolorcodes.com/
     for grade in grade_list:
 
-        if grade == 'purple':
+        if grade == conf.Grade.purple.value:
             class_text.append('#A569BD')
-        elif grade == 'orange':
+        elif grade == conf.Grade.orange.value:
             class_text.append('#E67E22')
-        elif grade == 'green':
+        elif grade == conf.Grade.green.value:
             class_text.append('#58D68D')
-        elif grade == 'yellow':
+        elif grade == conf.Grade.yellow.value:
             class_text.append('#F1C40F')
-        elif grade == 'blue':
+        elif grade == conf.Grade.blue.value:
             class_text.append('#3498DB')
-        elif grade == 'white':
+        elif grade == conf.Grade.white.value:
             class_text.append('#D0D3D4')
-        elif grade == 'black':
+        elif grade == conf.Grade.black.value:
             class_text.append('#34495E')
-        elif grade == 'red':
+        elif grade == conf.Grade.red.value:
             class_text.append('#E74C3C')
         else:
             class_text.append('#784212')
@@ -245,9 +320,10 @@ def get_grade_hex_colour(grade_list):
 
 def get_sub_grade_icon_class(sub_grade_list):
     class_text = []
-
     for sub_grade in sub_grade_list:
-        class_text.append(conf.GradeSubIcon.get_value_from_name(sub_grade))
+        sub_grade_name = conf.GradeSub(sub_grade).name
+        class_text.append(
+            conf.GradeSubIcon.get_value_from_name(sub_grade_name))
 
     return class_text
 
