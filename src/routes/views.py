@@ -268,6 +268,32 @@ def routes_user_page(request, user_id, gym_id):
     return render_with_user_restriction(request, 'routes_user.html', data, user_id)
 
 
+
+
+
+
+
+
+
+
+
+def route_page(request,gym_id,route_id):
+    dal.get_routes_all()    
+    return render(request, 'route_page.html', data)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def get_active_grade_for_filter(user_id, gym_id):
 
     return dal.get_grade_name_of_last_recorded_climb(user_id, gym_id)

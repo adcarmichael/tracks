@@ -54,8 +54,8 @@ class _DalBase:
         query = self._filter_route_query_by_gym(query, gym_id)
         return query
 
-    def get_routes_all(self):
-        query = self._get_all_routes()
+    def get_routes_all(self,gym_id=[]):
+        query = self._get_all_routes(gym_id=gym_id)
         data = _Data(query)
         return data
 
