@@ -8,17 +8,29 @@ import routes.services.dal as Dal
 import routes.services.utils as Utils
 import routes.services.conf as conf
 from django.db.models.functions import Cast, Coalesce
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.db.models import DateField
 import os
+import tracks
+from django.db.models import Count
 
 
 def truncate_tables():
-    with connection.cursor() as cursor:
-        cursor.execute('TRUNCATE routes_gym RESTART IDENTITY CASCADE;')
-        cursor.execute('TRUNCATE routes_routerecord RESTART IDENTITY CASCADE;')
-        cursor.execute('TRUNCATE routes_profile RESTART IDENTITY CASCADE;')
-        cursor.execute('TRUNCATE auth_user RESTART IDENTITY CASCADE;')
+    # The below code only works for postgres
+    current_engine = get_current_db_engine()
+    is_postgres = "django.db.backends.postgresql" == current_engine
+    if is_postgres:
+        with connection.cursor() as cursor:
+            cursor.execute('TRUNCATE routes_gym RESTART IDENTITY CASCADE;')
+            cursor.execute(
+                'TRUNCATE routes_routerecord RESTART IDENTITY CASCADE;')
+            cursor.execute('TRUNCATE routes_profile RESTART IDENTITY CASCADE;')
+            cursor.execute('TRUNCATE auth_user RESTART IDENTITY CASCADE;')
+            cursor.execute('TRUNCATE routes_route RESTART IDENTITY CASCADE;')
+
+
+def get_current_db_engine():
+    return tracks.settings.DATABASES['default']['ENGINE']
 
 
 def add_sample_route_set(gym_id, colour='black', grade=['high', 'medium'], down_date=None, up_date='03/06/2019'):
@@ -42,10 +54,10 @@ def create_superuser_named_admin():
     os.system("""echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@myproject.com', 'password')" | python manage.py shell""")
 
 
-def create_auth_user():
+def create_auth_user(name='Chevy Chase', email='chevy@chase.com', password='chevyspassword'):
     from django.contrib.auth.models import User
     user = User.objects.create_user(
-        'Chevy Chase', 'chevy@chase.com', 'chevyspassword')
+        name, email, password)
 
 
 class HomePageTest(TestCase):
@@ -59,27 +71,20 @@ class HomePageTest(TestCase):
         self.assertTemplateUsed(response, 'home_page.html')
 
 
-# class RoutePageTest(TestCase):
-    # def test_route_page_returns_correct_html(self):
-    #     c = Client()
-    #     response = c.get('/')
-    #     html = response.content.decode('utf')
-    #     self.assertTrue(html.startswith('<html>'))
-    #     self.assertTrue(html.endswith('</html>'))
+class TestRouteSet(TestCase):
+    def setUp(self):
+        truncate_tables()
 
-    # def test_user_records_route_completion(self):
-    #     add_sample_route_set(colour='green')
-
-    #     response = Client().get('routes/')
-
-    #     self.fail('Please complete the test!')
-    #     pass
-
-    # def test_access_to_route_data(self):
-    #     r = Route()
-    #     r.grade = 'Green'
-    #     Route.objects.all()
-
+    def test_get_route_set(self):
+        dates = ['04/07/2019', '04/07/2021', '04/06/2019']
+        add_sample_data(grade=['medium'], up_date=dates[0])
+        add_sample_route_set(1)
+        dal = Dal.get_dal()
+        data = dal.get_route_set_data(gym_id=1)
+        self.assertEqual(data['up_date'][0], Utils.convert_str_to_datetime(dates[0]))
+        self.assertEqual(data['num_routes'][0], 1)
+        self.assertEqual(data['num_routes'][1], 2)
+        self.fail()
 
 class EdenRockMapTest(TestCase):
     def test_grade(self):
@@ -126,7 +131,7 @@ class TestDal(TestCase):
         add_sample_gym()
         add_sample_route_set(gym_id=1)
         add_sample_route_set(gym_id=1)
-        
+
         dataNew = dal.get_routes_all()
         self.assertEqual(dataNew.get_count(), 2)
         self.assertEqual(dataNew.get_grade()[0], conf.Grade.black.name)
@@ -197,7 +202,7 @@ class TestDal(TestCase):
             'medium'], colour=colour_exp)
 
         dal = Dal.get_dal()
-        data = dal.get_route_set_of_grade(colour_exp, is_active=True)
+        data = dal.get_active_route_set (colour_exp, is_active=True)
 
         colour_act = data.get_grade()[0]
         up_date_act = data.get_up_date()[0]
@@ -278,16 +283,17 @@ class Test__Data(TestCase):
         self.assertEqual(id[0], 1)
 
 
-
-def create_sample_route_record( status=[1], is_climbed=[True], route_num=1):
+def create_sample_route_record(record_type=[1], route_num=1):
     create_auth_user()
     add_sample_data()
     route = Route.objects.all()
     profile = Profile.objects.first()
 
-    for ind, stat in enumerate(status):
+    for ind, stat in enumerate(record_type):
         RouteRecord.objects.create(
-            route=route[ind], user=profile, status=status[ind], is_climbed=is_climbed[ind])
+            route=route[ind], user=profile, record_type=record_type[ind])
+
+
 
 class TestRouteRecord(TestCase):
 
@@ -300,13 +306,12 @@ class TestRouteRecord(TestCase):
         route_id = 1
 
         create_sample_route_record(
-            status=[1, 0], is_climbed=[True, False])
+            record_type=[1, 0])
         dal = Dal.get_dal()
         route_record = dal.get_route_record_for_user(
             user_id, route_id)
 
-        self.assertEqual(route_record['status'][0], 1)
-        self.assertEqual(route_record['is_climbed'][0], True)
+        self.assertEqual(route_record['record_type'][0], 1)
 
     def test_get_route_record_for_gym(self):
 
@@ -314,14 +319,13 @@ class TestRouteRecord(TestCase):
         route_id = 1
 
         create_sample_route_record(
-            status=[1, 0], is_climbed=[True, False])
+            record_type=[1, 0])
         dal = Dal.get_dal()
 
         route_record = dal.get_route_record_for_user(
             user_id, route_id, gym_id=1)
 
-        self.assertEqual(route_record['status'][0], 1)
-        self.assertEqual(route_record['is_climbed'][0], True)
+        self.assertEqual(route_record['record_type'][0], 1)
 
     def test_get_route_record_for_multi_routes(self):
         user_id = 1
@@ -329,14 +333,12 @@ class TestRouteRecord(TestCase):
         dal = Dal.get_dal()
 
         create_sample_route_record(
-            status=[1, 0], is_climbed=[True, False])
+            record_type=[1, 0])
         route_record = dal = Dal.get_dal().get_route_record_for_user(
             user_id, route_id)
         # breakpoint()
-        self.assertEqual(route_record['status'][0], 1)
-        self.assertEqual(route_record['status'][1], 0)
-        self.assertEqual(route_record['is_climbed'][0], True)
-        self.assertEqual(route_record['is_climbed'][1], False)
+        self.assertEqual(route_record['record_type'][0], 1)
+        self.assertEqual(route_record['record_type'][1], 0)
 
     def test_get_route_record_for_non_existent_route(self):
         user_id = 1
@@ -344,32 +346,30 @@ class TestRouteRecord(TestCase):
         dal = Dal.get_dal()
 
         create_sample_route_record(
-            status=[1, 0], is_climbed=[True, False])
+            record_type=[1, 0])
         route_record = dal.get_route_record_for_user(
             user_id, route_id)
 
-        self.assertEqual(route_record['status'], [0])
-        self.assertEqual(route_record['is_climbed'], [False])
+        self.assertEqual(route_record['record_type'], [0])
 
     def test_get_route_record_for_non_existent_user(self):
         user_id = 100
         route_id = 1
 
         create_sample_route_record(
-            status=[1, 0], is_climbed=[True, False])
+            record_type=[1, 0])
         dal = Dal.get_dal()
         route_record = dal.get_route_record_for_user(
             user_id, route_id)
 
-        self.assertEqual(route_record['status'], [0])
-        self.assertEqual(route_record['is_climbed'], [False])
+        self.assertEqual(route_record['record_type'], [0])
 
     def test_get_grade_name_of_last_recorded_climb(self):
         user_id = 1
         route_id = 1
         gym_id = 1
         create_sample_route_record(
-            status=[1, 0], is_climbed=[True, False])
+            record_type=[1, 0])
 
         dal = Dal.get_dal()
         grade_name = dal.get_grade_name_of_last_recorded_climb(
@@ -387,7 +387,7 @@ class TestRouteRecord(TestCase):
         gym_id = 1
 
         create_sample_route_record(
-            status=[1, 0], is_climbed=[True, False])
+            status=[1, 0])
 
         dal = Dal.get_dal()
         grade_name = dal.get_grade_name_of_last_recorded_climb(
@@ -403,38 +403,246 @@ class TestRouteRecord(TestCase):
         user_id = 1
         route_id = 1
         is_climbed = True
-        status = 101
+        record_type = 101
 
         create_auth_user()
         add_sample_data()
         dal = Dal.get_dal()
-        dal.set_route_record_for_user(user_id, route_id, status, is_climbed)
+        dal.set_route_record_for_user(user_id, route_id, record_type)
 
         rr = RouteRecord.objects.all().filter(
             user__id=user_id).filter(route__id=route_id)
         # breakpoint()
-        self.assertEqual(rr[0].status, status)
-        self.assertEqual(rr[0].is_climbed, is_climbed)
+        self.assertEqual(rr[0].record_type, record_type)
 
     def test_set_existing_route_record(self):
         user_id = 1
         route_id = 1
         is_climbed = True
-        status = 101
+        record_type = 101
 
         create_auth_user()
         add_sample_data()
         dal = Dal.get_dal()
         dal.set_route_record_for_user(
-            user_id, route_id, status, is_climbed)
+            user_id, route_id, record_type)
         dal.set_route_record_for_user(
-            user_id, route_id, 123, False)
+            user_id, route_id, 123)
 
         rr = RouteRecord.objects.all().filter(
             user__id=user_id).filter(route__id=route_id)
-        self.assertEqual(rr[0].status, 123)
-        self.assertEqual(rr[0].is_climbed, False)
-        self.assertEqual(rr.count(), 1)
+        self.assertEqual(rr[0].record_type, 101)
+        self.assertEqual(rr.count(), 2)
+
+    def test_get_records_for_active_routes(self):
+
+        self.add_sample_data_active()
+        self.add_sample_data_inactive(colour='black')
+        
+        dal = Dal.get_dal()
+        data = dal.get_records_for_active_routes(gym_id=1,user_id=1)
+
+        self.assertEqual(data['grade'],[conf.Grade.red.value]*2)
+
+    def test_get_records_for_active_routes_with_record(self):
+        user_id = 1
+        route_id = 1
+        record_type = conf.ClimbStatus.climbed.value
+
+        self.add_sample_data_active()
+        create_auth_user()
+
+        dal = Dal.get_dal()
+        dal.set_route_record_for_user(user_id,route_id,record_type)
+        data = dal.get_records_for_active_routes(gym_id=1,user_id=1)
+
+        self.assertEqual(data['is_climbed'],[True,False])
+
+    def test_get_records_for_active_routes_with_record_date(self):
+        user_id = 1
+        route_id = 1
+        record_type = conf.ClimbStatus.climbed.value
+
+        self.add_sample_data_active()
+        create_auth_user()
+        dal = Dal.get_dal()
+
+        profile = Profile.objects.all().filter(user__id=user_id)[0]
+        route = Route.objects.all().filter(id=route_id)[0]
+
+        td = timedelta(days=30)
+        date_base = datetime.now().date()
+
+        RouteRecord.objects.create(user=profile, route=route, record_type=record_type)
+        RouteRecord.objects.create(user=profile, route=route, record_type=record_type)
+        RouteRecord.objects.filter(id=1).update(date=(date_base-td))
+
+        data = dal.get_records_for_active_routes(gym_id=1,user_id=1)
+        self.assertEqual(data['date_climbed'][0],datetime.now().date())
+
+    def add_sample_data_active(self,colour='red'):
+        now = datetime.now().date()
+        td = timedelta(days=30)
+        up_date_active = (now - td).strftime('%d/%m/%Y')
+        down_date_active = (now + td).strftime('%d/%m/%Y')
+        add_sample_data(colour=colour, up_date = up_date_active , down_date=down_date_active)
+    
+    def add_sample_data_inactive(self,colour='red'):
+        now = datetime.now().date()
+        td = timedelta(days=30)
+        up_date_active = (now - td).strftime('%d/%m/%Y')
+        down_date_active = (now - td).strftime('%d/%m/%Y')
+        add_sample_data(colour=colour, up_date = up_date_active , down_date=down_date_active)
+
+    def test_record_for_multi_route_sets(self):
+        user_id = 1
+        route_id = 1
+        record_type_arb = 1
+
+        user_2 = 2
+        route_id_2 = 2
+        record_type_is_climbed = conf.ClimbStatus.climbed.value
+
+        route_id_for_2nd_set = 3
+
+        create_auth_user()
+        add_sample_data()
+        add_sample_data(colour='red')
+
+        dal = Dal.get_dal()
+        dal.set_route_record_for_user(user_2, route_id, record_type_arb)
+
+        dal.set_route_record_for_user(
+            user_2, route_id_2, record_type_is_climbed)
+        dal.set_route_record_for_user(
+            user_2, route_id_2, record_type_is_climbed)
+        dal.set_route_record_for_user(
+            user_2, route_id_2, record_type_is_climbed)
+
+        dal.set_route_record_for_user(
+            user_2, route_id_for_2nd_set, record_type_is_climbed)
+
+        data_2 = dal.get_records_for_active_routes(user_id=user_2)
+        num_climbed = data_2['num_climbed']
+        self.assertEqual(num_climbed[0], 1)
+        self.assertEqual(num_climbed[1], 3)
+        
+        self.fail()
+    
+
+    def test_record_num_climbed_for_user(self):
+        user_id = 1
+        route_id = 1
+        record_type_arb = 1
+
+        user_2 = 2
+        route_id_2 = 2
+        record_type_is_climbed = conf.ClimbStatus.climbed.value
+
+        create_auth_user()
+        create_auth_user(name='new_user')
+        add_sample_data()
+        dal = Dal.get_dal()
+        dal.set_route_record_for_user(user_2, route_id, record_type_arb)
+
+        dal.set_route_record_for_user(
+            user_2, route_id_2, record_type_is_climbed)
+        dal.set_route_record_for_user(
+            user_2, route_id_2, record_type_is_climbed)
+        dal.set_route_record_for_user(
+            user_2, route_id_2, record_type_is_climbed)
+        breakpoint()
+        data_2 = dal.get_records_for_active_routes(user_id=user_2)
+        num_climbed = data_2['num_climbed']
+        self.assertEqual(num_climbed[0], 1)
+        self.assertEqual(num_climbed[1], 3)
+
+    def test_record_is_climbed(self):
+        user_id = 1
+        route_id = 1
+        record_type_arb = 101
+
+        route_id_2 = 2
+        record_type_is_climbed = conf.ClimbStatus.climbed.value
+
+        create_auth_user()
+        add_sample_data()
+        dal = Dal.get_dal()
+        dal.set_route_record_for_user(user_id, route_id, record_type_arb)
+
+        dal.set_route_record_for_user(
+            user_id, route_id_2, record_type_is_climbed)
+        dal.set_route_record_for_user(
+            user_id, route_id_2, record_type_is_climbed)
+
+        data = dal.get_records_for_active_routes()
+        is_climbed = data['is_climbed']
+
+        self.assertEqual(is_climbed[0], False)
+        self.assertEqual(is_climbed[1], True)
+
+    def test_record_is_attempted(self):
+        user_id = 1
+        route_id = 1
+        record_type_arb = conf.ClimbStatus.attempted.value
+
+        create_auth_user()
+        add_sample_data()
+        dal = Dal.get_dal()
+
+        dal.set_route_record_for_user(user_id, route_id, record_type_arb)
+
+        data = dal.get_records_for_active_routes()
+        is_att = data['is_attempted']
+
+        self.assertEqual(is_att[0], True)
+        self.assertEqual(data['num_attempted'][0], 1)
+
+    def test_record_is_onsight(self):
+        user_id = 1
+        route_id = 1
+        record_type_arb = conf.ClimbStatus.onsight.value
+
+        create_auth_user()
+        add_sample_data()
+        dal = Dal.get_dal()
+
+        dal.set_route_record_for_user(user_id, route_id, record_type_arb)
+
+        data = dal.get_records_for_active_routes()
+        is_onsight = data['is_onsight']
+
+        self.assertEqual(is_onsight[0], True)
+
+    def test_record_is_climbed_for_user(self):
+        user_id = 1
+        route_id = 1
+        record_type_arb = 1
+
+        user_2 = 2
+        route_id_2 = 2
+        record_type_is_climbed = conf.ClimbStatus.climbed.value
+
+        create_auth_user()
+        create_auth_user(name='new_user')
+        add_sample_data()
+        dal = Dal.get_dal()
+        dal.set_route_record_for_user(user_id, route_id, record_type_arb)
+
+        dal.set_route_record_for_user(
+            user_2, route_id_2, record_type_is_climbed)
+        dal.set_route_record_for_user(
+            user_2, route_id_2, record_type_is_climbed)
+
+        data = dal.get_records_for_active_routes(user_id=1)
+        is_climbed = data['is_climbed']
+        self.assertEqual(is_climbed[0], True)
+        self.assertEqual(is_climbed[1], False)
+
+        data_2 = dal.get_records_for_active_routes(user_id=user_2)
+        is_climbed_2 = data_2['is_climbed']
+        self.assertEqual(is_climbed_2[0], False)
+        self.assertEqual(is_climbed_2[1], True)
 
 
 class TestGym(TestCase):
@@ -490,3 +698,6 @@ class TestEnumMapping(TestCase):
         name = Utils.get_grade_sub_name_from_value([1, 2])
         self.assertEqual(name[0], 'lowest')
         self.assertEqual(name[1], 'low')
+
+
+

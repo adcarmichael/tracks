@@ -1,9 +1,10 @@
 from routes.models import RouteSet, Route, RouteRecord, Profile, Gym
 from enum import Enum
 import routes.services.conf as conf
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.db.models import DateField
 from django.db.models.functions import Cast, Coalesce
+from django.db.models import Avg, Count, Min, Sum,Max
 # if __name__ == "__main__":
 #     import django
 #     import os
@@ -48,7 +49,8 @@ class _DalBase:
         self.DataMap = DataMap()
 
     def _get_all_routes(self, gym_id=[]):
-        query = Route.objects.all().order_by('-route_set__up_date')
+        query = Route.objects.all().order_by(
+            '-route_set__up_date')
         query = self._filter_route_query_by_gym(query, gym_id)
         return query
 
@@ -56,6 +58,25 @@ class _DalBase:
         query = self._get_all_routes()
         data = _Data(query)
         return data
+
+    def _get_route_set_for_gym(self, gym_id):
+        query = RouteSet.objects.all()
+        query = self._filter_route_set_query_by_gym(query, gym_id)
+        return query
+
+    def get_route_set_data(self, gym_id=[]):
+        query = self._get_route_set_for_gym(gym_id)
+        num_routes = self.get_number_of_routes_in_set(query)
+        route_set_id = [q.id for q in query]
+        up_date = [q.up_date for q in query]
+        down_date = [q.down_date for q in query]
+        data = {'id':route_set_id,'up_date':up_date,'down_date':down_date,'num_routes':num_routes}
+        return data
+
+    def get_number_of_routes_in_set(self, route_set_query):
+        query = route_set_query.annotate(num_routes=Count('routes'))
+
+        return [q.num_routes for q in query]
 
     def _filter_route_query_by_gym(self, query, gym_id):
         if query:
@@ -74,7 +95,7 @@ class _DalBase:
             query = query.filter(route__route_set__gym__id=gym_id)
         return query
 
-    def _filter_query_to_active_based_on_up_date(self, query):
+    def _filter_route_query_to_active_based_on_up_date(self, query):
         for index in range(0, query.count()):
             date_search = query[index].route_set.up_date
             if date_search < datetime.now().date():
@@ -82,6 +103,11 @@ class _DalBase:
                 query = query.filter(route_set__id=id)
                 return query
         return query
+
+    def get_active_route_set_ids(self, gym_id):
+        query = RouteSet.objects.all()
+        datetime.now().date() - timedelta(days=30)
+        query.exclude(up_date__lt=datetime.date(2005, 1, 3))
 
     def get_route_record_for_user(self, user_id, route_id, gym_id=[]):
         if not isinstance(route_id, (list,)):
@@ -131,14 +157,11 @@ class _DalBase:
         name, id = self._get_grade_name_of_last_recorded_climb(user_id, gym_id)
         return name
 
-    def set_route_record_for_user(self, user_id, route_id, status, is_climbed):
-        query = self._get_route_record_for_user(user_id, route_id)
-        if query:
-            self._update_route_record(
-                query[0].id, status=status, is_climbed=is_climbed)
-        else:
-            self._create_route_record(
-                user_id, route_id, status=status, is_climbed=is_climbed)
+    def set_route_record_for_user(self, user_id, route_id, record_type):
+
+        self._create_route_record(
+            user_id, route_id, record_type=record_type)
+
 
     def _get_route_record_for_user(self, user_id, route_id, gym_id=[]):
         if not isinstance(route_id, (list,)):
@@ -149,12 +172,12 @@ class _DalBase:
         query = self._filter_route_record_query_by_gym(query, gym_id)
         return query
 
-    def _create_route_record(self, user_id, route_id, is_climbed=False, status=0):
+    def _create_route_record(self, user_id, route_id, record_type):
         profile = Profile.objects.all().filter(user__id=user_id)
         route = Route.objects.all().filter(id=route_id)
         if profile and route:
             RouteRecord.objects.create(
-                user=profile[0], route=route[0], status=status, is_climbed=is_climbed)
+                user=profile[0], route=route[0], record_type=record_type)
 
     def _update_route_record(self, route_record_id, is_climbed=[], status=[]):
         rr = RouteRecord.objects.get(id=route_record_id)
@@ -165,13 +188,18 @@ class _DalBase:
                 rr.is_climbed = is_climbed
             rr.save()
 
-    def get_route_set_of_grade(self, colour, is_active=False, gym_id=[]):
+    def _get_route_set_of_grade(self, colour, is_active=False, gym_id=[]):
         query = self._get_all_routes()
         grade = self.DataMap.grade(colour)
         query = query.filter(grade=grade)
         if is_active:
-            query = self._filter_query_to_active_based_on_up_date(query)
+            query = self._filter_route_query_to_active_based_on_up_date(query)
         query = self._filter_route_query_by_gym(query, gym_id)
+        return query
+
+    def get_route_set_of_grade(self, colour, is_active=False, gym_id=[]):
+        self._get_route_set_of_grade(
+            colour, is_active=is_active, gym_id=gym_id)
         return _Data(query)
 
     def add_route_set(self, gym_id, colour, grade_list, up_date, down_date=None):
@@ -242,6 +270,103 @@ class _DalBase:
 
     def get_gym_all(self):
         return _GymData(self._get_gym_all())
+
+    def _get_record_data_from_route_query(self, query, user_id=[]):
+        route_id_list = [tmp.id for tmp in query]
+        grade_list = [tmp.grade for tmp in query]
+        grade_sub_list = [tmp.grade_sub for tmp in query]
+        number_list = [tmp.number for tmp in query]
+
+        is_climbed_list, num_climbed_list, date_climbed = _get_record_type_count(
+            query, route_id_list, conf.ClimbStatus.climbed.value, user_id=user_id)
+
+        is_attempted_list, num_attempted_list, date_attempted = _get_record_type_count(
+            query, route_id_list, conf.ClimbStatus.attempted.value, user_id=user_id)
+
+        is_onsight_list, num_onsight, date_onsight = _get_record_type_count(
+            query, route_id_list, conf.ClimbStatus.onsight.value, user_id=user_id)
+             
+        for iroute in range(len(num_onsight)):
+            if is_onsight_list[iroute]:
+                num_climbed_list[iroute] += 1
+                is_climbed_list[iroute] = True
+                if not date_climbed[iroute]:
+                    date_climbed[iroute] = date_onsight[iroute]
+                    
+
+        # q = _filter_route_query_by_record_type_and_user(query, record_type, user_id)
+
+        data = {'id': route_id_list,
+                'number': number_list,
+                'grade': grade_list,
+                'grade_sub': grade_sub_list,
+                'is_climbed': is_climbed_list,
+                'num_climbed': num_climbed_list,
+                'date_climbed': date_climbed,
+                'is_attempted': is_attempted_list,
+                'num_attempted': num_attempted_list,
+                'date_attempted': date_attempted,
+                'is_onsight': is_onsight_list, 'date_onsight': date_onsight}
+                
+        return data
+
+    def get_records_for_active_routes(self, gym_id=[], user_id=[]):
+        query = self._get_all_routes(gym_id)
+        
+        query = self._filter_to_only_active_routes(query)
+        data = self._get_record_data_from_route_query(query, user_id=user_id)
+        return data
+
+    def _filter_to_only_active_routes(self, query):
+        date_now = datetime.now().date()
+        query = query.filter(route_set__up_date__lt=date_now)
+        query = query.filter(route_set__down_date__gt=date_now)
+        return query
+
+
+def _get_record_type_count(query_route, route_id_list, record_type, user_id=[]):
+
+    num_routes = len(route_id_list)
+    is_rt_list = [False] * num_routes
+    num_rt_list = [0] * num_routes
+    date_list = [None] * num_routes
+    if query_route:
+        query = _filter_route_query_by_record_type_and_user(
+            query_route, record_type, user_id)
+        # ABSOLUTE WORLD OF PAIN - cannot dor filter().filter() then aan annotate as you get a bug (square of the count!!!)
+        
+        query = query.annotate(n_record_type_val=Count('routerecord'),date_max=Max('routerecord__date'))
+        
+        # Ensure that data is populated for all records and unrecorded
+        num_rt = [tmp.n_record_type_val for tmp in query]
+        route_id_rt_list = [tmp.id for tmp in query]
+        date = [tmp.date_max for tmp in query]
+
+        for num, i_route_id in enumerate(route_id_rt_list):
+            index = route_id_list.index(i_route_id)
+            is_rt_list[index] = True
+            num_rt_list[index] = num_rt[num]
+            date_list[index] = date[num]
+
+    return is_rt_list, num_rt_list, date_list
+
+
+def _filter_route_query_by_record_for_user(query, user_id):
+    if query and user_id:
+        query = query.filter(routerecord__user=user_id)
+    return query
+
+
+def _filter_route_query_by_record_type_and_user(query, record_type, user_id=[]):
+
+    if query:
+        if user_id:
+            # ABSOLUTE WORLD OF PAIN - cannot dor filter().filter() then aan annotate as you get a bug (square of the count!!!)
+            query = query.filter(
+                routerecord__record_type=record_type, routerecord__user=user_id)
+        else:
+            query = query.filter(routerecord__record_type=record_type)
+    return query
 
 
 class _DalEdenRocks(_DalBase):

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="uk-heading-bullet">Update Route Set #{{route_set_id}}</h1>
+<p>The below form is used to update an existing Route Set for Eden Rocks. </p>
+<div class='uk-card uk-card-default uk-card-body uk-container-large uk-padding-large'>
+
+    <form method="post" class='uk-form-horizontal'>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input class="uk-button" type="submit" value="Submit">
+    </form>
+</div>
+{% block footer %}
+{% endblock %}
+{% endblock %}

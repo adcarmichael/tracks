@@ -21,7 +21,6 @@ from routes.views import signup
 from routes.views import account_activation_sent
 from routes.views import activate
 import routes.views as rv
-import routes.views as rv
 from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 
@@ -36,11 +35,15 @@ urlpatterns = [
     path('gyms/<int:gym_id>/routes', routes_page, name='routes'),
     path('gyms/<int:gym_id>/routes/set/add/', rv.route_set_add_page,
          name='add_route_set_page'),
+    path('gyms/<int:gym_id>/routes/set/<int:route_set_id>/update/', rv.route_set_update_page,
+         name='add_route_update_page'),
+    path('gyms/<int:gym_id>/routes/set', rv.route_set_page,
+         name='route_set_page'),
     path('gyms/<str:gym_id>/routes/<int:route_id>',
          routes_page, name='route_ind'),
     path('users/<int:user_id>/<int:gym_id>/routes',
          rv.routes_user_page, name='routes_for_user'),
-    path('users/<int:user_id>/<int:gym_id>/routes/<int:route_id>/record/',
+    path('users/<int:user_id>/<int:gym_id>/routes/<int:route_id>/record/<int:record_type>/',
          rv.record_route, name='routes_record_for_user'),
     url(r'^account_activation_sent/$', account_activation_sent,
         name='account_activation_sent'),

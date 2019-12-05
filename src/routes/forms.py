@@ -19,6 +19,13 @@ class GymCreateForm(forms.Form):
     Email = forms.EmailField(help_text='Email of Climbing Gym')
 
 
+class RouteSetForm(forms.Form):
+    up_date = forms.DateField(
+        widget=forms.widgets.DateInput(attrs={'type': 'date', 'class': 'uk-input', 'uk-tooltip': 'The date that the route set will go live. Click on the date picker at the far right.'}), label='Up Date')
+    down_date = forms.DateField(
+        widget=forms.widgets.DateInput(attrs={'uk-tooltip': 'The date that the route set will be taken down. Click on the date picker at the far right.', 'type': 'date', 'class': 'uk-input'}), label='Down Date')
+
+
 class AddRouteSetForm_Eden(forms.Form):
     # grade = forms.CharField(label='grade', max_length=100)
     # grade_sub = forms.CharField(label='grade', max_length=100)
@@ -35,51 +42,11 @@ class AddRouteSetForm_Eden(forms.Form):
     down_date = forms.DateField(
         widget=forms.widgets.DateInput(attrs={'uk-tooltip': 'The date that the route set will be taken down. Click on the date picker at the far right.', 'type': 'date', 'class': 'uk-input'}), label='Down Date')
 
-    grade_sub_1 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #1', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_2 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #2', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_3 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #3', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_4 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #4', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_5 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #5', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_6 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #6', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_7 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #7', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_8 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #8', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_9 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #9', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_10 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #10', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_11 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #11', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_12 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #12', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_13 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #13', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_14 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #14', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_15 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #15', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_16 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #16', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_17 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #17', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_18 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #18', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_19 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #19', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_20 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #20', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_21 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #21', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_22 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #22', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_23 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #23', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
-    grade_sub_24 = forms.ChoiceField(
-        choices=CHOICES_grade_sub, label='Route #24', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        num_routes = 41
+        CHOICES_grade_sub = [(e.value, e.name) for e in GradeSub]
+        for ind in range(num_routes):
+            field_name = f'grade_sub_{ind}'
+            self.fields[field_name] = forms.ChoiceField(
+                choices=CHOICES_grade_sub, label=f'Route #{ind}', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))

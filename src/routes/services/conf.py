@@ -51,8 +51,8 @@ class GradeSub(_Enum):
 
 class ClimbStatus(_Enum):
     unclimbed = 0
-    attempted = 1
-    climbed = 2
+    climbed = 1
+    attempted = 2
     flashed = 3
     onsight = 4
 

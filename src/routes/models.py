@@ -47,6 +47,9 @@ class Profile(models.Model):
     email_confirmed = models.BooleanField(default=False)
     # other fields...
 
+    def __str__(self):
+        return "ID:{}, Name:{}".format(self.user.id, self.user.username)
+
 
 @receiver(post_save, sender=User)
 def update_user_profile(sender, instance, created, **kwargs):
@@ -60,12 +63,11 @@ class RouteRecord(Model):
     user = ForeignKey(Profile, on_delete=CASCADE)
     date = DateField(null=False, auto_now=True,
                      verbose_name='Date of completed climb')
+    record_type = IntegerField(
+        verbose_name='E.g. mastered, climbed, attempted, todo')
     # date_last_failed_attempt = DateField(
     # null=False, auto_now=True, verbose_name='Date of last attempted climb')
 
-    status = IntegerField(
-        verbose_name='E.g. mastered, climbed, attempted, todo')
-    is_climbed = models.BooleanField(default=False)
     # is_on_sight = models.BooleanField(default=False)
 
     # climb_count = IntegerField(default=0,
@@ -75,3 +77,6 @@ class RouteRecord(Model):
 
     class meta:
         unique_together = ('route', 'user',)
+
+    def __str__(self):
+        return "Route:{}, User:{}, Record Type:{}".format(self.route, self.user, self.record_type)
