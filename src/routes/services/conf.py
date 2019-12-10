@@ -62,6 +62,7 @@ class ClimbStatus(_Enum):
         return self.unclimbed
 
 
+
 def get_grade_names():
     return [e.name for e in Grade]
 

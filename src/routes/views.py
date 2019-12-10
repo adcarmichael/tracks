@@ -14,6 +14,8 @@ import routes.services.dal as Dal
 from routes.forms import SignUpForm, GymCreateForm
 from routes.tokens import account_activation_token
 from routes.services.conf import GymKey
+import routes.services.records as rec
+from routes import services
 from .forms import AddRouteSetForm_Eden, RouteSetForm
 import routes.services.utils as util
 from routes.services.conf import GradeSub, Grade
@@ -268,7 +270,7 @@ def routes_user_page(request, user_id, gym_id):
     return render_with_user_restriction(request, 'routes_user.html', data, user_id)
 
 
-
+#P
 
 
 
@@ -278,7 +280,9 @@ def routes_user_page(request, user_id, gym_id):
 
 
 def route_page(request,gym_id,route_id):
-    dal.get_routes_all()    
+    r = rec.record()   
+    records = r.get_for_route(route_id,max_return=20)
+    data = {'records':records}
     return render(request, 'route_page.html', data)
 
 

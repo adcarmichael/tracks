@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %} Route Details {% endblock %}
+
+{% block content %}
+<br>
+<table class="uk-table">
+        <caption>Recent Climbs</caption>
+    <thead>
+            <tr>
+                <th>Username</th>
+                <th>Date</th>
+                <th>Status</th>
+            </tr>
+    </thead>
+    <tbody>
+{% for route in records %}
+    <tr>
+
+        <td>{{ route.username }}</td>
+        <td>{{ route.date|timesince  }} ago</td>
+        <td>{{ route.record_type_name }}</td>
+    </tr>
+
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}

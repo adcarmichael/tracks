@@ -215,9 +215,10 @@ class _DalBase:
 
     def _create_route_set_for_list_of_grade_sub(self, gym_id, grade, grade_sub_list, up_date, down_date=None):
         gym = self.get_gym(gym_id)
-        # up_date = Cast(up_date, DateField)
+
         is_dup = self._check_for_duplicate_based_on_grade_and_up_date(
             grade, up_date, gym_id)
+
         if not is_dup:
             rs = RouteSet.objects.create(up_date=up_date, gym=gym)
             if down_date:
