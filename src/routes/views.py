@@ -14,6 +14,8 @@ import routes.services.dal as Dal
 from routes.forms import SignUpForm, GymCreateForm
 from routes.tokens import account_activation_token
 from routes.services.conf import GymKey
+import routes.services.records as rec
+from routes import services
 from .forms import AddRouteSetForm_Eden, RouteSetForm
 import routes.services.utils as util
 from routes.services.conf import GradeSub, Grade
@@ -237,19 +239,9 @@ def process_route_set_form(form, gym_id):
 
 
 def routes_user_page(request, user_id, gym_id):
-    # route_data_all = dal.get_route_set_of_grade('purple', gym_id=gym_id)
-    # breakpoint()
-    # route_record = dal.get_route_record_for_user(
-    #     user_id, route_data_all.get_route_id())
 
     record_data = dal.get_records_for_active_routes(gym_id, user_id)
 
-    print(record_data)
-    print(gym_id)
-    print(user_id)
-    # grade = data.get_grade()
-    # sub_grade = route_data_all.get_grade_sub()
-    # route_id = route_data_all.get_route_id()
     grade_names = conf.get_grade_names()
     grade_sub_names = get_grade_sub_names_clean()
     active_grade = get_active_grade_for_filter(user_id, gym_id)
@@ -265,7 +257,6 @@ def routes_user_page(request, user_id, gym_id):
                      record_data['is_climbed'],
                      record_data['date_climbed'])
     
-    # data = get_route_date_for_routes_page(gym_id)
     data = {'route_data': route_data,
             'user_id': user_id,
             'gym_id': gym_id,
@@ -275,9 +266,36 @@ def routes_user_page(request, user_id, gym_id):
             'climb_status_climbed': conf.ClimbStatus.climbed.value,
             'climb_status_attempt': conf.ClimbStatus.attempted.value,
             'climb_status_onsight': conf.ClimbStatus.onsight.value}
-    print(grade_names)
 
     return render_with_user_restriction(request, 'routes_user.html', data, user_id)
+
+
+#P
+
+
+
+
+
+
+
+
+def route_page(request,gym_id,route_id):
+    r = rec.record()   
+    records = r.get_for_route(route_id,max_return=20)
+    data = {'records':records,'gym_id':gym_id,'route_id':route_id}
+    return render(request, 'route_page.html', data)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def get_active_grade_for_filter(user_id, gym_id):

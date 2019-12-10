@@ -54,8 +54,8 @@ class _DalBase:
         query = self._filter_route_query_by_gym(query, gym_id)
         return query
 
-    def get_routes_all(self):
-        query = self._get_all_routes()
+    def get_routes_all(self,gym_id=[]):
+        query = self._get_all_routes(gym_id=gym_id)
         data = _Data(query)
         return data
 
@@ -215,9 +215,10 @@ class _DalBase:
 
     def _create_route_set_for_list_of_grade_sub(self, gym_id, grade, grade_sub_list, up_date, down_date=None):
         gym = self.get_gym(gym_id)
-        # up_date = Cast(up_date, DateField)
+
         is_dup = self._check_for_duplicate_based_on_grade_and_up_date(
             grade, up_date, gym_id)
+
         if not is_dup:
             rs = RouteSet.objects.create(up_date=up_date, gym=gym)
             if down_date:

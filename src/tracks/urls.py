@@ -40,7 +40,7 @@ urlpatterns = [
     path('gyms/<int:gym_id>/routes/set', rv.route_set_page,
          name='route_set_page'),
     path('gyms/<str:gym_id>/routes/<int:route_id>',
-         routes_page, name='route_ind'),
+         rv.route_page, name='route_indiv'),
     path('users/<int:user_id>/<int:gym_id>/routes',
          rv.routes_user_page, name='routes_for_user'),
     path('users/<int:user_id>/<int:gym_id>/routes/<int:route_id>/record/<int:record_type>/',
