@@ -282,7 +282,7 @@ def routes_user_page(request, user_id, gym_id):
 def route_page(request,gym_id,route_id):
     r = rec.record()   
     records = r.get_for_route(route_id,max_return=20)
-    data = {'records':records}
+    data = {'records':records,'gym_id':gym_id,'route_id':route_id}
     return render(request, 'route_page.html', data)
 
 
