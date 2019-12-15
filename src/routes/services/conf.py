@@ -1,5 +1,6 @@
 from enum import Enum
 
+default_grade_eden = 'yellow'
 
 class _Enum(Enum):
     @classmethod
@@ -60,6 +61,7 @@ class ClimbStatus(_Enum):
     def get_default():
         self = ClimbStatus
         return self.unclimbed
+
 
 
 def get_grade_names():

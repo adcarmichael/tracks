@@ -48,14 +48,21 @@ class _DalBase:
     def __init__(self, DataMap):
         self.DataMap = DataMap()
 
-    def _get_all_routes(self, gym_id=[]):
-        query = Route.objects.all().order_by(
+    def _get_all_routes(self, gym_id=[],grade=[]):
+
+        if grade:
+            print(grade)
+            query = Route.objects.filter(grade=grade).order_by(
             '-route_set__up_date')
+        else:
+            query = Route.objects.all().order_by(
+            '-route_set__up_date')
+
         query = self._filter_route_query_by_gym(query, gym_id)
         return query
 
-    def get_routes_all(self):
-        query = self._get_all_routes()
+    def get_routes_all(self,gym_id=[]):
+        query = self._get_all_routes(gym_id=gym_id)
         data = _Data(query)
         return data
 
@@ -215,9 +222,10 @@ class _DalBase:
 
     def _create_route_set_for_list_of_grade_sub(self, gym_id, grade, grade_sub_list, up_date, down_date=None):
         gym = self.get_gym(gym_id)
-        # up_date = Cast(up_date, DateField)
+
         is_dup = self._check_for_duplicate_based_on_grade_and_up_date(
             grade, up_date, gym_id)
+
         if not is_dup:
             rs = RouteSet.objects.create(up_date=up_date, gym=gym)
             if down_date:
@@ -310,13 +318,13 @@ class _DalBase:
                 
         return data
 
-    def get_records_for_active_routes(self, gym_id=[], user_id=[]):
-        query = self._get_all_routes(gym_id)
+    def get_records_for_active_routes(self, gym_id=[], user_id=[],grade=[]):
+        query = self._get_all_routes(gym_id,grade=grade)
         
         query = self._filter_to_only_active_routes(query)
         data = self._get_record_data_from_route_query(query, user_id=user_id)
         return data
-
+    
     def _filter_to_only_active_routes(self, query):
         date_now = datetime.now().date()
         query = query.filter(route_set__up_date__lt=date_now)

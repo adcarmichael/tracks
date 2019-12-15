@@ -14,6 +14,10 @@ import routes.services.dal as Dal
 from routes.forms import SignUpForm, GymCreateForm
 from routes.tokens import account_activation_token
 from routes.services.conf import GymKey
+import routes.services.records as rec
+from routes import services
+from routes.services import metrics
+
 from .forms import AddRouteSetForm_Eden, RouteSetForm
 import routes.services.utils as util
 from routes.services.conf import GradeSub, Grade
@@ -237,25 +241,19 @@ def process_route_set_form(form, gym_id):
 
 
 def routes_user_page(request, user_id, gym_id):
-    # route_data_all = dal.get_route_set_of_grade('purple', gym_id=gym_id)
-    # breakpoint()
-    # route_record = dal.get_route_record_for_user(
-    #     user_id, route_data_all.get_route_id())
 
-    record_data = dal.get_records_for_active_routes(gym_id, user_id)
+    grade_name = request.GET.get('grade',conf.default_grade_eden)
+    grade = conf.Grade.get_value_from_name(grade_name)
 
-    print(record_data)
-    print(gym_id)
-    print(user_id)
-    # grade = data.get_grade()
-    # sub_grade = route_data_all.get_grade_sub()
-    # route_id = route_data_all.get_route_id()
+    record_data = dal.get_records_for_active_routes(gym_id, user_id,grade=grade)
     grade_names = conf.get_grade_names()
     grade_sub_names = get_grade_sub_names_clean()
     active_grade = get_active_grade_for_filter(user_id, gym_id)
     grade_names_all = [conf.Grade(val).name for val in record_data['grade']]
     grade_sub_names_all = [conf.GradeSub(val).name for val in record_data['grade_sub']]
     
+    n_total_climbs = metrics.get_total_climbs_for_route(record_data['id'])
+
     route_data = zip(record_data['id'],
                      record_data['number'],
                      grade_names_all,
@@ -263,27 +261,55 @@ def routes_user_page(request, user_id, gym_id):
                      get_grade_hex_colour(record_data['grade']),
                      get_sub_grade_icon_class(record_data['grade_sub']),
                      record_data['is_climbed'],
-                     record_data['date_climbed'])
+                     record_data['date_climbed'],
+                     n_total_climbs)
     
-    # data = get_route_date_for_routes_page(gym_id)
     data = {'route_data': route_data,
             'user_id': user_id,
             'gym_id': gym_id,
-            'active_grade': active_grade,
+            'active_grade': grade,
             'grade_names': grade_names,
             'grade_sub_names': grade_sub_names,
             'climb_status_climbed': conf.ClimbStatus.climbed.value,
             'climb_status_attempt': conf.ClimbStatus.attempted.value,
             'climb_status_onsight': conf.ClimbStatus.onsight.value}
-    print(grade_names)
 
     return render_with_user_restriction(request, 'routes_user.html', data, user_id)
+
+# def routes_user_page(request, user_id, gym_id,grade):
+
+
+
+
+
+
+
+
+def route_page(request,gym_id,route_id):
+    r = rec.record()   
+    records = r.get_for_route(route_id,max_return=20)
+    data = {'records':records,'gym_id':gym_id,'route_id':route_id}
+    return render(request, 'route_page.html', data)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def get_active_grade_for_filter(user_id, gym_id):
 
     return dal.get_grade_name_of_last_recorded_climb(user_id, gym_id)
-
+def get_default_grade(user_id,gym_id):
+    get_active_grade_for_filter()
+    pass
 
 def get_grade_sub_names_clean():
     grade_sub_names = conf.get_grade_sub_names()

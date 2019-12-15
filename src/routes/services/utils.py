@@ -17,6 +17,10 @@ def get_name_from_value_for_enum(enum, value):
         name.append(enum(val).name)
     return name
 
+def ensure_data_is_type_list(data):
+    if not isinstance(data, (list,)):
+            data = [data]
+    return data
 
 def get_grade_name_from_value(value):
     return get_name_from_value_for_enum(conf.Grade, value)
