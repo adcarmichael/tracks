@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from routes.views import home_page
 from routes.views import routes_page
 from routes.views import signup
@@ -39,12 +39,18 @@ urlpatterns = [
          name='add_route_update_page'),
     path('gyms/<int:gym_id>/routes/set', rv.route_set_page,
          name='route_set_page'),
-    path('gyms/<str:gym_id>/routes/<int:route_id>',
+    path('gyms/<int:gym_id>/routes/<int:route_id>',
          rv.route_page, name='route_indiv'),
+
     path('users/<int:user_id>/<int:gym_id>/routes',
          rv.routes_user_page, name='routes_for_user'),
+
+    # path('users/<int:user_id>/<int:gym_id>/routes/<int:grade>',
+    #      rv.routes_user_grade_page, name='routes_for_user_for_grade'),
+
     path('users/<int:user_id>/<int:gym_id>/routes/<int:route_id>/record/<int:record_type>/',
          rv.record_route, name='routes_record_for_user'),
+
     url(r'^account_activation_sent/$', account_activation_sent,
         name='account_activation_sent'),
     url(r'^activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',

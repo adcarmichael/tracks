@@ -3,26 +3,26 @@
 
 {% block content %}
 <br>
-<h2 class="uk-heading-line"><span> Route Details for #{{route_id}}</span></h2>
+<h2 class="uk-heading-line"><span> Route Details for ID{{route_id}}</span></h2>
 <br>
 <table class="uk-table">
-        <caption>Recent Climbs</caption>
+    <caption>Recent Climbs</caption>
     <thead>
-            <tr>
-                <th>Username</th>
-                <th>Date</th>
-                <th>Status</th>
-            </tr>
+        <tr>
+            <th>Username</th>
+            <th>Date</th>
+            <th>Status</th>
+        </tr>
     </thead>
     <tbody>
-{% for route in records %}
-    <tr>
+        {% for route in records %}
+        <tr>
 
-        <td>{{ route.username }}</td>
-        <td>{{ route.date|timesince  }} ago</td>
-        <td>
+            <td>{{ route.username }}</td>
+            <td>{{ route.date|timesince  }} ago</td>
+            <td>
                 {% if route.record_type == 1 %}
-                <span class="uk-label uk-label-success">{{ route.record_type_name }}</span> 
+                <span class="uk-label uk-label-success">{{ route.record_type_name }}</span>
                 {% elif route.record_type == 4 %}
                 <span class="uk-label uk-label-primary">{{ route.record_type_name }}</span>
                 {% elif route.record_type == 2 %}
@@ -30,9 +30,9 @@
                 {{ route.record_type_name }}
                 {% endif %}
             </td>
-    </tr>
+        </tr>
 
-{% endfor %}
-</tbody>
+        {% endfor %}
+    </tbody>
 </table>
 {% endblock %}

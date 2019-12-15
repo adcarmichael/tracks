@@ -1,5 +1,6 @@
 from enum import Enum
 
+default_grade_eden = 'yellow'
 
 class _Enum(Enum):
     @classmethod

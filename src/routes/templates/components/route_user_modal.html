@@ -1,0 +1,53 @@
+<div id="modal-sections-{{route_id}}" uk-modal>
+    <div class="uk-modal-dialog">
+        <button class="uk-modal-close-default" type="button" uk-close></button>
+
+        <div class="uk-modal-header">
+            <i class=" fa fa-arrow-circle-down fa-2x" style="color: {{colour}}"></i>
+            <span class="uk-modal-title">Route #{{number}}</span>
+        </div>
+
+        <div class="uk-modal-body">
+            <div class="uk-container uk-flex-center uk-text-center ">
+                <div class="uk-grid uk-grid-small  uk-child-width-1-2@s">
+
+                    <a class='uk-link-reset' href="{% url 'route_indiv' gym_id route_id %}">
+                        <div class="uk-card uk-card-hover uk-card-header uk-margin-remove">
+                            <i class=" fas fa-eye fa-lg fa-2x" style="color: #16A085"></i>
+                            <p class="uk-margin-remove-bottom">View Route</p>
+                            <span class=" uk-text-meta">Route Details and Statistics</span>
+                        </div>
+                    </a>
+
+                    <a class='uk-link-reset'
+                        href="/users/{{user_id}}/{{gym_id}}/routes/{{route_id}}/record/{{climb_status_onsight}}/">
+                        <div class="uk-card uk-card-hover uk-card-header">
+                            <i class=" fas fa-bullseye fa-lg fa-2x" style="color: #C0392B "></i>
+                            <p class="uk-margin-remove-bottom">Climbed On-Sight!</p>
+                            <span class="uk-text-meta">In One With No Beta</span>
+                        </div>
+                    </a>
+
+                    <a class='uk-link-reset'
+                        href="/users/{{user_id}}/{{gym_id}}/routes/{{route_id}}/record/{{climb_status_attempt}}/">
+                        <div class="uk-card uk-card-hover uk-card-header ">
+                            <i class=" fas fa-chart-line fa-lg fa-2x" style="color: #F4D03F"></i>
+                            <p class="uk-margin-remove-bottom">Attempted Climb </p>
+                            <span class=" uk-text-meta">Failure is Success in Progress</span>
+                        </div>
+                    </a>
+
+                    <a id="modal-sections-record-climb-{{route_id}}" class='uk-link-reset'
+                        href="/users/{{user_id}}/{{gym_id}}/routes/{{route_id}}/record/{{climb_status_climbed}}/">
+                        <div class=" uk-card uk-card-hover uk-card-header">
+                            <i class=" far fa-hand-rock fa-lg fa-2x" style="color: #2471A3"></i>
+                            <p class="uk-margin-remove-bottom">Record Climb</p>
+                            <span class="uk-text-meta">Climbed in N Attempts</span>
+                        </div>
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
