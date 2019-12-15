@@ -272,8 +272,10 @@ def routes_user_page(request, user_id, gym_id):
             'grade_sub_names': grade_sub_names,
             'climb_status_climbed': conf.ClimbStatus.climbed.value,
             'climb_status_attempt': conf.ClimbStatus.attempted.value,
-            'climb_status_onsight': conf.ClimbStatus.onsight.value}
-
+            'climb_status_onsight': conf.ClimbStatus.onsight.value,
+            'n_climbed': sum(record_data['is_climbed']),
+            'n_routes': len(record_data['id'])}
+            
     return render_with_user_restriction(request, 'routes_user.html', data, user_id)
 
 # def routes_user_page(request, user_id, gym_id,grade):

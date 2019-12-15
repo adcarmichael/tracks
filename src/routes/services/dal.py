@@ -51,7 +51,6 @@ class _DalBase:
     def _get_all_routes(self, gym_id=[],grade=[]):
 
         if grade:
-            print(grade)
             query = Route.objects.filter(grade=grade).order_by(
             '-route_set__up_date')
         else:
