@@ -23,6 +23,9 @@ import routes.services.utils as util
 from routes.services.conf import GradeSub, Grade
 from routes.services import conf as conf
 from datetime import datetime
+
+from routes.services import security
+
 dal = Dal.get_dal(GymKey.eden_rock_edinburgh)
 
 
@@ -248,7 +251,6 @@ def routes_user_page(request, user_id, gym_id):
     record_data = dal.get_records_for_active_routes(gym_id, user_id,grade=grade)
     grade_names = conf.get_grade_names()
     grade_sub_names = get_grade_sub_names_clean()
-    active_grade = get_active_grade_for_filter(user_id, gym_id)
     grade_names_all = [conf.Grade(val).name for val in record_data['grade']]
     grade_sub_names_all = [conf.GradeSub(val).name for val in record_data['grade_sub']]
     
@@ -276,54 +278,53 @@ def routes_user_page(request, user_id, gym_id):
             'n_climbed': sum(record_data['is_climbed']),
             'n_routes': len(record_data['id'])}
             
-    return render_with_user_restriction(request, 'routes_user.html', data, user_id)
+    return security.render_with_user_restriction(request, 'routes_user.html', data, user_id)
 
-# def routes_user_page(request, user_id, gym_id,grade):
+def route_record_delete(request, user_id, gym_id,route_id):
+        
+    if security.check_user_credentials(request, user_id):
+        services.records.delete_route_record_for_user(user_id,route_id)
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    else:
+        return HttpResponseForbidden()
 
-
-
-
-
-
-
+def route_record_delete_last_entry(request, user_id, gym_id,route_id):
+        
+    if security.check_user_credentials(request, user_id):
+        services.records.delete_last_route_record_entry_for_user(user_id,route_id)
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    else:
+        return HttpResponseForbidden()
 
 def route_page(request,gym_id,route_id):
     r = rec.record()   
     records = r.get_for_route(route_id,max_return=20)
-    data = {'records':records,'gym_id':gym_id,'route_id':route_id}
+    data = {'records':records,'gym_id':gym_id,'route_id':route_id,'user_id': request.user.id}
     return render(request, 'route_page.html', data)
 
 
 
 
-
-
-
-
-
-
-
+def record_route(request, user_id, gym_id, route_id,record_type):
+    is_auth = security.check_user_credentials(request, user_id)
+    is_valid = security.Validate().gym(gym_id)
+    if is_auth and is_valid:
+        dal.set_route_record_for_user(
+            user_id, route_id, record_type)
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    else:
+        return HttpResponseForbidden()
 
 
 
 def get_active_grade_for_filter(user_id, gym_id):
-
     return dal.get_grade_name_of_last_recorded_climb(user_id, gym_id)
-def get_default_grade(user_id,gym_id):
-    get_active_grade_for_filter()
-    pass
 
 def get_grade_sub_names_clean():
     grade_sub_names = conf.get_grade_sub_names()
     if 'null' in grade_sub_names:
         grade_sub_names.remove('null')
     return grade_sub_names
-
-
-def record_route(request, user_id, gym_id, route_id,record_type):
-    dal.set_route_record_for_user(
-        user_id, route_id, record_type)
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
 def get_grade_hex_colour(grade_list):
@@ -362,14 +363,4 @@ def get_sub_grade_icon_class(sub_grade_list):
     return class_text
 
 
-def is_username_match_user_id(username, user_id):
-    prof = Profile.objects.get(id=user_id)
-    return str(username) == str(prof.user.username)
 
-
-def render_with_user_restriction(request, html, data, user_id):
-    if not is_username_match_user_id(request.user, user_id):
-        response = HttpResponseForbidden()
-        return response
-    else:
-        return render(request, 'routes_user.html', data)
