@@ -7,7 +7,7 @@ from django.db.models import F
 
 class record:
     def get_for_route(self,route_id,max_return=20):
-        query = models.RouteRecord.objects.select_related('user__user__profile').filter(route=route_id)[:max_return]
+        query = models.RouteRecord.objects.select_related('user__user__profile').filter(route=route_id).order_by('-id')[:max_return]
         data = list(query.annotate(username=F('user__user__username')).values('username','date','record_type'))
 
         data = self.update_data_with_record_type_name(data)
@@ -34,6 +34,17 @@ class record:
 
 # def _get_username(rr):
 #     return rr.user.user.username
+
+def delete_route_record_for_user(user_id,route_id):
+    query = models.RouteRecord.objects.filter(user=user_id).filter(route=route_id)
+    if query:
+        query.delete()
+    
+
+def delete_last_route_record_entry_for_user(user_id,route_id):
+    query = models.RouteRecord.objects.filter(user=user_id).filter(route=route_id).order_by('-id').first()
+    if query:
+        query.delete()
 
 def _get_record_type(rr):
     return conf.ClimbStatus(rr.record_type).name

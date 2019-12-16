@@ -48,6 +48,13 @@ urlpatterns = [
     # path('users/<int:user_id>/<int:gym_id>/routes/<int:grade>',
     #      rv.routes_user_grade_page, name='routes_for_user_for_grade'),
 
+    path('users/<int:user_id>/<int:gym_id>/routes/<int:route_id>/record/delete/',
+         rv.route_record_delete, name='routes_record_for_user_delete'),
+    path('users/<int:user_id>/<int:gym_id>/routes/<int:route_id>/record/delete_last_entry/',
+         rv.route_record_delete_last_entry, name='routes_record_for_user_delete_last_entry'),
+
+    # path('users/<int:user_id>/<int:gym_id>/routes/<int:route_id>/record/delete-last/',
+    #      rv.record_route, name='routes_record_for_user_delete_last'),
     path('users/<int:user_id>/<int:gym_id>/routes/<int:route_id>/record/<int:record_type>/',
          rv.record_route, name='routes_record_for_user'),
 

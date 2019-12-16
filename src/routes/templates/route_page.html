@@ -35,4 +35,16 @@
         {% endfor %}
     </tbody>
 </table>
+
+{% if user.is_authenticated %}
+<h3>Delete Route Recordings for User <span class='uk-text-bold'>{{user}}</span></h3>
+<p>Use the below buttons to delete route recordings for {{user}}; noting that routes cannot be re-recorded
+    retrospectively.</p>
+<a href={% url 'routes_record_for_user_delete' gym_id=gym_id route_id=route_id user_id=user_id %}
+    class="uk-button uk-button-default uk-button-medium  title=" Learn More">Delete All</a>
+<a href={% url 'routes_record_for_user_delete_last_entry' gym_id=gym_id route_id=route_id user_id=user_id %}
+    class="uk-button uk-button-default uk-button-medium " title="Learn More">Delete
+    Last Entry</a>
+{% endif %}
+
 {% endblock %}
