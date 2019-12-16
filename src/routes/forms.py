@@ -47,6 +47,7 @@ class AddRouteSetForm_Eden(forms.Form):
         num_routes = 41
         CHOICES_grade_sub = [(e.value, e.name) for e in GradeSub]
         for ind in range(num_routes):
-            field_name = f'grade_sub_{ind}'
+            ind_1 = ind+1
+            field_name = f'grade_sub_{ind_1}'
             self.fields[field_name] = forms.ChoiceField(
-                choices=CHOICES_grade_sub, label=f'Route #{ind}', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
+                choices=CHOICES_grade_sub, label=f'Route #{ind_1}', widget=forms.widgets.Select(attrs={'class': 'uk-select'}))
