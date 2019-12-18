@@ -7,7 +7,7 @@ from routes.models import Route,RouteRecord
 from routes.services import metrics
 import routes.services.conf as conf
 
-class TestMetrics(TestCase):
+class TestMetrics(RoutesTestCase):
     # def test_get_most_recorded_grade(self):
     #     sampledata.create_auth_user()
     #     sampledata.route_set_active()

@@ -298,7 +298,7 @@ def route_record_delete_last_entry(request, user_id, gym_id,route_id):
 
 def route_page(request,gym_id,route_id):
     r = rec.record()   
-    records = r.get_for_route(route_id,max_return=20)
+    records = r.get_for_route(route_id,max_return=20,is_reversed=True)
     data = {'records':records,'gym_id':gym_id,'route_id':route_id,'user_id': request.user.id}
     return render(request, 'route_page.html', data)
 

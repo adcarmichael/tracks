@@ -6,8 +6,14 @@ from django.db.models import F
 
 
 class record:
-    def get_for_route(self,route_id,max_return=20):
-        query = models.RouteRecord.objects.select_related('user__user__profile').filter(route=route_id).order_by('-id')[:max_return]
+    def get_for_route(self,route_id,max_return=20,is_reversed=False):
+        query = models.RouteRecord.objects.select_related('user__user__profile').filter(route=route_id)
+        
+        if is_reversed:
+            query = query.order_by('-id')
+            
+        query = query[:max_return]
+        
         data = list(query.annotate(username=F('user__user__username')).values('username','date','record_type'))
 
         data = self.update_data_with_record_type_name(data)
