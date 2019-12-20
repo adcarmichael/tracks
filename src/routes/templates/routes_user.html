@@ -88,9 +88,10 @@
 
                             <!-- Total Climbs -->
                             <div class="uk-width-auto uk-text-right uk-text-meta ">
+                                <span class="disqus-comment-count"
+                                    data-disqus-identifier="{% url 'route_indiv' gym_id route_id %}"></span>
 
-                                <a uk-icon="comments"
-                                    href="https://chalktracks.com{% url 'route_indiv' gym_id route_id %}#disqus_thread"></a>
+
                                 <span uk-tooltip="Total Climbs for all Users"
                                     class="uk-badge uk-background-muted uk-text-bold"
                                     style="background-color:#C0C0C0">{{n_climbs_total}}</span>
