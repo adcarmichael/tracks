@@ -62,11 +62,13 @@
     <li class="uk-open">
         <a class="uk-accordion-title" href="#">Comments</a>
         <div class="uk-accordion-content">
-            {% include 'components/comments.html' with url=request.get_full_path  %}
 
         </div>
     </li>
 </ul>
+{% include 'components/comments.html' with url=request.get_full_path  %}
+
 {% endif %}
+
 
 {% endblock %}
