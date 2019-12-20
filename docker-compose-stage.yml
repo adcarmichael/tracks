@@ -1,0 +1,28 @@
+version: '3.2'  
+services:  
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./src:/src
+      - ./data/staging/nginx:/etc/nginx/conf.d
+    depends_on:
+      - web
+  web:
+    build: .
+    container_name: web_container
+    depends_on:
+      - db
+    volumes:
+      - ./src:/src
+    env_file:
+      - ./.env
+  db:
+    image: postgres:12.0-alpine
+    container_name: postgres_container
+    env_file:
+      - ./.env
+    

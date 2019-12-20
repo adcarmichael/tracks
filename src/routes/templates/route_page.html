@@ -36,6 +36,7 @@
     </tbody>
 </table>
 
+
 {% if user.is_authenticated %}
 <ul uk-accordion>
     <li>
@@ -58,8 +59,14 @@
             <a href='#' class="uk-button uk-button-default uk-button-medium ">Notify Gym (TBD)</a>
         </div>
     </li>
-</ul>
+    <li class="uk-open">
+        <a class="uk-accordion-title" href="#">Comments</a>
+        <div class="uk-accordion-content">
+            {% include 'components/comments.html' with url=request.get_full_path  %}
 
+        </div>
+    </li>
+</ul>
 {% endif %}
 
 {% endblock %}
