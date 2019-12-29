@@ -326,7 +326,7 @@ class _DalBase:
         return data
     
     def _filter_to_only_active_routes(self, query):
-        query = R.route_set._filter_to_only_active_routes(query)
+        query = R._filter_to_only_active_routes(query)
         return query
 
 
