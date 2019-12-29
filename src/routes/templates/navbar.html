@@ -44,7 +44,7 @@
                         <a href="#">{{ user.username }}</a>
                         <div class="uk-navbar-dropdown">
                             <ul class="uk-nav uk-navbar-dropdown-nav">
-                                <!-- <li class=""><a href="\users\{{ user.id }}\routes\1">Dashboard</a></li> -->
+                                <li class=""><a href="{% url 'user_dashboard' %}">Dashboard</a></li>
                                 <li><a href="\accounts\logout">Logout</a></li>
                             </ul>
                         </div>
