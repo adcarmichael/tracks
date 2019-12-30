@@ -26,6 +26,9 @@
                             <ul class="uk-nav uk-navbar-dropdown-nav">
                                 <li class=""><a href="\gyms\add">Add New Gym</a></li>
                             </ul>
+                            <ul class="uk-nav uk-navbar-dropdown-nav">
+                                <li class=""><a href="{% url 'user_dashboard' %}">Dashboard</a></li>
+                            </ul>
                         </div>
 
                     </li>
@@ -44,7 +47,7 @@
                         <a href="#">{{ user.username }}</a>
                         <div class="uk-navbar-dropdown">
                             <ul class="uk-nav uk-navbar-dropdown-nav">
-                                <li class=""><a href="{% url 'user_dashboard' %}">Dashboard</a></li>
+
                                 <li><a href="\accounts\logout">Logout</a></li>
                             </ul>
                         </div>

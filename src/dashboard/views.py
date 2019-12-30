@@ -34,5 +34,5 @@ def user_dashboard_page(request):
         }
         return redirect_params('/tracks', params)
 
-    context = {'user': user}
+    context = {'username': user}
     return render(request, template_name, context)
