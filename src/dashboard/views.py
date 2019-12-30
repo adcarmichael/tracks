@@ -26,13 +26,13 @@ def user_dashboard_page(request):
     if not request.user.is_authenticated:
         return HttpResponseForbidden()
 
-    user_id = request.GET.get('user_id')
+    user = request.GET.get('user')
 
-    if not user_id:
+    if not user:
         params = {
-            'user_id': request.user
+            'user': request.user
         }
         return redirect_params('/tracks', params)
 
-    context = {'user_id': user_id}
+    context = {'user': user}
     return render(request, template_name, context)
