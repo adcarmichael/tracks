@@ -5,37 +5,32 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel='stylesheet' href="{% static 'routes/base.css' %}">
+    {% include "base_css.html" %}
 
-    <link rel="stylesheet" type="text/css" href="{% static 'routes/css/uikit.min.css' %}">
-    <script src="{% static 'routes/js/jquery-3.4.1.min.js' %}"></script>
-    <script src="{% static 'routes/js/font-awesome.js' %}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js"></script>
     <title>{% block title %}ChalkTracks{% endblock %}</title>
 
     {% block navbar %}
     {% include "navbar.html" %}
     {% endblock %}
 
-    <script src="{% static 'routes/js/uikit.min.js' %}" async></script>
-    <script src="{% static 'routes/js/uikit-icons.min.js' %}" async></script>
 </head>
 
-{% block body %}
-
 <body>
+    {% block body %}
     <br>
-
     <div class=" uk-padding-large uk-container uk-container-small">
         {% block content %}
         <h1>Hello, world!</h1>
         {% endblock %}
     </div>
+    {% endblock %}
 
+    {% include 'base_js.html' %}
+
+    {% block jquery %} {% endblock %}
 
 </body>
-{% endblock %}
+
 <!-- footer -->
 <footer>
     {% block footer %}

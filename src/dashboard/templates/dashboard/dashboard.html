@@ -7,22 +7,16 @@
 <br>
 <h2 class="uk-heading-line"><span> {{user|title}}</span></h2>
 <div class='uk-card uk-card-default uk-width-1-2@m uk-card-hover'>
-
     <div class="uk-card-body">
         <canvas id="radar_chart" width="1" height="1" data-url="{% url 'chart_data' %}?user={{user}}"></canvas>
-
-        <!-- <canvas id="myChart" data-url="{% url 'chart_data'%}"></canvas> -->
     </div>
     <div class="uk-card-footer">
         <p class="uk-text-small uk-text-muted">Grade completion between current and previous route sets.</p>
     </div>
 </div>
-
-
-
+{% endblock%}
+{% block jquery %}
 <script>
-    var defaultData = []
-    var labels = []
     $.ajax({
         method: "GET",
 
@@ -30,7 +24,6 @@
         dataType: 'json',
         success: function (data) {
             var ctx = document.getElementById("radar_chart").getContext('2d');
-            console.log(data);
             var chart = new Chart(ctx, data);
         },
         error: function (error_data) {
