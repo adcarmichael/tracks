@@ -2,6 +2,11 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import authentication, permissions
+from django.http import JsonResponse
+
+from routes.services import metrics, conf, utils
+
+from django.contrib.auth.models import User
 
 # Create your views here.
 
@@ -11,35 +16,66 @@ class ChartData(APIView):
     permission_classes = []
 
     def get(self, format=None):
+        user = self.request.GET.get('user')
 
-        # metrics.get_percentage_complete_for_active_grade(
-        #     gym_id, user_id, grade)
+        if not user:
+            return Response({})
 
-        data = {'sales': 10, 'customers': 100}
-        return Response(data)
+        user_id = User.objects.get(username=user).pk
 
+        gym_id = 1
 
-"""
-def chart_data(request):
-    dataset = Passenger.objects \
-        .values('embarked') \
-        .exclude(embarked='') \
-        .annotate(total=Count('embarked')) \
-        .order_by('embarked')
+        labels = []
+        data_current = []
+        data_previous = []
+        for grade in range(3, 9):
+            perc_current = metrics.get_percentage_complete_for_active_grade(
+                gym_id, user_id, grade)
 
-    port_display_name = dict()
-    for port_tuple in Passenger.PORT_CHOICES:
-        port_display_name[port_tuple[0]] = port_tuple[1]
+            perc_prev = metrics.get_percentage_complete_for_previously_active_grade(
+                gym_id, user_id, grade)
 
-    chart = {
-        'chart': {'type': 'pie'},
-        'title': {'text': 'Titanic Survivors by Ticket Class'},
-        'series': [{
-            'name': 'Embarkation Port',
-            'data': list(map(lambda row: {'name': port_display_name[row['embarked']], 'y': row['total']}, dataset))
-        }]
-    }
+            labels.append(utils.get_grade_name_from_value(grade))
+            data_current.append(round(perc_current, 1))
+            data_previous.append(round(perc_prev, 1))
 
-    return JsonResponse(chart)
+        context = {
+            'type': 'radar',
+            'data': {
+                'labels': labels,
+                'datasets': [{
+                    'label': 'Current (%)',
+                    'data': data_current,
+                    'backgroundColor': [
+                        'rgba(54, 162, 235, 0.2)',
+                    ],
+                    'borderColor': [
+                        'rgba(54, 162, 235, 1)',
+                    ],
+                    'borderWidth': 1
+                },
+                    {
+                    'label': 'Previous (%)',
+                    'data': data_previous,
+                    'backgroundColor': [
+                        'rgba(255, 206, 86, 0.1 )',
+                    ],
+                    'borderColor': [
+                        'rgba(255, 206, 86, 0.5)',
+                    ],
+                    'borderWidth': 1
+                }]
+            },
+            'options': {
+                'scale': {
+                    'ticks': {
+                        'suggestedMin': 0,
+                        'suggestedMax': 100,
+                        'stepSize': 25
+                    }
 
-"""
+                }
+            }
+        }
+
+        return Response(context)

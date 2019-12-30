@@ -1,41 +1,41 @@
 {% extends 'base.html' %}
-{% load static %}
+
+{% load templatehelpers %}
+{% block title %} Tracks {% endblock %}
 {% block content %}
+
 <br>
-<div class='uk-card uk-card-default uk-width-1-3@m uk-card-hover'>
-    <div class="uk-card-header">
-        <h4 class="">My Chart</h4>
-    </div>
+<h2 class="uk-heading-line"><span> {{user|title}}</span></h2>
+<div class='uk-card uk-card-default uk-width-1-2@m uk-card-hover'>
+
     <div class="uk-card-body">
-        <canvas id="myChart"></canvas>
+        <canvas id="radar_chart" width="1" height="1" data-url="{% url 'chart_data' %}?user={{user}}"></canvas>
+
+        <!-- <canvas id="myChart" data-url="{% url 'chart_data'%}"></canvas> -->
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
-    <script>
-        var ctx = document.getElementById('myChart').getContext('2d');
-        var chart = new Chart(ctx, {
-            // The type of chart we want to create
-            type: 'line',
-
-            // The data for our dataset
-            data: {
-                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-                datasets: [{
-                    label: 'My First dataset',
-                    backgroundColor: 'rgb(255, 99, 132)',
-                    borderColor: 'rgb(255, 99, 132)',
-                    data: [0, 10, 5, 2, 20, 30, 45]
-                }]
-            },
-
-            // Configuration options go here
-            options: {}
-        });
-    </script>
-
-
-    <div id="container" data-url="{% url 'chart_data' %}"></div>
+    <div class="uk-card-footer">
+        <p class="uk-text-small uk-text-muted">Grade completion between current and previous route sets.</p>
+    </div>
+</div>
 
 
 
+<script>
+    var defaultData = []
+    var labels = []
+    $.ajax({
+        method: "GET",
 
-    {% endblock%}
+        url: $("#radar_chart").attr("data-url"),
+        dataType: 'json',
+        success: function (data) {
+            var ctx = document.getElementById("radar_chart").getContext('2d');
+            console.log(data);
+            var chart = new Chart(ctx, data);
+        },
+        error: function (error_data) {
+            console.log(url)
+        }
+    });
+</script>
+{% endblock%}
