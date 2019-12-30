@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from django.db.models import DateField
 from django.db.models.functions import Cast, Coalesce
 from django.db.models import Avg, Count, Min, Sum,Max
+import routes.services.routes as R
 # if __name__ == "__main__":
 #     import django
 #     import os
@@ -325,9 +326,7 @@ class _DalBase:
         return data
     
     def _filter_to_only_active_routes(self, query):
-        date_now = datetime.now().date()
-        query = query.filter(route_set__up_date__lt=date_now)
-        query = query.filter(route_set__down_date__gt=date_now)
+        query = R._filter_to_only_active_routes(query)
         return query
 
 

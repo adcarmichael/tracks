@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% load templatehelpers %}
+{% block title %} Tracks {% endblock %}
+{% block content %}
+
+<br>
+<h2 class="uk-heading-line"><span> {{username|title}}</span></h2>
+<div class='uk-card uk-card-default uk-width-1-2@m uk-card-hover'>
+    <div class="uk-card-body">
+        <canvas id="radar_chart" width="1" height="1" data-url="{% url 'chart_data' %}?user={{username}}"></canvas>
+    </div>
+    <div class="uk-card-footer">
+        <p class="uk-text-small uk-text-muted">Grade completion between current and previous route sets.</p>
+    </div>
+</div>
+{% endblock%}
+{% block jquery %}
+<script>
+    $.ajax({
+        method: "GET",
+
+        url: $("#radar_chart").attr("data-url"),
+        dataType: 'json',
+        success: function (data) {
+            var ctx = document.getElementById("radar_chart").getContext('2d');
+            var chart = new Chart(ctx, data);
+        },
+        error: function (error_data) {
+            console.log(url)
+        }
+    });
+</script>
+{% endblock%}

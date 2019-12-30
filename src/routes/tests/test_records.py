@@ -9,6 +9,7 @@ class TestRecords(RoutesTestCase):
         route_id = 1
 
         sampledata.create_auth_user()
+        sampledata.add_gym()
         sampledata.route_set_active()
         sampledata.create_sample_route_record()
         sampledata.create_sample_route_record(record_type=2)
@@ -28,6 +29,7 @@ class TestRecordsDelete(RoutesTestCase):
         route_id = 1
 
         sampledata.create_auth_user()
+        sampledata.add_gym()
         sampledata.route_set_active()
         sampledata.gym_and_route_set()
         sampledata.create_sample_route_record()
@@ -47,6 +49,7 @@ class TestRecordsDelete(RoutesTestCase):
         route_id = 1
 
         sampledata.create_auth_user()
+        sampledata.add_gym()
         sampledata.route_set_active()
         sampledata.gym_and_route_set()
         sampledata.create_sample_route_record()
