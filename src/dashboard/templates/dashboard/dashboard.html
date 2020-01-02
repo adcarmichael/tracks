@@ -5,7 +5,13 @@
 {% block content %}
 
 <br>
+
 <h2 class="uk-heading-line"><span> {{username|title}}</span></h2>
+<a href="{% url 'routes_for_user' user_id=user_id gym_id=1 %}"
+    class="uk-button uk-button-default uk-button-medium  title=" Learn More">Go to Tracks for Eden Rock Edinburgh</a>
+<br><br>
+
+
 <div class='uk-card uk-card-default uk-width-1-2@m uk-card-hover'>
     <div class="uk-card-body">
         <canvas id="radar_chart" width="1" height="1" data-url="{% url 'chart_data' %}?user={{username}}"></canvas>

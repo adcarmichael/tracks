@@ -129,6 +129,7 @@ def get_route_data_for_routes_page(gym_id):
 
 def routes_page(request, gym_id):
     data = get_route_data_for_routes_page()
+    
     return render(request, 'routes.html', data)
 
 
@@ -306,7 +307,7 @@ def route_record_delete_last_entry(request, user_id, gym_id,route_id):
 def route_page(request,gym_id,route_id):
     r = rec.record()   
     records = r.get_for_route(route_id,max_return=20,is_reversed=True)
-    data = {'records':records,'gym_id':gym_id,'route_id':route_id,'user_id': request.user.id}
+    data = {'records':records,'gym_id':gym_id,'route_id':route_id,'user_id': request.user.id,'http_referer':request.META.get('HTTP_REFERER')}
     return render(request, 'route_page.html', data)
 
 
