@@ -264,6 +264,10 @@ def routes_user_page(request, user_id, gym_id):
                      get_sub_grade_icon_class(record_data['grade_sub']),
                      record_data['is_climbed'],
                      record_data['date_climbed'],
+                     record_data['num_climbed'],
+                     record_data['is_onsight'],
+                     record_data['is_attempted'],
+                     record_data['num_attempted'],
                      n_total_climbs)
     
     data = {'route_data': route_data,

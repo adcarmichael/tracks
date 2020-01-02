@@ -56,10 +56,10 @@
         <progress id='js-progressbar' data-uk-tooltip="{{n_climbed}} out of {{n_routes}} routes climbed"
             class="uk-progress" value={{n_climbed}} max={{n_routes}}></progress>
 
-        <div uk-grid class="uk-grid uk-grid-small uk-child-width-1-2@m uk-child-width-1-3@l uk-grid-match js-filter">
+        <div uk-grid class="uk-grid uk-grid-small uk-child-width-1-2@s uk-child-width-1-3@l uk-grid-match js-filter">
 
 
-            {% for route_id, number, grade, grade_sub, colour, icon, is_climbed, date_climbed, n_climbs_total in route_data %}
+            {% for route_id, number, grade, grade_sub, colour, icon, is_climbed, date_climbed,num_climbed, is_onsight,is_attempted,num_attempted, n_climbs_total in route_data %}
 
             <div data-grade='{{grade}}' data-sub-grade={{grade_sub}} data-climbed='{{is_climbed}}'
                 class="{{grade}}-grade is_climbed_{{is_climbed}}" data-tags="">
@@ -76,15 +76,26 @@
                             </div>
 
                             <!-- Is climbed  -->
-                            {% if is_climbed %}
+
                             <div class="uk-width-auto uk-text-right uk-text-meta ">
                                 <span class="uk-text-mute">
-                                    <i data-uk-tooltip="Climbed" style="color=orange"
-                                        class="far fa-hand-rock fa-lg fa-1.5x " style="color: #34495E "></i>
-                                    &nbsp;&nbsp;{{date_climbed|timesince}} ago
+                                    {% if is_onsight %}
+                                    <i data-uk-tooltip="Onsight" class="fas fa-bullseye fa-lg "
+                                        style="vertical-align: middle;color: rgba(192, 57, 43,0.3)   "></i>
+                                    {% endif %}
+                                    {% if is_attempted %}
+                                    <span uk-tooltip="Total Attempts for {{user}}"
+                                        class="uk-badge uk-background-muted uk-text-bold"
+                                        style="background-color:rgba(244, 208, 63,0.8)">{{num_attempted}}</span>
+                                    {% endif %}
+                                    {% if is_climbed %}
+                                    <!-- &nbsp;&nbsp;{{date_climbed|timesince}} ago -->
+                                    <span uk-tooltip="Total Climbs for {{user}}"
+                                        class="uk-badge uk-background-muted uk-text-bold"
+                                        style="background-color:rgba(36, 113, 163,0.5)">{{num_climbed}}</span>
+                                    {% endif %}
                                 </span>
                             </div>
-                            {% endif %}
 
                             <!-- Total Climbs -->
                             <div class="uk-width-auto uk-text-right uk-text-meta ">
