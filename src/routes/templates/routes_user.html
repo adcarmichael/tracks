@@ -4,7 +4,14 @@
 {% block footer %}
 {% endblock %}
 {% block content %}
+
 <br>
+{% if not is_users_page %}
+<div class="uk-alert-danger" uk-alert>
+    <a class="uk-alert-close" uk-close></a>
+    <p>This is the route recordings for another user and cannot be modified.</p>
+</div>
+{% endif %}
 
 <section data-uk-filter="target: .js-filter"
     class="uk-section uk-section-xsmall uk-section-default uk-padding-remove-bottom">
@@ -112,8 +119,11 @@
                     </div>
                 </div>
             </div>
+            {% if is_users_page %}
             {% include "components/route_user_modal.html" %}
-
+            {% else %}
+            {% include "components/route_non_user_modal.html" %}
+            {% endif %}
             {% endfor %}
         </div>
 </section>

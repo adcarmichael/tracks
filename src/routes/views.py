@@ -245,6 +245,8 @@ def process_route_set_form(form, gym_id):
 
 def routes_user_page(request, user_id, gym_id):
 
+    is_users_page = security.check_user_credentials(request, user_id)
+
     grade_name = request.GET.get('grade',conf.default_grade_eden)
     grade = conf.Grade.get_value_from_name(grade_name)
 
@@ -272,6 +274,7 @@ def routes_user_page(request, user_id, gym_id):
     
     data = {'route_data': route_data,
             'user_id': user_id,
+            'is_users_page':is_users_page,
             'gym_id': gym_id,
             'active_grade': grade,
             'grade_names': grade_names,
@@ -282,7 +285,7 @@ def routes_user_page(request, user_id, gym_id):
             'n_climbed': sum(record_data['is_climbed']),
             'n_routes': len(record_data['id'])}
             
-    return security.render_with_user_restriction(request, 'routes_user.html', data, user_id)
+    return render(request, 'routes_user.html', data, user_id)
 
 def route_record_delete(request, user_id, gym_id,route_id):
         
