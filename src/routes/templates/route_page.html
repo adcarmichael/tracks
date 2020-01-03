@@ -3,6 +3,8 @@
 
 {% block content %}
 <br>
+<a href="{{http_referer}}" class="uk-button uk-button-default uk-button-medium  title=" Learn More">Back to Tracks</a>
+
 <h2 class="uk-heading-line"><span> Route Details for ID{{route_id}}</span></h2>
 <br>
 <table class="uk-table">
@@ -18,7 +20,7 @@
         {% for route in records %}
         <tr>
 
-            <td>{{ route.username }}</td>
+            <td><a href="{% url 'user_dashboard' %}?user={{route.username}}">{{ route.username }}</a></td>
             <td>{{ route.date|timesince  }} ago</td>
             <td>
                 {% if route.record_type == 1 %}
@@ -62,11 +64,11 @@
     <li class="uk-open">
         <a class="uk-accordion-title" href="#">Comments</a>
         <div class="uk-accordion-content">
+            {% include 'components/comments.html' with url=request.get_full_path  %}
 
         </div>
     </li>
 </ul>
-<!-- {% include 'components/comments.html' with url=request.get_full_path  %} -->
 
 {% endif %}
 

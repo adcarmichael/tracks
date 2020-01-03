@@ -129,6 +129,7 @@ def get_route_data_for_routes_page(gym_id):
 
 def routes_page(request, gym_id):
     data = get_route_data_for_routes_page()
+    
     return render(request, 'routes.html', data)
 
 
@@ -245,6 +246,8 @@ def process_route_set_form(form, gym_id):
 
 def routes_user_page(request, user_id, gym_id):
 
+    is_users_page = security.check_user_credentials(request, user_id)
+
     grade_name = request.GET.get('grade',conf.default_grade_eden)
     grade = conf.Grade.get_value_from_name(grade_name)
 
@@ -264,10 +267,15 @@ def routes_user_page(request, user_id, gym_id):
                      get_sub_grade_icon_class(record_data['grade_sub']),
                      record_data['is_climbed'],
                      record_data['date_climbed'],
+                     record_data['num_climbed'],
+                     record_data['is_onsight'],
+                     record_data['is_attempted'],
+                     record_data['num_attempted'],
                      n_total_climbs)
     
     data = {'route_data': route_data,
             'user_id': user_id,
+            'is_users_page':is_users_page,
             'gym_id': gym_id,
             'active_grade': grade,
             'grade_names': grade_names,
@@ -278,7 +286,7 @@ def routes_user_page(request, user_id, gym_id):
             'n_climbed': sum(record_data['is_climbed']),
             'n_routes': len(record_data['id'])}
             
-    return security.render_with_user_restriction(request, 'routes_user.html', data, user_id)
+    return render(request, 'routes_user.html', data, user_id)
 
 def route_record_delete(request, user_id, gym_id,route_id):
         
@@ -299,7 +307,7 @@ def route_record_delete_last_entry(request, user_id, gym_id,route_id):
 def route_page(request,gym_id,route_id):
     r = rec.record()   
     records = r.get_for_route(route_id,max_return=20,is_reversed=True)
-    data = {'records':records,'gym_id':gym_id,'route_id':route_id,'user_id': request.user.id}
+    data = {'records':records,'gym_id':gym_id,'route_id':route_id,'user_id': request.user.id,'http_referer':request.META.get('HTTP_REFERER')}
     return render(request, 'route_page.html', data)
 
 
