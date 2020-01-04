@@ -33,6 +33,8 @@ services:
   db:
     image: postgres:12.0-alpine
     container_name: postgres_container
+    volumes:
+      - /srv/docker/postgresql:/var/lib/postgresql/data/
     env_file:
       - ./.env
     
