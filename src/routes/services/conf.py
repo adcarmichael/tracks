@@ -1,6 +1,8 @@
 from enum import Enum
 
+
 default_grade_eden = 'yellow'
+
 
 class _Enum(Enum):
     @classmethod
@@ -9,6 +11,16 @@ class _Enum(Enum):
             if e.name.lower() == name.lower():
                 return e.value
         return None
+
+
+class FilterClimbStatus(_Enum):
+    ALL = 0
+    climbed = 1
+    unclimbed = 2
+    @staticmethod
+    def get_default_filter_name():
+        self = FilterClimbStatus
+        return self.ALL.name
 
 
 class GymKey(_Enum):
@@ -61,7 +73,6 @@ class ClimbStatus(_Enum):
     def get_default():
         self = ClimbStatus
         return self.unclimbed
-
 
 
 def get_grade_names():
