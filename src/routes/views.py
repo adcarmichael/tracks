@@ -249,6 +249,8 @@ def routes_user_page(request, user_id, gym_id):
     is_users_page = security.check_user_credentials(request, user_id)
 
     grade_name = request.GET.get('grade',conf.default_grade_eden)
+    climb_status_for_filter = request.GET.get('climbstatus',conf.FilterClimbStatus.get_default_filter_name())
+
     grade = conf.Grade.get_value_from_name(grade_name)
 
     record_data = dal.get_records_for_active_routes(gym_id, user_id,grade=grade)
@@ -284,7 +286,8 @@ def routes_user_page(request, user_id, gym_id):
             'climb_status_attempt': conf.ClimbStatus.attempted.value,
             'climb_status_onsight': conf.ClimbStatus.onsight.value,
             'n_climbed': sum(record_data['is_climbed']),
-            'n_routes': len(record_data['id'])}
+            'n_routes': len(record_data['id']),
+            'climb_status_for_filter':climb_status_for_filter}
             
     return render(request, 'routes_user.html', data, user_id)
 

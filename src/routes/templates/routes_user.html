@@ -4,7 +4,7 @@
 {% block footer %}
 {% endblock %}
 {% block content %}
-
+{% with params=request.GET.urlencode %}
 <br>
 {% if not is_users_page %}
 <div class="uk-alert-danger" uk-alert>
@@ -17,16 +17,8 @@
     <div class="uk-container uk-container-expand uk-margin-large-bottom">
 
         <div class="uk-grid-small uk-grid-divider uk-child-width-auto " uk-grid>
-            <div class='uk-visible@l'>
-                <ul class="uk-subnav uk-subnav-pill" uk-margin>
-                    {% for grade_name in grade_names %}
-                    <li {% if active_grade == grade_name %} class="uk-active" {% endif %}><a
-                            href="{% relative_url grade_name 'grade' params %}">{{grade_name}}</a></li>
 
-                    {% endfor %}
-                </ul>
-            </div>
-            <div class='uk-hidden@l'>
+            <div>
                 <button class="uk-button uk-button-default" type="button">Grade</button>
                 <div uk-dropdown>
                     <ul class="uk-nav uk-dropdown-nav">
@@ -38,7 +30,7 @@
                     </ul>
                 </div>
             </div>
-            <div>
+            <!-- <div>
                 <button class="uk-button uk-button-default" type="button">Filter</button>
                 <div uk-dropdown>
                     <ul class="uk-nav uk-dropdown-nav">
@@ -49,15 +41,36 @@
                             <a href="#">{{grade_sub_name}}</a>
                         </li>
                         {% endfor %}
+
+                    </ul>
+                </div>
+            </div> -->
+            <div>
+                <button class="uk-button uk-button-default" type="button">Status</button>
+                <div uk-dropdown>
+                    <ul class="uk-nav uk-dropdown-nav">
                         <li class="uk-nav-header">Climb Status</li>
-                        <li uk-filter-control="filter: [data-climbed='True']; group: climbed"><a href="#">Climbed</a>
+                        <li {% if climb_status_for_filter == 'ALL' %} class="uk-active" {% endif %}><a
+                                href="{% relative_url 'ALL' 'climbstatus' params %}">All</a>
+                        <li {% if climb_status_for_filter == 'climbed' %} class="uk-active" {% endif %}><a
+                                href="{% relative_url 'climbed' 'climbstatus' params %}">Climbed</a>
                         </li>
-                        <li class="uk-active" uk-filter-control="filter: [data-climbed='False']; group: climbed"><a
-                                href="#">Unclimbed</a>
+                        <li {% if climb_status_for_filter == 'unclimbed' %} class="uk-active" {% endif %}><a
+                                href="{% relative_url 'unclimbed' 'climbstatus' params %}">Unclimbed</a>
+
                     </ul>
                 </div>
             </div>
         </div>
+
+
+        <a {% if climb_status_for_filter == 'unclimbed' %} class="uk-active"
+            uk-filter-control="filter: [data-climbed='False']; group: climbed"
+            {% elif climb_status_for_filter == 'climbed' %} class="uk-active"
+            uk-filter-control="filter: [data-climbed='True']; group: climbed" {% else %}
+            uk-filter-control="filter: [data-climbed='ALL']; group: climbed" {% endif %}></a>
+
+
 
         <progress id='js-progressbar' data-uk-tooltip="{{n_climbed}} out of {{n_routes}} routes climbed"
             class="uk-progress" value={{n_climbed}} max={{n_routes}}></progress>
@@ -127,5 +140,5 @@
         </div>
 </section>
 <!-- <script id="dsq-count-scr" src="//chalktracks.disqus.com/count.js" async></script> -->
-
+{% endwith %}
 {% endblock %}

@@ -3,8 +3,9 @@
 {% load templatehelpers %}
 {% block title %} Tracks {% endblock %}
 {% block content %}
-
-<br>
+<div class="uk-alert-warning" uk-alert>
+    <p>This dashboard is still experimental..</p>
+</div>
 
 <h2 class="uk-heading-line"><span> {{username|title}}</span></h2>
 <a href="{% url 'routes_for_user' user_id=user_id gym_id=1 %}"
