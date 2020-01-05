@@ -13,8 +13,6 @@
 
                     <!-- <li class="uk-active uk-visible@m"><a href="" data-uk-icon="home"></a></li> -->
                     {% if user.is_authenticated %}
-
-
                     <li>
                         <a href="#">Tracks</a>
                         <div class="uk-navbar-dropdown">
@@ -23,7 +21,6 @@
                                 <li><a>More Gyms to Follow</a></li>
                             </ul>
                         </div>
-
                     </li>
                     <li>
                         <a href="#">{{ user.username }}</a>
@@ -32,13 +29,12 @@
                                 <li class=""><a href="{% url 'user_dashboard' %}">Dashboard</a></li>
                                 <li><a href="\accounts\logout">Logout</a></li>
                                 {% if user.is_superuser %}
-
                                 <li class="uk-nav-header">Admin</li>
                                 <li class=""><a href="\gyms\1\routes\set\add/">Add New Route Set for Eden Rocks</a></li>
                                 <li class=""><a href="/gyms/1/routes/set">View Route Sets for Eden Rocks</a></li>
                                 <li class=""><a href="\gyms\add">Add New Gym</a></li>
+                                {% endif %}
                             </ul>
-                            {% endif %}
                         </div>
                     </li>
                     <li>
