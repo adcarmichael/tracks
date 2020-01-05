@@ -13,26 +13,8 @@
 
                     <!-- <li class="uk-active uk-visible@m"><a href="" data-uk-icon="home"></a></li> -->
                     {% if user.is_authenticated %}
-                    {% if user.is_superuser %}
-                    <li>
-                        <a href="#">Admin</a>
-                        <div class="uk-navbar-dropdown">
-                            <ul class="uk-nav uk-navbar-dropdown-nav">
-                                <li class=""><a href="\gyms\1\routes\set\add/">Add New Route Set for Eden Rocks</a></li>
-                            </ul>
-                            <ul class="uk-nav uk-navbar-dropdown-nav">
-                                <li class=""><a href="/gyms/1/routes/set">View Route Sets for Eden Rocks</a></li>
-                            </ul>
-                            <ul class="uk-nav uk-navbar-dropdown-nav">
-                                <li class=""><a href="\gyms\add">Add New Gym</a></li>
-                            </ul>
-                            <ul class="uk-nav uk-navbar-dropdown-nav">
-                                <li class=""><a href="{% url 'user_dashboard' %}">Dashboard</a></li>
-                            </ul>
-                        </div>
 
-                    </li>
-                    {% endif %}
+
                     <li>
                         <a href="#">Tracks</a>
                         <div class="uk-navbar-dropdown">
@@ -47,9 +29,16 @@
                         <a href="#">{{ user.username }}</a>
                         <div class="uk-navbar-dropdown">
                             <ul class="uk-nav uk-navbar-dropdown-nav">
-
+                                <li class=""><a href="{% url 'user_dashboard' %}">Dashboard</a></li>
                                 <li><a href="\accounts\logout">Logout</a></li>
+                                {% if user.is_superuser %}
+
+                                <li class="uk-nav-header">Admin</li>
+                                <li class=""><a href="\gyms\1\routes\set\add/">Add New Route Set for Eden Rocks</a></li>
+                                <li class=""><a href="/gyms/1/routes/set">View Route Sets for Eden Rocks</a></li>
+                                <li class=""><a href="\gyms\add">Add New Gym</a></li>
                             </ul>
+                            {% endif %}
                         </div>
                     </li>
                     <li>
