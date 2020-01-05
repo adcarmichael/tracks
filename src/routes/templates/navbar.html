@@ -13,13 +13,32 @@
 
                     <!-- <li class="uk-active uk-visible@m"><a href="" data-uk-icon="home"></a></li> -->
                     {% if user.is_authenticated %}
+                    {% if user.is_superuser %}
+                    <li>
+                        <a href="#">Admin</a>
+                        <div class="uk-navbar-dropdown">
+                            <ul class="uk-nav uk-navbar-dropdown-nav">
+                                <li class=""><a href="\gyms\1\routes\set\add/">Add New Route Set for Eden Rocks</a></li>
+                            </ul>
+                            <ul class="uk-nav uk-navbar-dropdown-nav">
+                                <li class=""><a href="/gyms/1/routes/set">View Route Sets for Eden Rocks</a></li>
+                            </ul>
+                            <ul class="uk-nav uk-navbar-dropdown-nav">
+                                <li class=""><a href="\gyms\add">Add New Gym</a></li>
+                            </ul>
+                            <ul class="uk-nav uk-navbar-dropdown-nav">
+                                <li class=""><a href="{% url 'user_dashboard' %}">Dashboard</a></li>
+                            </ul>
+                        </div>
 
+                    </li>
+                    {% endif %}
                     <li>
                         <a href="#">Tracks</a>
                         <div class="uk-navbar-dropdown">
                             <ul class="uk-nav uk-navbar-dropdown-nav">
                                 <li class=""><a href="\users\{{ user.id }}\1\routes">Eden Rock</a></li>
-                                <li><a href='#'>More Gyms to Follow</a></li>
+                                <li><a>More Gyms to Follow</a></li>
                             </ul>
                         </div>
 
@@ -28,60 +47,45 @@
                         <a href="#">{{ user.username }}</a>
                         <div class="uk-navbar-dropdown">
                             <ul class="uk-nav uk-navbar-dropdown-nav">
-                                <li class=""><a href="{% url 'user_dashboard' %}">Dashboard</a></li>
+
                                 <li><a href="\accounts\logout">Logout</a></li>
-
-                                {% if user.is_superuser %}
-                                <li class="uk-nav-header">Admin</li>
-
-                                <ul class="uk-nav uk-navbar-dropdown-nav">
-                                    <li class=""><a href="\gyms\1\routes\set\add/">Add New Route Set for Eden Rocks</a>
-                                    </li>
-                                </ul>
-                                <ul class="uk-nav uk-navbar-dropdown-nav">
-                                    <li class=""><a href="/gyms/1/routes/set">View Route Sets for Eden Rocks</a></li>
-                                </ul>
-                                <ul class="uk-nav uk-navbar-dropdown-nav">
-                                    <li class=""><a href="\gyms\add">Add New Gym</a></li>
-                                </ul>
                             </ul>
                         </div>
-
+                    </li>
+                    <li>
+                        <a class="uk-navbar-toggle" data-uk-toggle data-uk-navbar-toggle-icon href="#offcanvas-nav"></a>
                     </li>
                     {% endif %}
+                </ul>
             </div>
-            </li>
-            {% endif %}
-            </ul>
+        </nav>
     </div>
-    </nav>
-</div>
 </div>
 <!-- 
-<div id="offcanvas-nav" data-uk-offcanvas="flip: true; overlay: false">
-    <div class="uk-offcanvas-bar uk-offcanvas-bar-animation uk-offcanvas-slide">
-        <button class="uk-offcanvas-close uk-close uk-icon" type="button" data-uk-close></button>
-        <ul class="uk-nav uk-nav-default">
-            <li class="uk-active"><a href="#">Active</a></li>
-            <li class="uk-parent">
-                <a href="#">Parent</a>
-                <ul class="uk-nav-sub">
-                    <li class=""><a href="\users\{{ user.id }}\1\routes">Eden Rock</a></li>
-                    <li><a href="#">Sub item</a></li>
-                </ul>
-            </li>
-            <li class="uk-nav-header">Header</li>
-            <li><a href="#js-options"><span class="uk-margin-small-right uk-icon" data-uk-icon="icon: table"></span>
-                    Item</a></li>
-            <li><a href="#"><span class="uk-margin-small-right uk-icon" data-uk-icon="icon: thumbnails"></span>
-                    Item</a></li>
-            <li class="uk-nav-divider"></li>
-            <li><a href="#"><span class="uk-margin-small-right uk-icon" data-uk-icon="icon: trash"></span> Item</a>
-            </li>
-        </ul>
-        <h3>Title</h3>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-            labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-            laboris nisi ut aliquip ex ea commodo consequat.</p>
-    </div>
-</div> -->
+    <div id="offcanvas-nav" data-uk-offcanvas="flip: true; overlay: false">
+        <div class="uk-offcanvas-bar uk-offcanvas-bar-animation uk-offcanvas-slide">
+            <button class="uk-offcanvas-close uk-close uk-icon" type="button" data-uk-close></button>
+            <ul class="uk-nav uk-nav-default">
+                <li class="uk-active"><a href="#">Active</a></li>
+                <li class="uk-parent">
+                    <a href="#">Parent</a>
+                    <ul class="uk-nav-sub">
+                        <li class=""><a href="\users\{{ user.id }}\1\routes">Eden Rock</a></li>
+                        <li><a href="#">Sub item</a></li>
+                    </ul>
+                </li>
+                <li class="uk-nav-header">Header</li>
+                <li><a href="#js-options"><span class="uk-margin-small-right uk-icon" data-uk-icon="icon: table"></span>
+                        Item</a></li>
+                <li><a href="#"><span class="uk-margin-small-right uk-icon" data-uk-icon="icon: thumbnails"></span>
+                        Item</a></li>
+                <li class="uk-nav-divider"></li>
+                <li><a href="#"><span class="uk-margin-small-right uk-icon" data-uk-icon="icon: trash"></span> Item</a>
+                </li>
+            </ul>
+            <h3>Title</h3>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                laboris nisi ut aliquip ex ea commodo consequat.</p>
+        </div>
+    </div> -->
