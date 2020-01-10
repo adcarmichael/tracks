@@ -6,6 +6,7 @@ from django.db.models import DateField
 from django.db.models.functions import Cast, Coalesce
 from django.db.models import Avg, Count, Min, Sum,Max
 import routes.services.routes as R
+import routes.services.route_set as service_rs
 # if __name__ == "__main__":
 #     import django
 #     import os
@@ -217,27 +218,9 @@ class _DalBase:
 
         grade_sub_list = [self.DataMap.grade_sub(grade_sub_str)
                           for grade_sub_str in grade_list]
-        self._create_route_set_for_list_of_grade_sub(
-            gym_id, grade, grade_sub_list, up_date, down_date)
+        service_rs.create_route_set(
+            gym_id, grade, grade_sub_list, up_date, down_date=down_date)
 
-    def _create_route_set_for_list_of_grade_sub(self, gym_id, grade, grade_sub_list, up_date, down_date=None):
-        gym = self.get_gym(gym_id)
-
-        is_dup = self._check_for_duplicate_based_on_grade_and_up_date(
-            grade, up_date, gym_id)
-
-        if not is_dup:
-            rs = RouteSet.objects.create(up_date=up_date, gym=gym)
-            if down_date:
-                rs.down_date = Cast(down_date, DateField())
-                rs.save()
-
-            for ind, grade_sub in enumerate(grade_sub_list):
-                number = ind + 1
-                Route.objects.create(grade=grade,
-                                     grade_sub=grade_sub,
-                                     number=number,
-                                     route_set=rs)
 
     def _check_for_duplicate_based_on_grade_and_up_date(self, grade, up_date, gym_id):
 

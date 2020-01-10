@@ -25,6 +25,7 @@ from routes.services import conf as conf
 from datetime import datetime
 
 from routes.services import security
+import routes.services.route_set as service_rs
 
 dal = Dal.get_dal(GymKey.eden_rock_edinburgh)
 
@@ -239,9 +240,10 @@ def process_route_set_form(form, gym_id):
             if grade_sub_temp != 0:
                 grade_sub.append(grade_sub_temp)
                 number.append(ind)
-
-    dal._create_route_set_for_list_of_grade_sub(
-        gym_id, grade, grade_sub, up_date, down_date=down_date)
+    service_rs.create_route_set(
+            gym_id, grade, grade_sub, up_date, down_date=down_date)
+    # dal._create_route_set_for_list_of_grade_sub(
+    #     gym_id, grade, grade_sub, up_date, down_date=down_date)
 
 
 def routes_user_page(request, user_id, gym_id):
