@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import IntegerField, EmailField, ForeignKey, DateField, BooleanField, CharField
 from django.db.models import Model, CASCADE
 from django.db.models import OneToOneField
+from django.db.models import ImageField, TextField
 from datetime import date
 from django.utils import timezone
 from django.contrib.auth.models import User
@@ -13,16 +14,22 @@ class Gym(Model):
     email = EmailField(null=False)
     name = CharField(max_length=300)
     city = CharField(max_length=300)
-    # website = CharField(max_length=300)
+    website = CharField(max_length=300, default='')
+    # image = ImageField()
+    description = TextField(max_length=300, default='')
+
+    def __str__(self):
+        return f'{self.name} in {self.city}'
 
 
 class RouteSet(Model):
     gym = ForeignKey(Gym, on_delete=CASCADE)
     up_date = DateField(null=False)
     down_date = DateField(null=True)
+    zone = CharField(max_length=200, default='')
 
     def __str__(self):
-        return "{} {}".format(self.up_date, self.down_date)
+        return f'{self.gym.name} set on {self.up_date} and down on {self.down_date}. The zone is {self.zone}'
 
 
 class Route(Model):
@@ -34,7 +41,7 @@ class Route(Model):
     route_set = ForeignKey(RouteSet, on_delete=CASCADE, related_name='routes')
 
     def __str__(self):
-        return "{} {} {}".format(self.grade, self.grade_sub, self.route_set)
+        return f"Number {self.number} of Route Set {self.route_set.id} ({self.route_set}) with grade {self.grade} and sub grade {self.grade_sub}"
 
 
 class UserProfile(Model):
