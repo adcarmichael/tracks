@@ -31,7 +31,7 @@ urlpatterns = [
     path('', home_page, name='home'),
     path('test', rv.test_page),
     path('gyms', rv.gyms_page),
-    path('gyms/add/', rv.gyms_add, name='add_new_gym'),
+    #     path('gyms/add/', rv.gyms_add, name='add_new_gym'),
     path('gyms/<int:gym_id>/routes', routes_page, name='routes'),
 
     #     path('gyms/<int:gym_id>/routes/set/add/', rv.route_set_add_page,

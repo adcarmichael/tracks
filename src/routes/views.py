@@ -48,24 +48,24 @@ def gyms_page(request):
     return render(request, 'gyms_page.html', {'gym': gym})
 
 
-def gyms_add(request):
-    # Adding gyms is restricted to
-    if request.user.is_superuser:
-        if request.method == 'POST':
-            form = GymCreateForm(request.POST)
+# def gyms_add(request):
+#     # Adding gyms is restricted to
+#     if request.user.is_superuser:
+#         if request.method == 'POST':
+#             form = GymCreateForm(request.POST)
 
-            if form.is_valid():
-                name = form.cleaned_data['Name']
-                email = form.cleaned_data['Email']
-                city = form.cleaned_data['City']
-                dal.create_gym(name, email, city)
-                return HttpResponseRedirect('/')
+#             if form.is_valid():
+#                 name = form.cleaned_data['Name']
+#                 email = form.cleaned_data['Email']
+#                 city = form.cleaned_data['City']
+#                 dal.create_gym(name, email, city)
+#                 return HttpResponseRedirect('/')
 
-        else:
-            form = GymCreateForm()
-        return render(request, 'gym_add_page.html', {'form': form})
-    else:
-        return HttpResponseForbidden()
+#         else:
+#             form = GymCreateForm()
+#         return render(request, 'gym_add_page.html', {'form': form})
+#     else:
+#         return HttpResponseForbidden()
 
 
 def signup(request):
