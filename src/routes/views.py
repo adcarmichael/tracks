@@ -9,7 +9,7 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_text
 
-from routes.models import Profile, RouteSet
+from routes.models import Profile, RouteSet,Zone
 import routes.services.dal as Dal
 from routes.forms import SignUpForm, GymCreateForm
 from routes.tokens import account_activation_token
@@ -134,12 +134,20 @@ def routes_page(request, gym_id):
     return render(request, 'routes.html', data)
 
 
+
+
 def test_page(request):
     CHOICES_grade_sub = [(e.value, e.name) for e in GradeSub]
     CHOICES_grade = [(e.value, e.name) for e in Grade]
     grade_data = zip(CHOICES_grade, CHOICES_grade_sub)
     data = {'grade_data': grade_data}
     if request.method == 'POST':
+        print(request.POST.items())
+        for key, value in request.POST.items():
+            print('Key: %s' % (key) ) 
+            # print(f'Key: {key}') in Python >= 3.7
+            print('Value %s' % (value) )
+        print(request.POST.dict())
         pass
 
     else:
@@ -159,7 +167,7 @@ def route_set_page(request, gym_id):
                              data_dict['down_date']))
 
         data = zip(data_dict['id'], data_dict['up_date'],
-                   data_dict['down_date'], data_dict['num_routes'], is_active)
+                   data_dict['down_date'], data_dict['num_routes'],data_dict['zone'], is_active)
 
         context = {'route_set_data': data,
                    'gym_id': gym_id, 'gym_name': gym_query.name}
@@ -377,3 +385,127 @@ def get_sub_grade_icon_class(sub_grade_list):
 
 
 
+class RouteSetCreate(View):
+    template_name = 'route_set_add_page.html'
+    fields = 'zone'
+    fields_prefix = {'route_num':'route_num_','grade':'grade_','grade_sub':'grade_sub_'}
+    grade_sub_choices = [e.name for e in GradeSub]
+    grade_choices = [e.name for e in Grade]
+    zone_choices = []
+    route_num_max = 300
+    valid = True
+    def get(self,request,*args,**kwargs):
+        context = self.get_init_context()
+        context['message'] = self.message
+        return render(request, self.template_name, context) 
+
+    def post(self,request,*args,**kwargs):
+        context = self.get_init_context()
+        num_rows = self.get_num_rows(request)
+        route_number = []
+        grade = []
+        grade_sub = []
+        for row in range(1,num_rows+1):
+            route_number.append(int(request.POST[self.fields_prefix['route_num'] + str(row)]))
+            grade.append(request.POST[self.fields_prefix['grade'] + str(row)])
+            grade_sub.append(request.POST[self.fields_prefix['grade_sub'] + str(row)])
+
+        zone = request.POST['zone']
+        up_date = request.POST['up_date']
+        down_date = request.POST['down_date']
+
+        self.check_date_str_is_clean(up_date,name='up_date')
+        self.check_date_str_is_clean(down_date,name='down_date')
+        self.check_choices_generic_is_clean('grade',grade,self.grade_choices)
+        self.check_choices_generic_is_clean('grade_sub',grade_sub,self.grade_sub_choices)
+        self.check_choices_generic_is_clean('zone',[zone],self.zone_choices)
+        self.check_route_num_is_clean(route_number)
+
+        if self.valid:
+            service_rs.create_route_set(self.kwargs['gym_id'],
+            conf.Grade.get_value_from_name_list(grade),
+            conf.GradeSub.get_value_from_name_list(grade_sub),
+            up_date,down_date,zone,route_number)
+            context['message_success'] = ['Successfully created new route set.']
+            return render(request, self.template_name, context) 
+        else:
+            context['route_data'] = zip(route_number,grade,grade_sub)
+            context['message'] = self.message
+
+            return render(request, self.template_name, context) 
+
+    def get_gym_id(self):
+        self.gym_id = self.kwargs['gym_id']
+        self.valid = security.Validate().gym(self.gym_id)
+        if not self.valid:
+            self.message.append('Gym does not exist')
+
+    def get_zone_choices(self):
+        
+        query = Zone.objects.filter(gym=self.gym_id)
+        if query:
+            zones = [a.name for a in query]
+            return zones
+        else:
+            return ['None']
+
+    def check_date_str_is_clean(self,date_str,name='Date'):
+        if type(date_str) is not str:
+            self.valid = False
+            self.message.append(f'{name} is not a string.')
+        if '-' not in date_str:
+            self.valid = False
+            self.message.append(f'{name} is not a valid format')
+
+    def check_route_num_is_clean(self,route_num):
+        if route_num:
+            for ind, rn in enumerate(route_num):
+                if type(rn) is not int:
+                    self.message.append(f'Route {ind} is not integer')
+                    self.valid=False
+                if rn > self.route_num_max or rn < 1:
+                    self.message.append(f'Route {ind} equals {rn} which is invalid')
+                    self.valid=False
+        else:
+            self.message.append(f'No route numbers were recieved')
+            self.valid=False
+
+    def check_choices_generic_is_clean(self,name,grade_gen,choices):
+        if grade_gen:
+            for ind, rn in enumerate(grade_gen):
+                if type(rn) is not str:
+                    self.message.append(f'{ind} is not String')
+                    self.valid=False
+                if rn not in choices:
+                    self.message.append(f'{name} {ind} equals {rn} which is invalid')
+                    self.valid=False
+        else:
+            self.message.append(f'No {name} were recieved')
+            self.valid =False
+
+    def get_num_routes_from_request(request):
+        keys = [key for key in request.POST.keys()]
+
+    def get_num_rows(self,request):
+        num_rows = 0
+        for key, value in request.POST.items():
+            if self.fields_prefix['route_num'] in key:
+                num_rows += 1
+        return num_rows
+
+    def get_init_route_data(self):
+        route_number = [1]
+        grade = [self.grade_choices[3]]
+        grade_sub = [self.grade_sub_choices[3]]
+        route_data=zip(route_number,grade,grade_sub)
+        return route_data
+
+    def get_init_context(self):
+        self.message = []
+        self.get_gym_id()
+        self.zone_choices = self.get_zone_choices()
+        init_context={'grade_choices':self.grade_choices,
+        'grade_sub_choices':self.grade_sub_choices,
+        'zone_choices':self.zone_choices,
+        'route_data':self.get_init_route_data()}
+        return init_context

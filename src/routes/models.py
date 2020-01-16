@@ -87,3 +87,11 @@ class RouteRecord(Model):
 
     def __str__(self):
         return "Route:{}, User:{}, Record Type:{}".format(self.route, self.user, self.record_type)
+
+
+class Zone(Model):
+    name = CharField(max_length=200)
+    gym = ForeignKey(Gym, on_delete=CASCADE)
+
+    def __str__(self):
+        return f'"{self.name}" at {self.gym.name}'

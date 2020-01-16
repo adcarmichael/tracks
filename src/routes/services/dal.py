@@ -78,7 +78,8 @@ class _DalBase:
         route_set_id = [q.id for q in query]
         up_date = [q.up_date for q in query]
         down_date = [q.down_date for q in query]
-        data = {'id':route_set_id,'up_date':up_date,'down_date':down_date,'num_routes':num_routes}
+        zone = [q.zone for q in query]
+        data = {'id':route_set_id,'up_date':up_date,'down_date':down_date,'num_routes':num_routes,'zone':zone}
         return data
 
     def get_number_of_routes_in_set(self, route_set_query):
