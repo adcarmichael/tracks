@@ -1,10 +1,14 @@
 <!doctype html>
 <html lang="en">
 {% load static %}
+{% load pwa %}
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    {% progressive_web_app_meta %}
+
     {% include "base_css.html" %}
     {% block head_css_js %}
     {% endblock %}
