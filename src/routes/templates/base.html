@@ -6,7 +6,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% include "base_css.html" %}
-
+    {% block head_css_js %}
+    {% endblock %}
     <title>{% block title %}ChalkTracks{% endblock %}</title>
 
     {% block navbar %}
@@ -33,6 +34,8 @@
 
 <!-- footer -->
 <footer>
+    {% block footer_css_js %}
+    {% endblock %}
     {% block footer %}
     {% endblock %}
 </footer>
