@@ -36,10 +36,13 @@ urlpatterns = [
 
     #     path('gyms/<int:gym_id>/routes/set/add/', rv.route_set_add_page,
     #     name='add_route_set_page'),
-    path('gyms/<int:gym_id>/routes/set/add/', rv.RouteSetCreate.as_view(),
+    path('gyms/<int:gym_id>/routes/set/add/', rv.RouteSetCreateViewNew.as_view(),
          name='add_route_set_page'),
+
     path('gyms/<int:gym_id>/routes/set/<int:route_set_id>/update/', rv.route_set_update_page,
          name='add_route_update_page'),
+    path('gyms/<int:gym_id>/routes/set/<int:route_set_id>/delete/', rv.route_set_delete_page,
+         name='route_set_delete_page'),
     path('gyms/<int:gym_id>/routes/set', rv.route_set_page,
          name='route_set_page'),
     path('gyms/<int:gym_id>/routes/<int:route_id>',

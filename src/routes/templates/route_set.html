@@ -43,7 +43,24 @@
                     href="http://localhost/admin/routes/routeset/{{route_set_id}}/change">Edit Route Set</a>
                 <a class="uk-button uk-button-default" href="/gyms/{{gym_id}}/routes/set/{{route_set_id}}/update/">Edit
                     Dates</a>
-                <a class="uk-button uk-button-danger" href="#">Delete</a>
+
+
+                <button class="uk-button uk-button-danger uk-margin-small-right" type="button"
+                    uk-toggle="target: #modal-example">DELETE</button>
+            </div>
+        </div>
+
+        <!-- This is the modal -->
+        <div id="modal-example" uk-modal>
+            <div class="uk-modal-dialog uk-modal-body">
+                <h2 class="uk-modal-title">Delete Route Set?</h2>
+
+                <p class="uk-text-right">
+                    <button class="uk-button uk-button-success uk-modal-close" type="button">No</button>
+                    <a class="uk-button uk-button-danger"
+                        href="{% url 'route_set_delete_page' gym_id=gym_id route_set_id=route_set_id %}"
+                        type="button">Delete</a>
+                </p>
             </div>
         </div>
         {% endfor %}
