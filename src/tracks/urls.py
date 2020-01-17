@@ -25,6 +25,7 @@ from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
+    path('base_layout', rv.base_layout),
     path('accounts/signup/', signup, name='signup'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
@@ -62,7 +63,7 @@ urlpatterns = [
         name='account_activation_sent'),
     url(r'^activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
         activate, name='activate'),
-    path('base_layout', rv.base_layout),
+
     path('tracks', include('dashboard.urls')),
     path('api/', include('api.urls')),
     path('', include('pwa.urls')),
