@@ -375,3 +375,6 @@ def get_sub_grade_icon_class(sub_grade_list):
 
 
 
+def base_layout(request):
+	template='base.html'
+	return render(request,template)
