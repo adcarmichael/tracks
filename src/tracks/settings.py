@@ -195,11 +195,11 @@ LOGGING = {
 
 PWA_APP_NAME = 'ChalkTracks'
 PWA_APP_DESCRIPTION = "Indoor Climbing Tracker"
-PWA_APP_THEME_COLOR = '#0A0302'
-PWA_APP_BACKGROUND_COLOR = '#ffffff'
+PWA_APP_THEME_COLOR = '#000000'
+PWA_APP_BACKGROUND_COLOR = '#000000'
 PWA_APP_DISPLAY = 'standalone'
 PWA_APP_SCOPE = '/'
-PWA_APP_ORIENTATION = 'any'
+PWA_APP_ORIENTATION = 'portrait'
 PWA_APP_START_URL = '/'
 PWA_APP_ICONS = [
     {
@@ -207,11 +207,11 @@ PWA_APP_ICONS = [
         'sizes': '32x32'
     }
 ]
-PWA_APP_SPLASH_SCREEN = [
-    {
-        'src': '/static/images/icons/splash-640x1136.png',
-        'media': '(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)'
-    }
-]
+# PWA_APP_SPLASH_SCREEN = [
+#     {
+#         'src': '/static/images/icons/splash-640x1136.png',
+#         'media': '(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)'
+#     }
+# ]
 PWA_APP_DIR = 'ltr'
 PWA_APP_LANG = 'en-US'

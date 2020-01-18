@@ -25,7 +25,7 @@ from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-    #     path('', include('pwa.urls')),
+    path('', include('pwa.urls')),
     #     path('base_layout', rv.base_layout),
     path('accounts/signup/', signup, name='signup'),
     path('accounts/', include('django.contrib.auth.urls')),
