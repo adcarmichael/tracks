@@ -4,7 +4,7 @@
 //     event.waitUntil(
 //         caches.open(staticCacheName).then(function (cache) {
 //             return cache.addAll([
-//                 '/base_layout'
+//                 '/shell_top'
 //             ]);
 //         })
 //     );
@@ -14,7 +14,7 @@
 //     var requestUrl = new URL(event.request.url);
 //     if (requestUrl.origin === location.origin) {
 //         if ((requestUrl.pathname === '/')) {
-//             event.respondWith(caches.match('/base_layout'));
+//             event.respondWith(caches.match('/shell_top'));
 //             return;
 //         }
 //     }

@@ -374,7 +374,10 @@ def get_sub_grade_icon_class(sub_grade_list):
     return class_text
 
 
-
 def base_layout(request):
 	template='base.html'
+	return render(request,template)
+
+def shell_top(request):
+	template='navbar.html'
 	return render(request,template)
