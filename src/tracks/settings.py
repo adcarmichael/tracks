@@ -206,7 +206,7 @@ PWA_APP_ICONS = [
         'src': '/static/routes/favicon_io/favicon-32x32.png',
         'sizes': '32x32',
         "type": "image/png",
-        "purpose": "any maskable
+        "purpose": "any maskable"
     }, {
         "src": "/static/routes/favicon_io/android-chrome-192x192.png",
         "sizes": "192x192",
