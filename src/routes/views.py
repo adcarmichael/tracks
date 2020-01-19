@@ -9,7 +9,7 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_text
 
-from routes.models import Profile, RouteSet
+from routes.models import Profile, RouteSet,Zone
 import routes.services.dal as Dal
 from routes.forms import SignUpForm, GymCreateForm
 from routes.tokens import account_activation_token
@@ -18,13 +18,17 @@ import routes.services.records as rec
 from routes import services
 from routes.services import metrics
 
-from .forms import AddRouteSetForm_Eden, RouteSetForm
+from .forms import AddRouteSetForm_Eden, RouteSetCreateForm, RouteSetForm
 import routes.services.utils as util
 from routes.services.conf import GradeSub, Grade
 from routes.services import conf as conf
 from datetime import datetime
 
 from routes.services import security
+import routes.services.route_set as service_rs
+import logging
+
+logger = logging.getLogger(__name__)
 
 dal = Dal.get_dal(GymKey.eden_rock_edinburgh)
 
@@ -47,24 +51,24 @@ def gyms_page(request):
     return render(request, 'gyms_page.html', {'gym': gym})
 
 
-def gyms_add(request):
-    # Adding gyms is restricted to
-    if request.user.is_superuser:
-        if request.method == 'POST':
-            form = GymCreateForm(request.POST)
+# def gyms_add(request):
+#     # Adding gyms is restricted to
+#     if request.user.is_superuser:
+#         if request.method == 'POST':
+#             form = GymCreateForm(request.POST)
 
-            if form.is_valid():
-                name = form.cleaned_data['Name']
-                email = form.cleaned_data['Email']
-                city = form.cleaned_data['City']
-                dal.create_gym(name, email, city)
-                return HttpResponseRedirect('/')
+#             if form.is_valid():
+#                 name = form.cleaned_data['Name']
+#                 email = form.cleaned_data['Email']
+#                 city = form.cleaned_data['City']
+#                 dal.create_gym(name, email, city)
+#                 return HttpResponseRedirect('/')
 
-        else:
-            form = GymCreateForm()
-        return render(request, 'gym_add_page.html', {'form': form})
-    else:
-        return HttpResponseForbidden()
+#         else:
+#             form = GymCreateForm()
+#         return render(request, 'gym_add_page.html', {'form': form})
+#     else:
+#         return HttpResponseForbidden()
 
 
 def signup(request):
@@ -133,12 +137,20 @@ def routes_page(request, gym_id):
     return render(request, 'routes.html', data)
 
 
+
+
 def test_page(request):
     CHOICES_grade_sub = [(e.value, e.name) for e in GradeSub]
     CHOICES_grade = [(e.value, e.name) for e in Grade]
     grade_data = zip(CHOICES_grade, CHOICES_grade_sub)
     data = {'grade_data': grade_data}
     if request.method == 'POST':
+        print(request.POST.items())
+        for key, value in request.POST.items():
+            print('Key: %s' % (key) ) 
+            # print(f'Key: {key}') in Python >= 3.7
+            print('Value %s' % (value) )
+        print(request.POST.dict())
         pass
 
     else:
@@ -158,7 +170,7 @@ def route_set_page(request, gym_id):
                              data_dict['down_date']))
 
         data = zip(data_dict['id'], data_dict['up_date'],
-                   data_dict['down_date'], data_dict['num_routes'], is_active)
+                   data_dict['down_date'], data_dict['num_routes'],data_dict['zone'], is_active)
 
         context = {'route_set_data': data,
                    'gym_id': gym_id, 'gym_name': gym_query.name}
@@ -239,9 +251,10 @@ def process_route_set_form(form, gym_id):
             if grade_sub_temp != 0:
                 grade_sub.append(grade_sub_temp)
                 number.append(ind)
-
-    dal._create_route_set_for_list_of_grade_sub(
-        gym_id, grade, grade_sub, up_date, down_date=down_date)
+    service_rs.create_route_set(
+            gym_id, grade, grade_sub, up_date, down_date=down_date)
+    # dal._create_route_set_for_list_of_grade_sub(
+    #     gym_id, grade, grade_sub, up_date, down_date=down_date)
 
 
 def routes_user_page(request, user_id, gym_id):
@@ -373,6 +386,51 @@ def get_sub_grade_icon_class(sub_grade_list):
 
     return class_text
 
+class RouteSetCreateViewNew(View):
+    template_name = 'route_set_add_page.html'
+    def get(self,request,*args,**kwargs):
+        gym_id = self.kwargs['gym_id']
+        form = RouteSetCreateForm(gym_id)
+        context = form.get_context()
+        return render(request, self.template_name, context) 
+
+
+    def post(self,request,*args,**kwargs):
+        if request.user.is_superuser:
+            gym_id = self.kwargs['gym_id']
+            form = RouteSetCreateForm(gym_id,request)
+            context = form.get_context()
+
+            if form.is_valid():
+                grade = form.cleaned['grade']
+                grade_sub = form.cleaned['grade_sub']
+                number = form.cleaned['number']
+                zone = form.cleaned['zone'][0]
+                up_date = form.cleaned['up_date']
+                down_date = form.cleaned['down_date']
+
+                service_rs.create_route_set(gym_id,
+                    conf.Grade.get_value_from_name_list(grade),
+                    conf.GradeSub.get_value_from_name_list(grade_sub),
+                    up_date,down_date,zone,number)
+
+                logger.info(f'{request.user} created new route set for gym {gym_id} in zone {zone}')
+
+                context['message_success'] = ['Successfully created new route set.']
+            else:
+                logger.warning(f'{request.user} failed to create new route set for gym {gym_id}')
+
+            return render(request, self.template_name, context) 
+
+        else:
+            return HttpResponseForbidden()
+        
+def route_set_delete_page(request, gym_id,route_set_id):
+    if request.user.is_superuser:
+        RouteSet.objects.get(id=route_set_id).delete()   
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    else:
+        return HttpResponseForbidden()
 
 def base_layout(request):
 	template='base.html'
@@ -381,3 +439,4 @@ def base_layout(request):
 def shell_top(request):
 	template='navbar.html'
 	return render(request,template)
+

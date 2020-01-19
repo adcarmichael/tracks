@@ -25,6 +25,7 @@ from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
+
     path('', include('pwa.urls')),
     #     path('base_layout', rv.base_layout),
     path('shell_top', rv.shell_top),
@@ -34,12 +35,18 @@ urlpatterns = [
     path('', home_page, name='home'),
     path('test', rv.test_page),
     path('gyms', rv.gyms_page),
-    path('gyms/add/', rv.gyms_add, name='add_new_gym'),
+    #     path('gyms/add/', rv.gyms_add, name='add_new_gym'),
     path('gyms/<int:gym_id>/routes', routes_page, name='routes'),
-    path('gyms/<int:gym_id>/routes/set/add/', rv.route_set_add_page,
+
+    #     path('gyms/<int:gym_id>/routes/set/add/', rv.route_set_add_page,
+    #     name='add_route_set_page'),
+    path('gyms/<int:gym_id>/routes/set/add/', rv.RouteSetCreateViewNew.as_view(),
          name='add_route_set_page'),
+
     path('gyms/<int:gym_id>/routes/set/<int:route_set_id>/update/', rv.route_set_update_page,
          name='add_route_update_page'),
+    path('gyms/<int:gym_id>/routes/set/<int:route_set_id>/delete/', rv.route_set_delete_page,
+         name='route_set_delete_page'),
     path('gyms/<int:gym_id>/routes/set', rv.route_set_page,
          name='route_set_page'),
     path('gyms/<int:gym_id>/routes/<int:route_id>',

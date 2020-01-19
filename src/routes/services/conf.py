@@ -12,6 +12,16 @@ class _Enum(Enum):
                 return e.value
         return None
 
+    @classmethod
+    def get_value_from_name_list(self, name_list):
+        value = []
+        for name in name_list:
+            for e in self:
+                if e.name.lower() == name.lower():
+                    value.append(e.value)
+                    break
+        return value
+
 
 class FilterClimbStatus(_Enum):
     ALL = 0
