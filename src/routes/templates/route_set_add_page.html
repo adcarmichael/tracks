@@ -1,16 +1,153 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1 class="uk-heading-bullet">Create a Route Set</h1>
-<p>The below form is used to create a Route Set for Eden Rocks. For instance, create a new set of yellows </p>
-<div class='uk-card uk-card-default uk-card-body uk-container-large uk-padding-large'>
 
-    <form method="post" class='uk-form-horizontal'>
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input class="uk-button" type="submit" value="Submit">
-    </form>
+<h1 class="uk-heading-bullet uk-margin-top">Create a Route Set</h1>
+<p>The below form is used to create a Route Set for Eden Rocks. For instance, create a new set of yellows </p>
+
+{% for msg in message %}
+<div class="uk-alert-warning" uk-alert>
+    <p>{{msg|striptags }}</p>
 </div>
+{% endfor %}
+{% for msg in message_success %}
+<div class="uk-alert-success" uk-alert>
+    <p>{{msg|striptags }}</p>
+</div>
+{% endfor %}
+
+
+<div class='uk-card uk-card-default uk-card-body uk-container-large uk-padding-large'>
+    <div class="uk-margin">
+        <form method="post" class='uk-form-horizontal' id='rs_form'>
+            {% csrf_token %}
+
+
+            <p>Up Date</p>
+            <input type="date" name='up_date' class='uk-input'
+                uk-tooltip='The date that the route set will go live. Click on the date picker at the far right.'>
+
+            <p>Down Date</p>
+            <input type="date" name='down_date' class='uk-input'
+                uk-tooltip='The date that the route set will go down. Click on the date picker at the far right.'>
+
+            <p>Zone:</p>
+            <select name='zone' class="uk-select">
+                {% for zone in zone_choices %}
+                <option>{{zone}}</option>
+                {% endfor %}
+            </select>
+            <table class='uk-table uk-table-hover uk-table-small uk-table-justify' id="field">
+                <thead>
+                    <tr>
+                        <th>Route Number</th>
+                        <th>Grade</th>
+                        <th>Sub Grade</th>
+                    </tr>
+                </thead>
+
+                {% for route_number, grade, grade_sub in route_data %}
+                <tr>
+                    <td class='uk-table-shrink'>
+                        <input id='route_num' name='route_num_{{forloop.counter}}' class='uk-input' type="number"
+                            min='1' max='200' value="{{route_number}}">
+                    </td>
+                    <td>
+                        <select name='grade_{{forloop.counter}}' id='grade' class="uk-select">
+                            {% for grade_choice in grade_choices %}
+                            <option {% if grade == grade_choice %} selected {% endif %}>{{grade_choice}}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        <select id='grade_sub' name='grade_sub_{{forloop.counter}}' class="uk-select">
+                            {% for grade_sub_choice in grade_sub_choices %}
+                            <option {% if grade_sub == grade_sub_choice %} selected {% endif %}>{{grade_sub_choice}}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                </tr>
+
+                {% endfor %}
+            </table>
+
+
+            <button type="button" class="uk-button uk-button-default" id="btnAdd">
+                <span class='uk-text-emphasis'>+</span>
+            </button>
+            <button type="button" class="uk-button uk-button-default" id="deleteField">
+                <span class='uk-text-emphasis'>-</span>
+            </button>
+
+
+        </form>
+    </div>
+    <input class="uk-button" type="submit" value="Submit" form='rs_form'>
+</div>
+
 {% endblock %}
-{% block footer %}
+
+{% block jquery %}
+<script>
+    //https://github.com/spencertipping/jquery.fix.clone
+
+    // Textarea and select clone() bug workaround | Spencer Tipping
+    // Licensed under the terms of the MIT source code license
+
+    // Motivation.
+    // jQuery's clone() method works in most cases, but it fails to copy the value of textareas and select elements. This patch replaces jQuery's clone() method with a wrapper that fills in the
+    // values after the fact.
+
+    // An interesting error case submitted by Piotr Przybył: If two <select> options had the same value, the clone() method would select the wrong one in the cloned box. The fix, suggested by Piotr
+    // and implemented here, is to use the selectedIndex property on the <select> box itself rather than relying on jQuery's value-based val().
+
+    (function (original) {
+        jQuery.fn.clone = function () {
+            var result = original.apply(this, arguments),
+                my_textareas = this.find('textarea').add(this.filter('textarea')),
+                result_textareas = result.find('textarea').add(result.filter('textarea')),
+                my_selects = this.find('select').add(this.filter('select')),
+                result_selects = result.find('select').add(result.filter('select'));
+
+            for (var i = 0, l = my_textareas.length; i < l; ++i) $(result_textareas[i]).val($(my_textareas[i]).val());
+            for (var i = 0, l = my_selects.length; i < l; ++i) result_selects[i].selectedIndex = my_selects[i].selectedIndex;
+
+            return result;
+        };
+    })(jQuery.fn.clone);
+
+    $("#btnAdd").on("click", function () {
+
+        var $tableBody = $('#field').find("tbody"),
+            $trLast = $tableBody.find("tr:last"),
+            $trNew = $trLast.clone();
+
+        var num_prev = $trLast.find('#route_num').val()
+        var num_new = parseInt(num_prev) + 1
+        $trNew.find('#route_num').attr('value', num_new)
+        $trNew.find('#route_num').val(num_new)
+        $trLast.after($trNew);
+
+        var lengthRow = $("#field tbody tr").length
+        $trNew.find('#route_num').prop('name', 'route_num_' + lengthRow)
+        $trNew.find('#grade').prop('name', 'grade_' + lengthRow)
+        $trNew.find('#grade_sub').prop('name', 'grade_sub_' + lengthRow)
+
+
+    });
+
+    $(document).ready(function () {
+        $("#deleteField").click(function (event) {
+            var lengthRow = $("#field tbody tr").length;
+            if (lengthRow > 1) {
+                $("#field tbody tr:last").remove();
+
+            }
+            event.preventDefault();
+        });
+    });
+</script>
+
+
 {% endblock %}

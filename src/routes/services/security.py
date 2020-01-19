@@ -39,7 +39,7 @@ def render_with_user_restriction(request, html, data, user_id):
 class Validate:
 
     def gym(self, gym_id):
-        return self._check_query(Gym.objects.get(id=gym_id))
+        return Gym.objects.filter(id=gym_id).exists()
 
     def username(self, user_id):
         return self._check_query(User.objects.get(id=user_id))
