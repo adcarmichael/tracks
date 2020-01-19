@@ -15,6 +15,11 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+PWA_SERVICE_WORKER_PATH = os.path.join(
+    BASE_DIR, 'routes/static/routes/js', 'serviceworker.js')
+print(os.path.join(
+    BASE_DIR, 'routes/static/routes/js', 'serviceworker.js'))
+
 DEBUG = int(os.environ.get("DEBUG", default=0))
 
 SECRET_KEY = os.environ.get("SECRET_KEY", 'asdfkhbsadgui87gjsbdfui')
@@ -38,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'widget_tweaks',
     'rest_framework',
+    'pwa',
 ]
 # 'celery',
 
@@ -197,3 +203,43 @@ LOGGING = {
         # },
     },
 }
+
+
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'static'),
+# ]
+
+PWA_APP_NAME = 'ChalkTracks'
+PWA_APP_DESCRIPTION = "Indoor Climbing Tracker"
+PWA_APP_THEME_COLOR = '#000000'
+PWA_APP_BACKGROUND_COLOR = '#000000'
+PWA_APP_DISPLAY = 'standalone'
+PWA_APP_SCOPE = '/'
+PWA_APP_ORIENTATION = 'portrait'
+PWA_APP_START_URL = '/'
+PWA_APP_ICONS = [
+    {
+        'src': '/static/routes/favicon_io/favicon-32x32.png',
+        'sizes': '32x32',
+        "type": "image/png",
+        "purpose": "any maskable"
+    }, {
+        "src": "/static/routes/favicon_io/android-chrome-192x192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any maskable"
+    }, {
+        "src": "/static/routes/favicon_io/android-chrome-512x512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any maskable"
+    }
+]
+# PWA_APP_SPLASH_SCREEN = [
+#     {
+#         'src': '/static/images/icons/splash-640x1136.png',
+#         'media': '(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)'
+#     }
+# ]
+PWA_APP_DIR = 'ltr'
+PWA_APP_LANG = 'en-US'

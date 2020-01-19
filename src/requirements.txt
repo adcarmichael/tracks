@@ -11,3 +11,4 @@ djangorestframework==3.11.0
 markdown==3.1.1
 django-filter==2.2.0
 # Pillow==7.0.0
+django-pwa==1.0.6

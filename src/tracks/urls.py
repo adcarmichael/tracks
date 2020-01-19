@@ -25,6 +25,10 @@ from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
+
+    path('', include('pwa.urls')),
+    #     path('base_layout', rv.base_layout),
+    path('shell_top', rv.shell_top),
     path('accounts/signup/', signup, name='signup'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
@@ -71,4 +75,5 @@ urlpatterns = [
 
     path('tracks', include('dashboard.urls')),
     path('api/', include('api.urls')),
+
 ]

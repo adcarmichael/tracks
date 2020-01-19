@@ -394,6 +394,7 @@ class RouteSetCreateViewNew(View):
         context = form.get_context()
         return render(request, self.template_name, context) 
 
+
     def post(self,request,*args,**kwargs):
         if request.user.is_superuser:
             gym_id = self.kwargs['gym_id']
@@ -430,3 +431,12 @@ def route_set_delete_page(request, gym_id,route_set_id):
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
     else:
         return HttpResponseForbidden()
+
+def base_layout(request):
+	template='base.html'
+	return render(request,template)
+
+def shell_top(request):
+	template='navbar.html'
+	return render(request,template)
+
