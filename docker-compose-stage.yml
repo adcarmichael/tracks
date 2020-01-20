@@ -11,6 +11,7 @@ services:
       - ./data/staging/nginx:/etc/nginx/conf.d
     depends_on:
       - web
+
   web:
     build: .
     container_name: web_container
@@ -20,6 +21,12 @@ services:
       - ./src:/src
     env_file:
       - ./.env
+    environment:
+      SELENIUM_HOST: http://selenium:4444/wd/hub
+      TEST_SELENIUM: 'yes'
+    depends_on:
+      - selenium_hub
+  
   db:
     image: postgres:12.0-alpine
     container_name: postgres_container
@@ -27,6 +34,34 @@ services:
       - pgdata:/var/lib/postgresql/data/
     env_file:
       - ./.env
-      
+
+  selenium_hub:
+    container_name: selenium_hub
+    image: selenium/hub
+    ports:
+      - "4444:4444"
+
+  selenium_chrome:
+    container_name: selenium_chrome
+    image: selenium/node-chrome-debug
+    environment:
+      - HUB_HOST=selenium_hub
+      - HUB_PORT=4444
+    ports:
+      - "5900:5900"
+    depends_on:
+      - selenium_hub
+
+  selenium_firefox:
+    container_name: selenium_firefox
+    image: selenium/node-firefox-debug
+    environment:
+      - HUB_HOST=selenium_hub
+      - HUB_PORT=4444
+    ports:
+      - "5901:5900"
+    depends_on:
+      - selenium_hub
+
 volumes:
     pgdata:
