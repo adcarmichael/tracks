@@ -24,8 +24,13 @@ import routes.views as rv
 from django.conf.urls import url
 from django.contrib.auth import views as auth_views
 
-urlpatterns = [
 
+def trigger_error(request):
+    division_by_zero = 1 / 0
+
+
+urlpatterns = [
+    path('sentry-debug/', trigger_error),
     path('', include('pwa.urls')),
     #     path('base_layout', rv.base_layout),
     path('shell_top', rv.shell_top),
