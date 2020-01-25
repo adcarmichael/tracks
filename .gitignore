@@ -111,3 +111,4 @@ venv.bak/
 src/static
 update_web_production.sh
 src/VNC-Viewer-6.20.113-Windows.exe
+src/routes/static/routes/images/play.svg

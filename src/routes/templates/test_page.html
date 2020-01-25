@@ -1,153 +1,156 @@
 {% extends 'base.html' %}
-
-{% block content %}
-
-<h1 class="uk-heading-bullet uk-margin-top">Create a Route Set</h1>
-<p>The below form is used to create a Route Set for Eden Rocks. For instance, create a new set of yellows </p>
-
-{% for msg in message %}
-<div class="uk-alert-warning" uk-alert>
-    <p>{{msg|striptags }}</p>
-</div>
-{% endfor %}
-{% for msg in message_success %}
-<div class="uk-alert-success" uk-alert>
-    <p>{{msg|striptags }}</p>
-</div>
-{% endfor %}
-
-
-<div class='uk-card uk-card-default uk-card-body uk-container-large uk-padding-large'>
-    <div class="uk-margin">
-        <form method="post" class='uk-form-horizontal' id='rs_form'>
-            {% csrf_token %}
-
-
-            <p>Up Date</p>
-            <input type="date" name='up_date' class='uk-input'
-                uk-tooltip='The date that the route set will go live. Click on the date picker at the far right.'>
-
-            <p>Down Date</p>
-            <input type="date" name='down_date' class='uk-input'
-                uk-tooltip='The date that the route set will go down. Click on the date picker at the far right.'>
-
-            <p>Zone:</p>
-            <select name='zone' class="uk-select">
-                {% for zone in zone_choices %}
-                <option>{{zone}}</option>
-                {% endfor %}
-            </select>
-            <table class='uk-table uk-table-hover uk-table-small uk-table-justify' id="field">
-                <thead>
-                    <tr>
-                        <th>Route Number</th>
-                        <th>Grade</th>
-                        <th>Sub Grade</th>
-                    </tr>
-                </thead>
-
-                {% for route_number, grade, grade_sub in route_data %}
-                <tr>
-                    <td class='uk-table-shrink'>
-                        <input id='route_num' name='route_num_{{forloop.counter}}' class='uk-input' type="number"
-                            min='1' max='200' value="{{route_number}}">
-                    </td>
-                    <td>
-                        <select name='grade_{{forloop.counter}}' id='grade' class="uk-select">
-                            {% for grade_choice in grade_choices %}
-                            <option {% if grade == grade_choice %} selected {% endif %}>{{grade_choice}}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <td>
-                        <select id='grade_sub' name='grade_sub_{{forloop.counter}}' class="uk-select">
-                            {% for grade_sub_choice in grade_sub_choices %}
-                            <option {% if grade_sub == grade_sub_choice %} selected {% endif %}>{{grade_sub_choice}}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                </tr>
-
-                {% endfor %}
-            </table>
-
-
-            <button type="button" class="uk-button uk-button-default" id="btnAdd">
-                <span class='uk-text-emphasis'>+</span>
-            </button>
-            <button type="button" class="uk-button uk-button-default" id="deleteField">
-                <span class='uk-text-emphasis'>-</span>
-            </button>
-
-
-        </form>
-    </div>
-    <input class="uk-button" type="submit" value="Submit" form='rs_form'>
-</div>
+{% load static %}
+{% block navbar %}
 
 {% endblock %}
+{% block body %}
 
-{% block jquery %}
-<script>
-    //https://github.com/spencertipping/jquery.fix.clone
+<!-- <div class="uk-height-large  uk-flex-auto uk-background-cover  uk-flex" uk-parallax="bgy: -200">
 
-    // Textarea and select clone() bug workaround | Spencer Tipping
-    // Licensed under the terms of the MIT source code license
+    <h1 class="uk-width-1-2@m  uk-text-center uk-margin-auto uk-margin-auto-vertical">Headline</h1>
 
-    // Motivation.
-    // jQuery's clone() method works in most cases, but it fails to copy the value of textareas and select elements. This patch replaces jQuery's clone() method with a wrapper that fills in the
-    // values after the fact.
+</div> -->
 
-    // An interesting error case submitted by Piotr Przybył: If two <select> options had the same value, the clone() method would select the wrong one in the cloned box. The fix, suggested by Piotr
-    // and implemented here, is to use the selectedIndex property on the <select> box itself rather than relying on jQuery's value-based val().
+<div class="uk-flex uk-flex-center uk-flex-bottom uk-height-viewport uk-position-z-index uk-position-relative"
+    data-uk-height-viewport="min-height: 400">
 
-    (function (original) {
-        jQuery.fn.clone = function () {
-            var result = original.apply(this, arguments),
-                my_textareas = this.find('textarea').add(this.filter('textarea')),
-                result_textareas = result.find('textarea').add(result.filter('textarea')),
-                my_selects = this.find('select').add(this.filter('select')),
-                result_selects = result.find('select').add(result.filter('select'));
+    <div class="uk-position-top">
+        <div class="uk-container ">
+            <nav class="uk-navbar-container uk-navbar-transparent" data-uk-navbar>
+                <div class="uk-navbar-left">
+                    <div class="uk-navbar-item">
+                        <!-- <a class="uk-logo" href=""><img src="img/cover-logo.svg" alt="Logo"> -->
+                        <!-- <a href="\" class="uk-logo"> <span class='uk-text-muted uk-text-bold'>Chalk</span>Tracks</a> -->
+                    </div>
+                </div>
+                <div class="uk-navbar-right">
+                    <!-- <li class="uk-visible@s"><a href="">About</a></li> -->
 
-            for (var i = 0, l = my_textareas.length; i < l; ++i) $(result_textareas[i]).val($(my_textareas[i]).val());
-            for (var i = 0, l = my_selects.length; i < l; ++i) result_selects[i].selectedIndex = my_selects[i].selectedIndex;
+                    <!-- <li class="uk-active uk-visible@m"><a href="" data-uk-icon="home"></a></li> -->
+                    {% if user.is_authenticated %}
+                    <div class="uk-navbar-item">
+                        <a href="\accounts\logout"
+                            class="uk-button uk-button-default uk-button-small uk-width-2-3 uk-width-auto@s" id="logout"
+                            title="Learn More">Logout</a>
 
-            return result;
-        };
-    })(jQuery.fn.clone);
+                    </div>
 
-    $("#btnAdd").on("click", function () {
+                    {% else %}
+                    <div class="uk-navbar-item">
+                        <a href="\accounts\login" class="uk-button uk-button-default  uk-width-2-3 uk-width-auto@s"
+                            data-uk-icon="arrow-right" id="login" title="Learn More">Login</a>
 
-        var $tableBody = $('#field').find("tbody"),
-            $trLast = $tableBody.find("tr:last"),
-            $trNew = $trLast.clone();
+                    </div>
+                    <div class="uk-navbar-item">
+                        <a href="\accounts\signup" class="uk-button uk-button-primary  uk-width-2-3 uk-width-auto@s"
+                            data-uk-icon="check" id="sign-up" title="Learn More">Sign Up</a>
 
-        var num_prev = $trLast.find('#route_num').val()
-        var num_new = parseInt(num_prev) + 1
-        $trNew.find('#route_num').attr('value', num_new)
-        $trNew.find('#route_num').val(num_new)
-        $trLast.after($trNew);
+                    </div>
+                    {% endif %}
+                </div>
+            </nav>
+        </div>
+    </div>
 
-        var lengthRow = $("#field tbody tr").length
-        $trNew.find('#route_num').prop('name', 'route_num_' + lengthRow)
-        $trNew.find('#grade').prop('name', 'grade_' + lengthRow)
-        $trNew.find('#grade_sub').prop('name', 'grade_sub_' + lengthRow)
+    <div>
+        <div class=" uk-text-center">
+            <svg width="50%" height="50%" viewBox="0 0 500 500" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/"
+                style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+                <path class="star"
+                    d="M312.82 72.05C309.91 69.06 304.1 63.08 295.38 54.1L222.05 114.62L214.87 78.21L95.9 78.21L93.33 181.79L145.13 242.82L178.97 205.38L256.41 251.03L263.59 342.31L223.08 316.67L204.1 252.05L127.18 323.85L209.74 383.85L338.97 371.03L340.51 301.28L312.82 277.69L296.92 252.05L324.1 202.31L375.38 191.54L377.44 158.72L351.79 125.38L389.23 91.03L381.54 66.41L307.18 91.03L254.87 112.05L233.85 154.62L168.21 146.41L149.23 195.13"
+                    id="do3H0aXEb"></path>
+                <path class="star"
+                    d="M514.15 134.89L530.64 201.38L490.74 269.47L389.23 254.04L439.68 179.57L514.15 134.89Z"
+                    id="cghQa3ufD">
+                </path>
+                <path class="star"
+                    d="M430.64 64.15L445.53 33.83C401.91 29.93 377.98 27.27 373.72 25.85C367.34 23.72 274.26 25.32 262.02 22.66C253.87 20.89 229.75 20.89 189.68 22.66L49.79 45.53L39.68 165.21L88.62 235.96L121.6 267.87L47.66 289.68L148.19 416.81L297.66 433.3L410.43 390.21L357.77 269.47L375.85 214.68L415.21 133.3L494.47 64.15L430.64 64.15Z"
+                    id="b2cBM3DMH7"></path>
 
 
-    });
+            </svg>
+        </div>
+        <div class="uk-container  uk-flex-auto uk-text-left uk-margin-large-bottom"
+            data-uk-scrollspy="target: > .animate; cls: uk-animation-slide-right-medium uk-invisible; delay: 200">
+            <h1 class="uk-heading-primary animate uk-invisible" style="font-weight: 1000;"><span
+                    class='uk-text-muted uk-text-bold'>Chalk</span>Tracks</a></h1>
+            <h2 class="uk-heading-secondary  uk-text-muted uk-margin-auto animate uk-invisible"
+                style="font-weight: 200;">
+                Track the progress of your indoor climbs and find the next
+                grade.
+            </h2>
 
-    $(document).ready(function () {
-        $("#deleteField").click(function (event) {
-            var lengthRow = $("#field tbody tr").length;
-            if (lengthRow > 1) {
-                $("#field tbody tr:last").remove();
+        </div>
+    </div>
+</div>
 
+<div class="uk-flex uk-flex-center uk-flex-middle uk-height-viewport uk-position-z-index uk-position-relative"
+    data-uk-height-viewport="min-height: 400">
+
+
+    <div class="uk-container uk-container-small uk-flex-auto uk-text-center"
+        data-uk-scrollspy="target: > .animate; cls: uk-animation-slide-bottom-small uk-invisible; delay: 300">
+        <h1 class="uk-heading-primary animate uk-invisible" style="font-weight: 700;">Track Your Climbs</h1>
+        <div class="uk-width-4-5@m uk-margin-auto animate uk-invisible">
+            <p class="">Track the progress of your indoor climbs and find the next
+                grade.</p>
+        </div>
+        <div class="uk-margin-medium-top animate uk-invisible" data-uk-margin
+            data-uk-scrollspy-class="uk-animation-fade uk-invisible">
+            {% if user.is_authenticated %}
+            <a href="\accounts\logout" class="uk-button uk-button-default uk-button-large uk-width-2-3 uk-width-auto@s"
+                id="logout" title="Learn More">Logout</a>
+
+            {% else %}
+            <a href="\accounts\login" class="uk-button uk-button-default uk-button-large uk-width-2-3 uk-width-auto@s"
+                data-uk-icon="arrow-right" id="login" title="Learn More">Login</a>
+            <a href="\accounts\signup" class="uk-button uk-button-primary uk-button-large uk-width-2-3 uk-width-auto@s"
+                data-uk-icon="check" id="sign-up" title="Learn More">Sign Up</a>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<defs>
+    <style>
+        .star {
+            fill: none;
+            stroke: #DCDCDC;
+            stroke-width: 3px;
+
+            /* Stroke-dasharray property */
+            stroke-dasharray: 1353px;
+            stroke-dashoffset: 1353px;
+            animation: move 2s linear;
+            animation-fill-mode: forwards;
+        }
+
+        @keyframes move {
+            100% {
+                stroke-dashoffset: 0;
             }
-            event.preventDefault();
-        });
-    });
-</script>
+        }
+    </style>
+</defs>
 
+<!-- <svg class="uk-animation-stroke" style="--uk-animation-stroke: 46;" viewBox="0 0 20 20"
+    xmlns="http://www.w3.org/2000/svg">
+    <path class="star"
+        d="M312.82 72.05C309.91 69.06 304.1 63.08 295.38 54.1L222.05 114.62L214.87 78.21L95.9 78.21L93.33 181.79L145.13 242.82L178.97 205.38L256.41 251.03L263.59 342.31L223.08 316.67L204.1 252.05L127.18 323.85L209.74 383.85L338.97 371.03L340.51 301.28L312.82 277.69L296.92 252.05L324.1 202.31L375.38 191.54L377.44 158.72L351.79 125.38L389.23 91.03L381.54 66.41L307.18 91.03L254.87 112.05L233.85 154.62L168.21 146.41L149.23 195.13"
+        id="do3H0aXEb"></path>
+    <path class="star" d="M514.15 134.89L530.64 201.38L490.74 269.47L389.23 254.04L439.68 179.57L514.15 134.89Z"
+        id="cghQa3ufD">
+    </path>
+    <path class="star"
+        d="M430.64 64.15L445.53 33.83C401.91 29.93 377.98 27.27 373.72 25.85C367.34 23.72 274.26 25.32 262.02 22.66C253.87 20.89 229.75 20.89 189.68 22.66L49.79 45.53L39.68 165.21L88.62 235.96L121.6 267.87L47.66 289.68L148.19 416.81L297.66 433.3L410.43 390.21L357.77 269.47L375.85 214.68L415.21 133.3L494.47 64.15L430.64 64.15Z"
+        id="b2cBM3DMH7"></path>
+</svg>
+
+
+<div class=" uk-text-center" uk-parallax="stroke: 100%; viewport: 0.7">
+    <img style='stroke-dasharray: 10; stroke-dashoffset: 0' src="{% static 'routes/images/play.svg' %}" alt="" uk-svg>
+</div> -->
 
 {% endblock %}
