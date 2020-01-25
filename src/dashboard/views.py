@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect
-from routes.services import metrics
+from routes.services import metrics, records
+from routes.views import get_sub_grade_icon_class, get_grade_hex_colour
 import urllib
 from django.shortcuts import redirect
 from django.contrib.auth.models import User
@@ -41,6 +42,29 @@ def user_dashboard_page(request):
     if not user_id:
         return HttpResponseForbidden()
 
+    rec = records.record(is_reversed=True, max_return=20)
+    rec_data = rec.get_for_user(user_id)
+    rec_data = update_data_colour(rec_data)
+    rec_data = update_data_icon(rec_data)
+
     context = {'username': user,
-               'user_id': user_id}
+               'user_id': user_id,
+               'records': rec_data}
+
     return render(request, template_name, context)
+
+
+def update_data_icon(data):
+    for item in data:
+
+        item.update(
+            {"icon": get_sub_grade_icon_class(item['grade_sub'])[0]})
+    return data
+
+
+def update_data_colour(data):
+    for item in data:
+
+        item.update(
+            {"colour": get_grade_hex_colour(item['grade'])[0]})
+    return data

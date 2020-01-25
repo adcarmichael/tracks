@@ -5,19 +5,16 @@ from django.db.models import F
 
 
 class record:
-    def get_for_route(self, route_id, max_return=20, is_reversed=False):
-        query = models.RouteRecord.objects.select_related(
-            'user__user__profile').filter(route=route_id)
+    def __init__(self, max_return=20, is_reversed=False):
+        self.max_return = max_return
+        self.is_reversed = is_reversed
 
-        if is_reversed:
-            query = query.order_by('-id')
+    def get_for_route(self, route_id):
+        query = models.RouteRecord.objects.select_related('user__user__profile',
+                                                          'route', 'route__route_set__gym').filter(route=route_id)
 
-        query = query[:max_return]
+        data = self._get_data(query)
 
-        data = list(query.annotate(username=F('user__user__username')).values(
-            'username', 'date', 'record_type'))
-
-        data = self.update_data_with_record_type_name(data)
         return data
 
     def update_data_with_record_type_name(self, data):
@@ -25,6 +22,31 @@ class record:
             item.update(
                 {"record_type_name": conf.ClimbStatus(item['record_type']).name})
         return data
+
+    def _get_data(self, query):
+
+        if self.is_reversed:
+            query = query.order_by('-id')
+
+        query = query[:self.max_return]
+
+        data = list(query.annotate(gym_id=F('route__route_set__gym'), number=F('route__number'), grade=F('route__grade'), username=F('user__user__username'), grade_sub=F(
+            'route__grade_sub')).values('username', 'grade', 'grade_sub', 'date', 'record_type', 'route', 'number', 'gym_id'))
+        data = self.update_data_with_record_type_name(data)
+
+        return data
+
+    def get_for_user(self, user_id):
+
+        query = models.RouteRecord.objects.select_related('user__user__profile',
+                                                          'route').filter(user=user_id)
+        data = self._get_data(query)
+        return data
+
+
+class user_record:
+    def __init__(self, user_id, gym_id=[]):
+        self.user_id = user_id
 
 
 # def _get_record_type_name(query):
@@ -43,6 +65,7 @@ class record:
 
 # def _get_username(rr):
 #     return rr.user.user.username
+
 
 def delete_route_record_for_user(user_id, route_id):
     query = models.RouteRecord.objects.filter(

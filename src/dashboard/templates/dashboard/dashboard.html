@@ -26,15 +26,78 @@
 <br><br>
 
 
-<div class='uk-card uk-card-default uk-width-1-2@m uk-card-hover'>
+<!-- <div class='uk-card uk-card-default uk-width-1-2@m uk-card-hover'>
     <div class="uk-card-body">
         <canvas id="radar_chart" width="1" height="1" data-url="{% url 'chart_data' %}?user={{username}}"></canvas>
     </div>
     <div class="uk-card-footer">
         <p class="uk-text-small uk-text-muted">Grade completion between current and previous route sets.</p>
     </div>
+</div> -->
+
+<!-- route record history -->
+<div class="uk-child-width-1-2@l uk-grid-small uk-grid-match " uk-grid>
+
+    <div class='uk-card uk-card-default uk-card-hover '>
+        <div class="uk-card-body">
+            <canvas id="radar_chart" width="1" height="1" data-url="{% url 'chart_data' %}?user={{username}}"></canvas>
+        </div>
+        <div class="uk-card-footer">
+            <p class="uk-text-small uk-text-muted">Grade completion between current and previous route sets.</p>
+        </div>
+    </div>
+    <div>
+        <div class="uk-card uk-card-default uk-card-body">
+            <h3 class="uk-card-title">Default</h3>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+        </div>
+    </div>
 </div>
+<div class="uk-child-width-1-1 uk-grid-small uk-grid-match " uk-grid>
+    <div class='uk-card uk-card-default uk-card-hover '>
+        <div class="uk-card-body">
+            <table class="uk-table uk-table-small">
+                <thead>
+                    <tr>
+                        <th>Route</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for route in records %}
+                    <tr>
+
+                        <td><a href="{% url 'route_indiv' gym_id=route.gym_id route_id=route.route %}"><i
+                                    class='{{route.icon}}' style="color: {{route.colour}}"></i><span
+                                    class="uk-card-title uk-text-muted uk-margin-remove-bottom">&nbsp#{{route.number}}</span></a>
+                        </td>
+                        <td>{{ route.date|timesince  }} ago</td>
+                        <td>
+                            {% if route.record_type == 1 %}
+                            <span class="uk-label uk-label-success">{{ route.record_type_name }}</span>
+                            {% elif route.record_type == 4 %}
+                            <span class="uk-label uk-label-primary">{{ route.record_type_name }}</span>
+                            {% elif route.record_type == 2 %}
+                            <span class="uk-label uk-label-danger">{{ route.record_type_name }}</span> {% else %}
+                            {{ route.record_type_name }}
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="uk-card-footer">
+            <p class="uk-text-small uk-text-muted">Grade completion between current and previous route sets.</p>
+        </div>
+    </div>
+</div>
+
+
 {% endblock%}
+
 {% block jquery %}
 <script>
     $.ajax({

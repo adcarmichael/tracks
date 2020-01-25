@@ -321,8 +321,8 @@ def route_record_delete_last_entry(request, user_id, gym_id,route_id):
         return HttpResponseForbidden()
 
 def route_page(request,gym_id,route_id):
-    r = rec.record()   
-    records = r.get_for_route(route_id,max_return=20,is_reversed=True)
+    r = rec.record(is_reversed=True,max_return=20)   
+    records = r.get_for_route(route_id)
     data = {'records':records,'gym_id':gym_id,'route_id':route_id,'user_id': request.user.id,'http_referer':request.META.get('HTTP_REFERER')}
     return render(request, 'route_page.html', data)
 
@@ -353,6 +353,8 @@ def get_grade_sub_names_clean():
 
 def get_grade_hex_colour(grade_list):
     class_text = []
+    if not isinstance(grade_list, (list,)):
+            grade_list = [grade_list]
     # Colours came from https://htmlcolorcodes.com/
     for grade in grade_list:
 
@@ -379,6 +381,10 @@ def get_grade_hex_colour(grade_list):
 
 def get_sub_grade_icon_class(sub_grade_list):
     class_text = []
+
+    if not isinstance(sub_grade_list, (list,)):
+            sub_grade_list = [sub_grade_list]
+
     for sub_grade in sub_grade_list:
         sub_grade_name = conf.GradeSub(sub_grade).name
         class_text.append(
